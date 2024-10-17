@@ -2,15 +2,14 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./styles/globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+import { Plus_Jakarta_Sans as FontJakarta } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { TailwindIndicator } from "@/components/tailwind-indicator";
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], display: "swap" });
+
+const fontJakartaSans = FontJakarta({
+  subsets: ["latin"],
+  variable: "--font-jakarta-sans",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen mx-auto max-w-7xl`}
+        className={`${jakarta.className} ${fontJakartaSans.variable} antialiased min-h-screen mx-auto max-w-7xl`}
       >
         <ThemeProvider
           attribute="class"
@@ -36,6 +35,7 @@ export default function RootLayout({
         >
           {" "}
           {children}
+          <TailwindIndicator />
         </ThemeProvider>
       </body>
     </html>

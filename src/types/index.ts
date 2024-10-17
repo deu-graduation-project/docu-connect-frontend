@@ -41,4 +41,24 @@ export type MarketingConfig = {
 
 export type DashboardConfig = {
   mainNav: MainNavItem[];
+  footerNav: FooterItem[];
 };
+
+export type PublicMainConfig = {
+  faq: FaqItem[];
+};
+
+export interface FooterItem {
+  title: string;
+  items: {
+    title: string;
+    href: string;
+    external?: boolean;
+  }[];
+}
+
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+}
