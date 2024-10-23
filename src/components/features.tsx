@@ -1,144 +1,99 @@
-import React from "react";
+import {
+  Code,
+  DollarSign,
+  Cloud,
+  Users,
+  HelpCircle,
+  Shield,
+  Heart,
+  Settings,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-type Props = {};
+export default function FeaturesSection() {
+  const features = [
+    {
+      title: "Built for developers",
+      description:
+        "Built for engineers, developers, dreamers, thinkers and doers.",
+      icon: <Code size={30} className="text-primary" />,
+    },
+    {
+      title: "Ease of use",
+      description:
+        "It's as easy as using an Apple, and as expensive as buying one.",
+      icon: <Settings size={30} className="text-primary" />,
+    },
+    {
+      title: "Pricing like no other",
+      description:
+        "Our prices are best in the market. No cap, no lock, no credit card required.",
+      icon: <DollarSign size={30} className="text-primary" />,
+    },
+    {
+      title: "100% Uptime guarantee",
+      description: "We just cannot be taken down by anyone.",
+      icon: <Cloud size={30} className="text-primary" />,
+    },
+    {
+      title: "Multi-tenant Architecture",
+      description:
+        "You can simply share passwords instead of buying new seats.",
+      icon: <Users size={30} className="text-primary" />,
+    },
+    {
+      title: "24/7 Customer Support",
+      description:
+        "We are available 100% of the time. At least our AI Agents are.",
+      icon: <HelpCircle size={30} className="text-primary" />,
+    },
+    {
+      title: "Money back guarantee",
+      description:
+        "If you don't like EveryAI, we will convince you to like us.",
+      icon: <Shield size={30} className="text-primary" />,
+    },
+    {
+      title: "And everything else",
+      description: "I just ran out of copy ideas. Accept my sincere apologies.",
+      icon: <Heart size={30} className="text-primary" />,
+    },
+  ];
 
-export default function FeaturesSection({}: Props) {
   return (
-    <div>
-      <section
-        id="features"
-        className="container max-w-6xl  mx-auto space-y-6 bg-slate-50 py-8 dark:bg-transparent md:py-12 lg:py-24"
-      >
-        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-          <h1 className="  text-4xl font-semibold text-center ">Features</h1>
-
-          <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-            Unlock Powerful Features for Users and Agencies
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 relative z-10 py-10 max-w-7xl mx-auto">
+      {features.map((feature, index) => (
+        <div
+          key={feature.title}
+          className={cn(
+            "flex flex-col border  lg:border-r py-10 relative group/feature  border-secondary",
+            (index === 0 || index === 4) &&
+              "lg:border-l dark:border-neutral-800",
+            index < 4 && "lg:border-b border-secondary",
+            (index === 6 || index === 7) && "border-b-0 lg:border-b",
+            (index === 0 || index === 1) && "border-t-0 lg:border-t"
+          )}
+        >
+          {index < 4 && (
+            <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
+          )}
+          {index >= 4 && (
+            <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-neutral-100 dark:from-neutral-800 to-transparent pointer-events-none" />
+          )}
+          <div className="mb-4 relative z-10 px-10 text-primary ">
+            {feature.icon}
+          </div>
+          <div className="text-lg font-bold mb-2 relative z-10 px-10">
+            <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-neutral-300 dark:bg-neutral-700 group-hover/feature:bg-muted-foreground transition-all duration-200 origin-center" />
+            <span className="group-hover/feature:translate-x-2 transition duration-200 inline-block text-primary">
+              {feature.title}
+            </span>
+          </div>
+          <p className="text-sm  text-muted-foreground  max-w-xs relative z-10 px-10">
+            {feature.description}
           </p>
         </div>
-        <div className="mx-auto grid justify-between   gap-4 sm:grid-cols-2 max-w-[95vw]  md:grid-cols-3 lg:grid-cols-4">
-          <div className="relative overflow-hidden  rounded-lg border bg-background p-2">
-            <div className="flex h-[300px] flex-col justify-between rounded-md p-6">
-              <p className="text-sm text-muted-foreground"> {"(for users)"}</p>
-              <div className="space-y-2">
-                <h3 className="font-bold">
-                  Seamless Ordering and PDF Customization
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Upload and edit your documents before submitting them to local
-                  agencies for printing. Reduce your printing costs and ensure
-                  your files are exactly how you want them.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[300px] flex-col justify-between rounded-md p-6">
-              <p className="text-sm text-muted-foreground"> {"(for users)"}</p>
-
-              <div className="space-y-2">
-                <h3 className="font-bold">Build Your Personal Library</h3>
-                <p className="text-sm">
-                  Create a collection of notes, documents, or study materials.
-                  Choose to keep them private or share them with other users in
-                  our growing knowledge community.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[300px] flex-col justify-between rounded-md p-6">
-              <p className="text-sm text-muted-foreground"> {"(for users)"}</p>
-
-              <div className="space-y-2">
-                <h3 className="font-bold">Search and Discover</h3>
-                <p className="text-sm text-muted-foreground">
-                  Looking for a specific topic? Use our powerful search to find
-                  public notes and documents uploaded by other users. Filter by
-                  subject, agency, or popularity.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[300px] flex-col justify-between rounded-md p-6">
-              <p className="text-sm text-muted-foreground"> {"(for users)"}</p>
-
-              <div className="space-y-2">
-                <h3 className="font-bold">Track Orders and Review Agencies</h3>
-                <p className="text-sm text-muted-foreground">
-                  Stay updated on the status of your print jobs and leave
-                  feedback for agencies after your order is completed.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[300px] flex-col justify-between rounded-md p-6">
-              <p className="text-sm text-muted-foreground">
-                {" "}
-                {"(for agencies)"}
-              </p>
-
-              <div className="space-y-2">
-                <h3 className="font-bold">Manage Your Services</h3>
-                <p className="text-sm text-muted-foreground">
-                  Create a profile for your copy center, offer a range of
-                  products, and set your own pricing. Easily manage orders from
-                  users and track business performance through detailed
-                  analytics.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[300px] flex-col justify-between rounded-md p-6">
-              <p className="text-sm text-muted-foreground">
-                {" "}
-                {"(for agencies)"}
-              </p>
-              <div className="space-y-2">
-                <h3 className="font-bold">Direct Communication with Users</h3>
-                <p className="text-sm text-muted-foreground">
-                  Chat with customers about their orders, confirm details, and
-                  resolve any issues directly within the app.{" "}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[300px] flex-col justify-between rounded-md p-6">
-              <p className="text-sm text-muted-foreground">
-                {" "}
-                {"(for agencies)"}
-              </p>
-              <div className="space-y-2">
-                <h3 className="font-bold">Boost Your Visibility</h3>
-                <p className="text-sm text-muted-foreground">
-                  Gain access to a growing user base looking for reliable copy
-                  centers. Your agency will be featured in search results when
-                  users look for services near them.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-lg border bg-background p-2">
-            <div className="flex h-[300px] flex-col justify-between rounded-md p-6">
-              <p className="text-sm text-muted-foreground">
-                {" "}
-                {"(for agencies)"}
-              </p>
-              <div className="space-y-2">
-                <h3 className="font-bold">Order Management and Analytics</h3>
-                <p className="text-sm text-muted-foreground">
-                  Accept or reject orders in real time, and use our dashboard to
-                  track revenue, completed orders, and customer reviews.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      ))}
     </div>
   );
 }
