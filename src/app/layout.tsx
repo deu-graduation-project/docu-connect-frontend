@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${jakarta.className} ${fontJakartaSans.variable} antialiased min-h-screen mx-auto max-w-7xl`}
+        className={`${jakarta.className} ${fontJakartaSans.variable} min-h-screen mx-auto `}
       >
         <ThemeProvider
           attribute="class"

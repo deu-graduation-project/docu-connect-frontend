@@ -9,7 +9,7 @@ import { Shell } from "@/components/shell";
 import { dashboardConfig } from "@/config/dashboard";
 export function Footer() {
   return (
-    <footer className="w-full  bg-background">
+    <footer className="w-full max-w-7xl  bg-background">
       <Shell className="px-4" as="div">
         <section
           id="footer-content"
