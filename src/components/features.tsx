@@ -13,49 +13,46 @@ import { cn } from "@/lib/utils";
 export default function FeaturesSection() {
   const features = [
     {
-      title: "Built for developers",
+      title: "Developer-Friendly",
       description:
-        "Built for engineers, developers, dreamers, thinkers and doers.",
+        "Seamlessly integrates with agency workflows and developer tools.",
       icon: <Code size={30} className="text-primary" />,
     },
     {
-      title: "Ease of use",
-      description:
-        "It's as easy as using an Apple, and as expensive as buying one.",
+      title: "User-Friendly Design",
+      description: "A clean, intuitive interface for users and agencies alike.",
       icon: <Settings size={30} className="text-primary" />,
     },
     {
-      title: "Pricing like no other",
-      description:
-        "Our prices are best in the market. No cap, no lock, no credit card required.",
+      title: "Transparent Pricing",
+      description: "Affordable rates with no hidden fees or surprises.",
       icon: <DollarSign size={30} className="text-primary" />,
     },
     {
-      title: "100% Uptime guarantee",
-      description: "We just cannot be taken down by anyone.",
+      title: "Reliable Uptime",
+      description:
+        "Available 24/7 so users and agencies can always access their information.",
       icon: <Cloud size={30} className="text-primary" />,
     },
     {
-      title: "Multi-tenant Architecture",
-      description:
-        "You can simply share passwords instead of buying new seats.",
+      title: "Multi-User Collaboration",
+      description: "Easily collaborate on documents within the platform.",
       icon: <Users size={30} className="text-primary" />,
     },
     {
-      title: "24/7 Customer Support",
-      description:
-        "We are available 100% of the time. At least our AI Agents are.",
+      title: "Comprehensive Support",
+      description: "Assistance is just a message away—any time, any day.",
       icon: <HelpCircle size={30} className="text-primary" />,
     },
     {
-      title: "Money back guarantee",
-      description:
-        "If you don't like EveryAI, we will convince you to like us.",
+      title: "Satisfaction Guarantee",
+      description: "Love the platform or receive a full refund within 30 days.",
       icon: <Shield size={30} className="text-primary" />,
     },
     {
-      title: "And everything else",
-      description: "I just ran out of copy ideas. Accept my sincere apologies.",
+      title: "Inclusive Features",
+      description:
+        "Tools for both individuals and agencies to maximize impact.",
       icon: <Heart size={30} className="text-primary" />,
     },
   ];
