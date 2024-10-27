@@ -9,7 +9,7 @@ import {
   } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import Link from 'next/link'
-import { Button,buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 type Props = {}
 import { cn } from "@/lib/utils";
 
@@ -38,15 +38,15 @@ export default function SignIn({}: Props) {
             </div>
             <div className="flex flex-col gap-4">
                 <Button className='w-full'>
-                    LogIn
+                    Giriş Yap
                 </Button>
                 <Button className={cn(buttonVariants({variant: "secondary"}) ,"w-full")}>
-                    LogIn with Google
+                    Google İle Giriş Yap
                 </Button>
             </div>
             <div className="flex w-full gap-2">
-                <p>Hesabınız Yok Mu?</p>
-                <Link href={"#"}className='underline'>Kayıt Ol</Link>
+                <p>Hesabınız yok mu?</p>
+                <Link href={"/sign-up"}className='underline'>Kayıt Ol</Link>
             
             </div>
         </CardContent>

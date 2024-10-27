@@ -64,7 +64,12 @@ export default function Footer({ items }: NavProps) {
           {" "}
           <Button>
               <Link href={"sign-in"}>
-                  sign In
+                  Sign In
+              </Link>
+          </Button>
+          <Button>
+              <Link href={"sign-up"}>
+                  Sign Up
               </Link>
           </Button>
           <ModeToggle />
