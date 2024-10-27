@@ -61,18 +61,10 @@ export default function Footer({ items }: NavProps) {
           ) : null}
         </div>
         <div className="flex items-center gap-4">
-          {" "}
-          <Button>
-              <Link href={"sign-in"}>
-                  Sign In
-              </Link>
-          </Button>
-          <Button>
-              <Link href={"sign-up"}>
-                  Sign Up
-              </Link>
-          </Button>
           <ModeToggle />
+          <Button>
+            <Link href={"sign-in"}>Sign In</Link>
+          </Button>
           <div className="md:hidden flex">
             <Drawer>
               <DrawerTrigger>
