@@ -18,6 +18,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "./ui/drawer";
+import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 
 interface NavProps {
@@ -61,6 +62,11 @@ export default function Footer({ items }: NavProps) {
         </div>
         <div className="flex items-center gap-4">
           {" "}
+          <Button>
+              <Link href={"sign-in"}>
+                  sign In
+              </Link>
+          </Button>
           <ModeToggle />
           <div className="md:hidden flex">
             <Drawer>
