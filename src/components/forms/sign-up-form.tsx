@@ -25,17 +25,24 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import { userService } from "@/services/user-service";
+import { useState } from "react";
 
 const formSchema = z.object({
+  userName: z.string().min(1, "Adınızı giriniz"),
   firstName: z.string().min(1, "Adınızı giriniz"),
   lastName: z.string().min(1, "Soyadınızı giriniz"),
   email: z.string().email("Geçerli bir email giriniz"),
   password: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
+  confirmPassword: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 export default function SignUpForm() {
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -43,11 +50,37 @@ export default function SignUpForm() {
       lastName: "",
       email: "",
       password: "",
+      confirmPassword: "",
+      userName: "gokalp",
     },
   });
 
-  function onSubmit(values: FormData) {
-    console.log(values);
+  async function onSubmit(values: FormData) {
+    setError(null);
+    setSuccessMessage(null);
+
+    const userPayload = {
+      userName: values.userName,
+      name: `${values.firstName} ${values.lastName}`,
+      email: values.email,
+      password: values.password,
+      confirmPassword: values.confirmPassword,
+    };
+
+    try {
+      await userService.create(
+        userPayload,
+        (data) => {
+          setSuccessMessage(`Kullanıcı başarıyla oluşturuldu! ID: ${data.id}`);
+        },
+        (errorMessage) => {
+          setError(errorMessage);
+        }
+      );
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      setError("Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.");
+    }
   }
 
   return (
@@ -67,6 +100,19 @@ export default function SignUpForm() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 flex flex-col gap-6">
+              <FormField
+                control={form.control}
+                name="userName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Adınızı giriniz" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="firstName"
@@ -127,6 +173,23 @@ export default function SignUpForm() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Şifrenizi Giriniz</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Şifrenizi tekrar giriniz"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="flex flex-col gap-4">
                 <Button type="submit" className="w-full">
                   Kayıt Ol
@@ -147,6 +210,10 @@ export default function SignUpForm() {
                   Giriş Yap
                 </Link>
               </div>
+              {error && <p className="text-red-500 text-center">{error}</p>}
+              {successMessage && (
+                <p className="text-green-500 text-center">{successMessage}</p>
+              )}
             </CardContent>
           </Card>
         </form>

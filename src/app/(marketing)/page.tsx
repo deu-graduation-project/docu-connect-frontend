@@ -8,7 +8,7 @@ type Props = {};
 export default function IndexPage({}: Props) {
   return (
     <div className=" relative max-w-7xl mx-auto ">
-      <HeroSection />
+      {/* <HeroSection /> */}
       <SecondFeaturesSection />
       <FeaturesSection />
       <div className="mx-auto py-8">

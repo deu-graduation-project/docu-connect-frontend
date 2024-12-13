@@ -20,7 +20,7 @@ export const UserAuthService = () => {
     callBackFunction?: () => void
   ): Promise<void> => {
     try {
-      const response = await fetch(`http://localhost:5129/auth/login`, {
+      const response = await fetch(`http://localhost:5129/api/Auth/Login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

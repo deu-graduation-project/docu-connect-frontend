@@ -29,7 +29,7 @@ import { useRouter } from "next/router";
 import { UserAuthService } from "@/services/user";
 
 const formSchema = z.object({
-  email: z.string().email("Geçerli bir email giriniz"),
+  email: z.string(),
   password: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
 });
 
@@ -82,7 +82,7 @@ export default function SignInForm() {
                     <FormLabel>Emailinizi Giriniz</FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
+                        type="text"
                         placeholder="Emailinizi giriniz"
                         {...field}
                       />
