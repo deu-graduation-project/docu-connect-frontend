@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
+import { User } from "@/services/user-service";
 import {
   Card,
   CardContent,
@@ -28,14 +28,19 @@ import { Icons } from "@/components/icons";
 import { userService } from "@/services/user-service";
 import { useState } from "react";
 
-const formSchema = z.object({
-  userName: z.string().min(1, "Adınızı giriniz"),
-  firstName: z.string().min(1, "Adınızı giriniz"),
-  lastName: z.string().min(1, "Soyadınızı giriniz"),
-  email: z.string().email("Geçerli bir email giriniz"),
-  password: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
-  confirmPassword: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
-});
+const formSchema = z
+  .object({
+    userName: z.string().min(1, "Adınızı giriniz"),
+    name: z.string().min(1, "Adınızı giriniz"),
+    surname: z.string().min(1, "Soyadınızı giriniz"),
+    email: z.string().email("Geçerli bir email giriniz"),
+    password: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
+    passwordConfirm: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
+  })
+  .refine((data) => data.password === data.passwordConfirm, {
+    message: "Şifreler eşleşmiyor.",
+    path: ["passwordConfirm"], // Field to highlight
+  });
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -46,12 +51,13 @@ export default function SignUpForm() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      userName: "",
+      name: "",
+      surname: "",
       email: "",
+
       password: "",
-      confirmPassword: "",
-      userName: "gokalp",
+      passwordConfirm: "gokalp",
     },
   });
 
@@ -59,12 +65,13 @@ export default function SignUpForm() {
     setError(null);
     setSuccessMessage(null);
 
-    const userPayload = {
+    const userPayload: User = {
       userName: values.userName,
-      name: `${values.firstName} ${values.lastName}`,
+      name: `${values.name} ${values.surname}`,
+      surname: values.surname,
       email: values.email,
       password: values.password,
-      confirmPassword: values.confirmPassword,
+      passwordConfirm: values.passwordConfirm,
     };
 
     try {
@@ -85,6 +92,7 @@ export default function SignUpForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
+      <div></div>
       <div className="absolute top-5 left-5">
         <Link href={"/"}>
           <Icons.arrowLeft strokeWidth={"1.3px"} />
@@ -115,7 +123,7 @@ export default function SignUpForm() {
               />
               <FormField
                 control={form.control}
-                name="firstName"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Adınızı Giriniz</FormLabel>
@@ -128,7 +136,7 @@ export default function SignUpForm() {
               />
               <FormField
                 control={form.control}
-                name="lastName"
+                name="surname"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Soyadınızı Giriniz</FormLabel>
@@ -175,10 +183,10 @@ export default function SignUpForm() {
               />
               <FormField
                 control={form.control}
-                name="confirmPassword"
+                name="passwordConfirm"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Şifrenizi Giriniz</FormLabel>
+                    <FormLabel>Şifrenizi Tekrar Giriniz</FormLabel>
                     <FormControl>
                       <Input
                         type="password"

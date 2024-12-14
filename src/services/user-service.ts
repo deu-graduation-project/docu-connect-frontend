@@ -21,34 +21,51 @@ class UserService {
     this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
   }
 
+  /*************  Codeium Command ⭐  *************/
+  /**
+   * Creates a new user and returns the created user's data.
+   * @param user - The user data to be created.
+   * @param successCallback - An optional callback function that will be called with the created user's data.
+   * @param errorCallback - An optional callback function that will be called with an error message if any error occurs.
+   */
   async create(
     user: User,
     successCallback?: (data: UserCreate) => void,
     errorCallback?: (errorMessage: string) => void
   ): Promise<UserCreate> {
+    if (!user) {
+      throw new Error("User data cannot be null or undefined.");
+    }
+
     try {
-      const response = await fetch(`${this.baseUrl}/users/createUser`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(user),
-      });
+      const response = await fetch(
+        `http://localhost:5129/api/Users/CreateUser`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json-patch+json",
+          },
+          body: JSON.stringify(user),
+        }
+      );
 
       if (!response.ok) {
         const errorResponse = await response.json();
+
         let message = "";
 
-        if (Array.isArray(errorResponse)) {
+        if (errorResponse && Array.isArray(errorResponse)) {
           errorResponse.forEach((v) => {
-            if (Array.isArray(v.value)) {
+            if (v.value && Array.isArray(v.value)) {
               v.value.forEach((errorMessage: any) => {
                 message += `${errorMessage}\n`;
               });
             }
           });
+        } else if (errorResponse && errorResponse.message) {
+          message = errorResponse.message;
         } else {
-          message = errorResponse.message || "An unknown error occurred.";
+          message = "An unknown error occurred.";
         }
 
         if (errorCallback) {
@@ -64,8 +81,18 @@ class UserService {
       }
 
       return data;
-    } catch (error) {
-      throw error;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (errorCallback) {
+          errorCallback(error.message || "An unknown error occurred.");
+        }
+
+        throw error;
+      } else {
+        // Handle the case where error is not an instance of Error
+        // For example, you can throw a new Error with a custom message
+        throw new Error("An unknown error occurred.");
+      }
     }
   }
 }
