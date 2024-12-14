@@ -1,42 +1,53 @@
-import React from "react";
-import Cookies from "js-cookie";
+import { AppSidebar } from "@/components/app-sidebar";
+import { getToken } from "@/services/tokens";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
-type Props = {};
-
-async function getToken(params: type) {
-  const getToken = () => {
-    return Cookies.get("accessToken"); // Token'ı çerezden al
-  };
-
-  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-    const token = getToken();
-
-    const headers = {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers, // Mevcut başlıkları koru
-    };
-
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
-
-    if (!response.ok) {
-      try {
-        const errorResponse = await response.json();
-        throw new Error(errorResponse.message || "API isteği başarısız oldu.");
-      } catch (error) {
-        throw new Error("API isteği başarısız oldu ve hata yanıtı alınamadı.");
-      }
-    }
-
-    return response.headers.get("Content-Type") === "application/zip"
-      ? response.blob()
-      : response.json();
-  };
-}
-
-export default function Dashboard({}: Props) {
-  return <div>Dashboard</div>;
+export default function Page() {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    Building Your Application
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="aspect-video rounded-xl bg-muted/50" />
+          </div>
+          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
 }

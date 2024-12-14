@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -25,7 +26,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { useRouter } from "next/router";
 import { UserAuthService } from "@/services/user";
 
 const formSchema = z.object({
@@ -37,7 +37,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function SignInForm() {
   const userAuthService = UserAuthService();
-  // const router = useRouter();
+  const router = useRouter();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,7 +50,7 @@ export default function SignInForm() {
     try {
       await userAuthService.login(values.email, values.password, () => {
         authService.identityCheck();
-        // router.push("/"); // Ana sayfaya yönlendir
+        router.push("/dashboard"); // Ana sayfaya yönlendir
       });
     } catch (error) {
       console.error("Login failed", error);

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./styles/globals.css";
+import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Plus_Jakarta_Sans as FontJakarta } from "next/font/google";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";

@@ -55,9 +55,8 @@ export default function SignUpForm() {
       name: "",
       surname: "",
       email: "",
-
       password: "",
-      passwordConfirm: "gokalp",
+      passwordConfirm: "",
     },
   });
 
@@ -78,7 +77,7 @@ export default function SignUpForm() {
       await userService.create(
         userPayload,
         (data) => {
-          setSuccessMessage(`Kullanıcı başarıyla oluşturuldu! ID: ${data.id}`);
+          setSuccessMessage(`Kullanıcı başarıyla oluşturuldu!`);
         },
         (errorMessage) => {
           setError(errorMessage);
