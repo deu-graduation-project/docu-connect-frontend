@@ -14,23 +14,19 @@ interface TokenResponse {
 }
 
 export const UserAuthService = () => {
-  
   const login = async (
     userNameOrEmail: string,
     password: string,
     callBackFunction?: () => void
   ): Promise<void> => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Auth/Login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userNameOrEmail, password }),
-        }
-      );
+      const response = await fetch(`http://localhost:5129/api/Auth/Login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userNameOrEmail, password }),
+      });
 
       if (!response.ok) {
         throw new Error("Giriş işlemi başarısız"); // HTTP hata kodlarına göre hata fırlat
