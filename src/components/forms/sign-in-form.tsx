@@ -26,7 +26,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { UserAuthService } from "@/services/user";
+import { UserAuthService } from "@/services/userAuth-service";
 
 const formSchema = z.object({
   email: z.string(),
