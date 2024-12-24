@@ -46,7 +46,7 @@ const data = {
     },
     {
       name: "Activity and History",
-      url: `/dashboard/activity`,
+      url: `/dashboard/activity-and-history`,
       icon: SquareActivity,
     },
     {
