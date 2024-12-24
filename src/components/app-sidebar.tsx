@@ -51,7 +51,7 @@ const data = {
     },
     {
       name: "Privacy & Preferences",
-      url: `/dashboard/privacy`,
+      url: `/dashboard/privacy-and-preferences`,
       icon: PieChart,
     },
     {
