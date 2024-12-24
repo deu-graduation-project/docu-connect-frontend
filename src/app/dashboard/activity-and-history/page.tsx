@@ -2,7 +2,7 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import OrdersTable from "./components/orders-table";
 import NotesLibrary from "./components/notes-library";
-
+import Reviews from "./components/reviews";
 type Props = {};
 
 export default function ActivityAndHistoryPage({}: Props) {
@@ -31,7 +31,7 @@ export default function ActivityAndHistoryPage({}: Props) {
           <NotesLibrary />
         </TabsContent>
         <TabsContent value="Reviews and Feedback">
-          Change your password here.
+          <Reviews />
         </TabsContent>
       </Tabs>
     </div>
