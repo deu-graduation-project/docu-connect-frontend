@@ -54,7 +54,7 @@ const chartConfig = {
 export function AudienceOverviewChart() {
   return (
     <Card className="max-h-[700px] flex flex-col justify-between">
-      <CardHeader>
+      <CardHeader className="flex flex-col items-center">
         <CardTitle>Audience</CardTitle>
         <CardDescription>
           Where users are downloading/viewing your notes.

@@ -61,12 +61,12 @@ const data = {
     },
     {
       name: "Support & Connections",
-      url: `/dashboard/support`,
+      url: `/dashboard/support-and-connections`,
       icon: Waypoints,
     },
     {
       name: "Account Management",
-      url: `/dashboard/account`,
+      url: `/dashboard/account-management`,
       icon: Wrench,
     },
   ],

@@ -1,4 +1,3 @@
-import React from "react";
 import { TotalViewChart } from "./components/total-view-chart";
 import { DownloadsChart } from "./components/downloads-chart";
 import { EngagementChart } from "./components/engagement-chart";
