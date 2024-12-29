@@ -78,7 +78,10 @@ export default function PrivacyPreferencesPage() {
             <Checkbox
               checked={notifications.orderUpdates}
               onCheckedChange={(val) =>
-                setNotifications({ ...notifications, orderUpdates: val })
+                setNotifications({
+                  ...notifications,
+                  orderUpdates: val as boolean,
+                })
               }
             />
             <span>Order Updates (Processing, Ready, Delivered)</span>
@@ -88,7 +91,10 @@ export default function PrivacyPreferencesPage() {
             <Checkbox
               checked={notifications.promotions}
               onCheckedChange={(val) =>
-                setNotifications({ ...notifications, promotions: val })
+                setNotifications({
+                  ...notifications,
+                  promotions: val as boolean,
+                })
               }
             />
             <span>New Features & Promotions</span>
@@ -98,7 +104,10 @@ export default function PrivacyPreferencesPage() {
             <Checkbox
               checked={notifications.engagement}
               onCheckedChange={(val) =>
-                setNotifications({ ...notifications, engagement: val })
+                setNotifications({
+                  ...notifications,
+                  engagement: val as boolean,
+                })
               }
             />
             <span>Engagement Alerts (Downloads, Likes)</span>
