@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { NavItem } from "@/types";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { ModeToggle } from "./mode-toggle";
+import { SignInButton } from "./ui/sign-in-button";
 import {
   Drawer,
   DrawerClose,
@@ -62,9 +63,8 @@ export default function Footer({ items }: NavProps) {
         </div>
         <div className="flex items-center gap-4">
           <ModeToggle />
-          <Button>
-            <Link href={"sign-in"}>Sign In</Link>
-          </Button>
+          <SignInButton />
+          
           <div className="md:hidden flex">
             <Drawer>
               <DrawerTrigger>

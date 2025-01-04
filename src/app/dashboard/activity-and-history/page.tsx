@@ -7,7 +7,7 @@ type Props = {};
 
 export default function ActivityAndHistoryPage({}: Props) {
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full max-w-7xl mx-auto container ">
       <Tabs
         defaultValue="Recent Orders & Photocopies"
         className=" w-full max-w-7xl"
