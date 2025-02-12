@@ -2,6 +2,7 @@
 
 import { Address, GetAgencies, GetBeAnAgencyRequests, GetSingleAgency, User, UserCreate } from "@/types/classes";
 import { fetchWithAuth } from "./fetch-with-auth";
+import { SucceededMessageResponse } from "@/types";
 
 
 class UserService {
@@ -91,32 +92,33 @@ class UserService {
     passwordConfirm: string,
     agencyName: string,
     address: Address,
+    profilePhoto?: File, // Profil fotoğrafı desteği eklendi
     agencyBio?: string,
     successCallback?: () => void,
     errorCallback?: (errorMessage: string) => void
   ) {
     try {
-      const response = await fetch(`${this.baseUrl}/Users/BeAnAgency`, {
+      const formData = new FormData();
+      formData.append("UserName", userName);
+      formData.append("Name", name);
+      formData.append("Surname", surname);
+      formData.append("Email", email);
+      formData.append("Password", password);
+      formData.append("PasswordConfirm", passwordConfirm);
+      formData.append("AgencyName", agencyName);
+      formData.append("Address", JSON.stringify(address));
+      if (agencyBio) formData.append("AgencyBio", agencyBio);
+      if (profilePhoto) formData.append("ProfilePhoto", profilePhoto); 
+
+      const response = await fetchWithAuth(`${this.baseUrl}/Users/BeAnAgency`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json-patch+json",
-        },
-        body: JSON.stringify({
-          userName,
-          name,
-          surname,
-          email,
-          password,
-          passwordConfirm,
-          agencyName,
-          address,
-          agencyBio,
-        }),
+        body: formData, // JSON yerine FormData kullanılıyor
       });
 
       if (!response.ok) {
         const errorResponse = await response.json();
         let message = "";
+
         if (errorResponse && Array.isArray(errorResponse)) {
           errorResponse.forEach((v) => {
             if (v.value && Array.isArray(v.value)) {
@@ -142,13 +144,12 @@ class UserService {
         successCallback();
       }
 
-      return response;
+      return response.json(); // JSON formatında döndür
     } catch (error: unknown) {
       if (error instanceof Error) {
         if (errorCallback) {
           errorCallback(error.message || "Bilinmeyen bir hata oluştu.");
         }
-
         throw error;
       } else {
         throw new Error("Bilinmeyen bir hata oluştu.");
@@ -242,7 +243,7 @@ class UserService {
     );
     return data;
   }
-  async assignRolesToUser(userId:string,roles:string[]){
+  async assignRolesToUser(userId: string, roles: string[]) {
     const response = await fetchWithAuth(
       `${this.baseUrl}/Users/AssignRolesToUser`,
       {
@@ -254,6 +255,35 @@ class UserService {
       }
     );
     return response;
+  }
+  async updateAgencyInfos(data: {
+    name?: string;
+    surname?: string;
+    agencyName?: string;
+    province?: string;
+    district?: string;
+    extra?: string;
+    agencyBio?: string;
+    profilePhoto?: File;
+  }): Promise<SucceededMessageResponse> {
+    const formData = new FormData();
+    if (data.name) formData.append("Name", data.name);
+    if (data.surname) formData.append("Surname", data.surname);
+    if (data.agencyName) formData.append("AgencyName", data.agencyName);
+    if (data.province) formData.append("Province", data.province);
+    if (data.district) formData.append("District", data.district);
+    if (data.extra) formData.append("Extra", data.extra);
+    if (data.agencyBio) formData.append("AgencyBio", data.agencyBio);
+    if (data.profilePhoto) formData.append("ProfilePhoto", data.profilePhoto);
+
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Users/UpdateAgencyInfos`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    );
+    return response.json() as Promise<SucceededMessageResponse>;
   }
 }
 

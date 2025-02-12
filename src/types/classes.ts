@@ -92,14 +92,15 @@ export interface Address {
   extra: string;
 }
 export interface GetBeAnAgencyRequests {
-  beAnAgencyRequestId:string;
+  beAnAgencyRequestId: string;
   agencyName: string;
   agencyId: string;
   BeAnAgencyRequestState: BeAnAgencyRequestState;
-  address:Address;
-  name:string;
-  surname:string;
-  email:string;
+  address: Address;
+  name: string;
+  surname: string;
+  email: string;
+  profilePhoto: string | null;
 }
 export interface AgencyProduct {
   productId: string;
@@ -116,10 +117,11 @@ export interface AgencyComment {
 export interface GetAgencies {
   agencyId: string;
   agencyName: string;
-  province:string;
-  district:string;
-  extra:string;
-  starRating:number;
+  province: string;
+  district: string;
+  extra: string;
+  starRating: number;
+  profilePhoto: string | null;
 }
 export interface GetSingleAgency {
   agencyId: string;
@@ -131,4 +133,5 @@ export interface GetSingleAgency {
   agencyProducts: AgencyProduct[];
   comments: AgencyComment[];
   starRating: number;
+  profilePhoto: string | null;
 }
