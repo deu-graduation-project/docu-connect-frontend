@@ -62,3 +62,7 @@ export interface FaqItem {
   question: string;
   answer: string;
 }
+export interface SucceededMessageResponse {
+  succeeded: boolean;
+  message: string;
+}
