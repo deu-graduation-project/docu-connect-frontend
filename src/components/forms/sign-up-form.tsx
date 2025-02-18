@@ -13,7 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { User } from "@/services/user-service";
 import {
   Card,
   CardContent,
@@ -27,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { userService } from "@/services/user-service";
 import { useState } from "react";
+import { User } from "@/types/classes";
 
 const formSchema = z
   .object({
@@ -74,7 +74,7 @@ export default function SignUpForm() {
     };
 
     try {
-      await userService.create(
+      await userService.createUser(
         userPayload,
         (data) => {
           setSuccessMessage(`Kullanıcı başarıyla oluşturuldu!`);

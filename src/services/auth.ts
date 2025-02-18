@@ -6,11 +6,13 @@ import { jwtDecode } from "jwt-decode";
 class AuthService {
   private _isAuthenticated = false;
   private _isAdmin = false;
+  private _isAgency=false;
   private _userId: string | null = null;
   private _username: string | null = null;
   private _authStatusSubject = new BehaviorSubject<{
     isAuthenticated: boolean;
     isAdmin: boolean;
+    isAgency:boolean;
     userId: string | null;
     username: string | null;
   }>({
@@ -18,6 +20,7 @@ class AuthService {
     isAdmin: this._isAdmin,
     userId: this._userId,
     username: this._username,
+    isAgency:this._isAgency
   });
   constructor() {
     this.identityCheck();
@@ -42,6 +45,7 @@ class AuthService {
     this._isAuthenticated = false;
     this._isAdmin = false;
     this._userId = null;
+    this._isAgency=false;
 
     // Güncellenen durumu yayınla
     this._authStatusSubject.next({
@@ -49,6 +53,7 @@ class AuthService {
       isAdmin: this._isAdmin,
       userId: this._userId,
       username: this._username,
+      isAgency:this._isAgency
     });
 
     // Kullanıcıya bilgi ver
@@ -77,6 +82,10 @@ class AuthService {
           decoded[
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
           ]?.includes("admin") || false;
+        this._isAgency =
+          decoded[
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+          ]?.includes("agency") || false;
         this._username =
           decoded[
             "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
@@ -99,6 +108,7 @@ class AuthService {
       isAdmin: this._isAdmin,
       userId: this._userId,
       username: this._username,
+      isAgency:this._isAgency
     });
   }
   private isTokenExpired(decodedToken: any): boolean {
@@ -111,6 +121,9 @@ class AuthService {
 
   public get isAdmin(): boolean {
     return this._isAdmin;
+  }
+  public get isAgency(): boolean {
+    return this._isAgency;
   }
 
   public get userId(): string | null {
