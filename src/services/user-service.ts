@@ -1,8 +1,14 @@
 // services/userService.ts
 
-import { Address, GetAgencies, GetBeAnAgencyRequests, GetSingleAgency, User, UserCreate } from "@/types/classes";
+import {
+  Address,
+  GetAgencies,
+  GetBeAnAgencyRequests,
+  GetSingleAgency,
+  User,
+  UserCreate,
+} from "@/types/classes";
 import { fetchWithAuth } from "./fetch-with-auth";
-
 
 class UserService {
   private baseUrl: string;
@@ -168,6 +174,7 @@ class UserService {
     );
     return response;
   }
+
   async getBeAnAgencyRequests(
     page: number,
     size: number,
@@ -242,7 +249,7 @@ class UserService {
     );
     return data;
   }
-  async assignRolesToUser(userId:string,roles:string[]){
+  async assignRolesToUser(userId: string, roles: string[]) {
     const response = await fetchWithAuth(
       `${this.baseUrl}/Users/AssignRolesToUser`,
       {
