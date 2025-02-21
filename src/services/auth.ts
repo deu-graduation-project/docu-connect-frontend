@@ -13,6 +13,9 @@ class AuthService {
   private _isAgency = false;
   private _userId: string | null = null;
   private _username: string | null = null;
+  private _name: string | null = null;
+  private _surname: string | null = null;
+  private _email: string | null = null;
 
   private _authStatusSubject = new BehaviorSubject<{
     isAuthenticated: boolean;
@@ -20,12 +23,18 @@ class AuthService {
     isAgency: boolean;
     userId: string | null;
     username: string | null;
+    name: string | null;
+    surname: string | null;
+    email: string | null;
   }>({
     isAuthenticated: this._isAuthenticated,
     isAdmin: this._isAdmin,
     isAgency: this._isAgency,
     userId: this._userId,
     username: this._username,
+    name: this._name,
+    surname: this._surname,
+    email: this._email,
   });
 
   constructor() {
@@ -41,6 +50,9 @@ class AuthService {
     this._isAgency = false;
     this._userId = null;
     this._username = null;
+    this._name = null;
+    this._surname = null;
+    this._email = null;
 
     this._authStatusSubject.next({
       isAuthenticated: this._isAuthenticated,
@@ -48,6 +60,9 @@ class AuthService {
       isAgency: this._isAgency,
       userId: this._userId,
       username: this._username,
+      name: this._name,
+      surname: this._surname,
+      email: this._email,
     });
   }
 
@@ -75,12 +90,27 @@ class AuthService {
           decoded[
             "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
           ] || null;
+        this._name =
+          decoded[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+          ] || null;
+        this._surname =
+          decoded[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+          ] || null;
+        this._email =
+          decoded[
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+          ] || null;
       } catch (error) {
         this._isAuthenticated = false;
         this._isAdmin = false;
         this._isAgency = false;
         this._userId = null;
         this._username = null;
+        this._email = null;
+        this._name = null;
+        this._surname = null;
       }
     } else {
       this._isAuthenticated = false;
@@ -88,6 +118,9 @@ class AuthService {
       this._isAgency = false;
       this._userId = null;
       this._username = null;
+      this._email = null;
+      this._name = null;
+      this._surname = null;
     }
 
     this._authStatusSubject.next({
@@ -96,6 +129,9 @@ class AuthService {
       isAgency: this._isAgency,
       userId: this._userId,
       username: this._username,
+      name: this._name,
+      surname: this._surname,
+      email: this._email,
     });
   }
 
@@ -118,7 +154,15 @@ class AuthService {
   public get userId(): string | null {
     return this._userId;
   }
-
+  public get name(): string | null {
+    return this._name;
+  }
+  public get surname(): string | null {
+    return this._surname;
+  }
+  public get email(): string | null {
+    return this._email;
+  }
   public get username(): string | null {
     return this._username;
   }
