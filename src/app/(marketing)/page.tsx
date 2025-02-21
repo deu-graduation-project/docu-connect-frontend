@@ -1,8 +1,8 @@
 import React from "react";
-import FAQSection from "@/components/faq";
-import FeaturesSection from "@/components/features";
-import HeroSection from "@/components/hero";
-import SecondFeaturesSection from "@/components/second-features";
+import FAQSection from "@/components/landing-components/faq";
+import FeaturesSection from "@/components/landing-components/features";
+import HeroSection from "@/components/landing-components/hero";
+import SecondFeaturesSection from "@/components/landing-components/second-features";
 type Props = {};
 
 export default function IndexPage({}: Props) {

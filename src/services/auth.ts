@@ -1,77 +1,62 @@
 import { BehaviorSubject } from "rxjs";
-
 import { jwtDecode } from "jwt-decode";
-// import { useToast } from "@/hooks/use-toast";
+import { getCookie, clearCookie } from "@/services/cookies";
+
+interface DecodedToken {
+  exp: number;
+  [key: string]: any; // Allow any other claims
+}
 
 class AuthService {
   private _isAuthenticated = false;
   private _isAdmin = false;
-  private _isAgency=false;
+  private _isAgency = false;
   private _userId: string | null = null;
   private _username: string | null = null;
+
   private _authStatusSubject = new BehaviorSubject<{
     isAuthenticated: boolean;
     isAdmin: boolean;
-    isAgency:boolean;
+    isAgency: boolean;
     userId: string | null;
     username: string | null;
   }>({
     isAuthenticated: this._isAuthenticated,
     isAdmin: this._isAdmin,
+    isAgency: this._isAgency,
     userId: this._userId,
     username: this._username,
-    isAgency:this._isAgency
   });
+
   constructor() {
     this.identityCheck();
   }
 
-  // Cookie'den tokeni alır
-  private getCookie(name: string): string | null {
-    const matches = document.cookie.match(
-      new RegExp(
-        "(?:^|; )" +
-          name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, "\\$1") +
-          "=([^;]*)"
-      )
-    );
-    return matches ? decodeURIComponent(matches[1]) : null;
-  }
-
   public async signOut(): Promise<void> {
-    // Çerezleri temizle
-    document.cookie =
-      "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"; // Çerezi sil
+    clearCookie("accessToken");
+    clearCookie("refreshToken");
+
     this._isAuthenticated = false;
     this._isAdmin = false;
+    this._isAgency = false;
     this._userId = null;
-    this._isAgency=false;
+    this._username = null;
 
-    // Güncellenen durumu yayınla
     this._authStatusSubject.next({
       isAuthenticated: this._isAuthenticated,
       isAdmin: this._isAdmin,
+      isAgency: this._isAgency,
       userId: this._userId,
       username: this._username,
-      isAgency:this._isAgency
     });
-
-    // Kullanıcıya bilgi ver
-
-    // const { toast } = useToast();
-    // toast({
-    //   title: "Oturum kapatıldı",
-    //   description: "Başarıyla çıkış yapıldı.",
-    // });
   }
 
   public async identityCheck(): Promise<void> {
-    const token =
-      typeof document !== "undefined" ? this.getCookie("accessToken") : null;
+    const token = getCookie("accessToken");
 
     if (token) {
       try {
-        const decoded: any = jwtDecode(token);
+        const decoded: DecodedToken = jwtDecode(token);
 
         this._isAuthenticated = !this.isTokenExpired(decoded);
         this._userId =
@@ -93,25 +78,28 @@ class AuthService {
       } catch (error) {
         this._isAuthenticated = false;
         this._isAdmin = false;
+        this._isAgency = false;
         this._userId = null;
         this._username = null;
       }
     } else {
       this._isAuthenticated = false;
       this._isAdmin = false;
+      this._isAgency = false;
       this._userId = null;
+      this._username = null;
     }
 
-    // Güncellenen durumu yayınla
     this._authStatusSubject.next({
       isAuthenticated: this._isAuthenticated,
       isAdmin: this._isAdmin,
+      isAgency: this._isAgency,
       userId: this._userId,
       username: this._username,
-      isAgency:this._isAgency
     });
   }
-  private isTokenExpired(decodedToken: any): boolean {
+
+  private isTokenExpired(decodedToken: DecodedToken): boolean {
     return decodedToken.exp * 1000 < Date.now();
   }
 
@@ -122,6 +110,7 @@ class AuthService {
   public get isAdmin(): boolean {
     return this._isAdmin;
   }
+
   public get isAgency(): boolean {
     return this._isAgency;
   }
@@ -130,11 +119,12 @@ class AuthService {
     return this._userId;
   }
 
-  public authStatus$() {
-    return this._authStatusSubject.asObservable();
-  }
   public get username(): string | null {
     return this._username;
+  }
+
+  public authStatus$() {
+    return this._authStatusSubject.asObservable();
   }
 }
 

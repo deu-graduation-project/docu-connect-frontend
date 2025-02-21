@@ -1,8 +1,25 @@
+"use client";
 import React from "react";
 import { Icons } from "@/components/icons";
-type Props = {};
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import useAuthStatus from "../../../lib/queries/auth-status";
+import withAuth from "@/components/with-auth";
 
-export default function ProfilePage({}: Props) {
+const ProfilePage = () => {
+  const { data, isLoading, error } = useAuthStatus();
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  if (!data?.isAuthenticated) {
+    return <div>Please log in to view this content.</div>;
+  }
+
   return (
     <div className=" pb-12">
       <div className=" h-64 w-full relative ">
@@ -68,4 +85,6 @@ export default function ProfilePage({}: Props) {
       </div>
     </div>
   );
-}
+};
+
+export default withAuth(ProfilePage);

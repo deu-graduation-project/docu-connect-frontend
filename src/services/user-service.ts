@@ -1,5 +1,3 @@
-// services/userService.ts
-
 import {
   Address,
   GetAgencies,
@@ -7,9 +5,9 @@ import {
   GetSingleAgency,
   User,
   UserCreate,
+  SucceededMessageResponse,
 } from "@/types/classes";
 import { fetchWithAuth } from "./fetch-with-auth";
-import { SucceededMessageResponse } from "@/types";
 
 class UserService {
   private baseUrl: string;
@@ -18,7 +16,6 @@ class UserService {
     this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
   }
 
-  /*************  Codeium Command ⭐  *************/
   /**
    * Creates a new user and returns the created user's data.
    * @param user - The user data to be created.
@@ -35,7 +32,7 @@ class UserService {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/Users/CreateUser`, {
+      const response = await fetchWithAuth(`${this.baseUrl}/Users/CreateUser`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json-patch+json",
@@ -43,52 +40,38 @@ class UserService {
         body: JSON.stringify(user),
       });
 
+      console.log("Response:", response); // Log the response object
+      console.log("Response status:", response.status); // Log the status code
+      console.log("Response headers:", response.headers); // Log the headers
+
       if (!response.ok) {
-        const errorResponse = await response.json();
-
-        let message = "";
-
-        if (errorResponse && Array.isArray(errorResponse)) {
-          errorResponse.forEach((v) => {
-            if (v.value && Array.isArray(v.value)) {
-              v.value.forEach((errorMessage: any) => {
-                message += `${errorMessage}\n`;
-              });
-            }
-          });
-        } else if (errorResponse && errorResponse.message) {
-          message = errorResponse.message;
-        } else {
-          message = "An unknown error occurred.";
+        let errorResponse;
+        try {
+          errorResponse = await response.json(); // Parse JSON for error responses
+        } catch (e) {
+          throw new Error("Failed to create user.");
         }
-
-        if (errorCallback) {
-          errorCallback(message.trim());
-        }
-
-        throw new Error(message.trim());
+        console.error("Error response:", errorResponse); // Log the error response
+        throw new Error(errorResponse.message || "Failed to create user.");
       }
 
-      const data: UserCreate = await response.json();
-      if (successCallback) {
-        successCallback(data);
-      }
-
+      const data: UserCreate = await response.json(); // Parse JSON for success responses
+      if (successCallback) successCallback(data);
       return data;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        if (errorCallback) {
-          errorCallback(error.message || "An unknown error occurred.");
-        }
-
-        throw error;
-      } else {
-        // Handle the case where error is not an instance of Error
-        // For example, you can throw a new Error with a custom message
-        throw new Error("An unknown error occurred.");
-      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred.";
+      if (errorCallback) errorCallback(errorMessage);
+      throw new Error(errorMessage);
     }
   }
+
+  /**
+   * Submits a request to become an agency.
+   * @param userData - User and agency details.
+   * @param successCallback - An optional callback function that will be called on success.
+   * @param errorCallback - An optional callback function that will be called with an error message if any error occurs.
+   */
   async beAnAgency(
     userName: string,
     name: string,
@@ -98,11 +81,11 @@ class UserService {
     passwordConfirm: string,
     agencyName: string,
     address: Address,
-    profilePhoto?: File, // Profil fotoğrafı desteği eklendi
+    profilePhoto?: File,
     agencyBio?: string,
     successCallback?: () => void,
     errorCallback?: (errorMessage: string) => void
-  ) {
+  ): Promise<any> {
     try {
       const formData = new FormData();
       formData.append("UserName", userName);
@@ -114,68 +97,58 @@ class UserService {
       formData.append("AgencyName", agencyName);
       formData.append("Address", JSON.stringify(address));
       if (agencyBio) formData.append("AgencyBio", agencyBio);
-      if (profilePhoto) formData.append("ProfilePhoto", profilePhoto); 
+      if (profilePhoto) formData.append("ProfilePhoto", profilePhoto);
 
       const response = await fetchWithAuth(`${this.baseUrl}/Users/BeAnAgency`, {
         method: "POST",
-        body: formData, // JSON yerine FormData kullanılıyor
+        body: formData,
       });
 
       if (!response.ok) {
         const errorResponse = await response.json();
-        let message = "";
-
-        if (errorResponse && Array.isArray(errorResponse)) {
-          errorResponse.forEach((v) => {
-            if (v.value && Array.isArray(v.value)) {
-              v.value.forEach((errorMessage: any) => {
-                message += `${errorMessage}\n`;
-              });
-            }
-          });
-        } else if (errorResponse && errorResponse.message) {
-          message = errorResponse.message;
-        } else {
-          message = "Bilinmeyen bir hata oluştu.";
-        }
-
-        if (errorCallback) {
-          errorCallback(message.trim());
-        }
-
-        throw new Error(message.trim());
+        const errorMessage = this.parseErrorResponse(errorResponse);
+        if (errorCallback) errorCallback(errorMessage);
+        throw new Error(errorMessage);
       }
 
-      if (successCallback) {
-        successCallback();
-      }
-
-      return response.json(); // JSON formatında döndür
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        if (errorCallback) {
-          errorCallback(error.message || "Bilinmeyen bir hata oluştu.");
-        }
-        throw error;
-      } else {
-        throw new Error("Bilinmeyen bir hata oluştu.");
-      }
+      if (successCallback) successCallback();
+      return response.json();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred.";
+      if (errorCallback) errorCallback(errorMessage);
+      throw new Error(errorMessage);
     }
   }
-  async beAnAgencyConfirm(BeAnAgencyRequestId: string, IsConfirmed: boolean) {
+
+  /**
+   * Confirms or rejects a "Be an Agency" request.
+   * @param BeAnAgencyRequestId - The ID of the request.
+   * @param IsConfirmed - Whether the request is confirmed.
+   */
+  async beAnAgencyConfirm(
+    BeAnAgencyRequestId: string,
+    IsConfirmed: boolean
+  ): Promise<any> {
     const response = await fetchWithAuth(
       `${this.baseUrl}/Users/BeAnAgencyConfirm`,
       {
         method: "POST",
-        body: JSON.stringify({
-          BeAnAgencyRequestId,
-          IsConfirmed,
-        }),
+        body: JSON.stringify({ BeAnAgencyRequestId, IsConfirmed }),
       }
     );
     return response;
   }
 
+  /**
+   * Fetches "Be an Agency" requests.
+   * @param page - The page number.
+   * @param size - The number of items per page.
+   * @param orderBy - Optional sorting criteria.
+   * @param usernameOrEmail - Optional filter by username or email.
+   * @param requestId - Optional filter by request ID.
+   * @param state - Optional filter by request state.
+   */
   async getBeAnAgencyRequests(
     page: number,
     size: number,
@@ -187,25 +160,32 @@ class UserService {
     totalCount: number;
     BeAnAgencyRequests: GetBeAnAgencyRequests[];
   }> {
-    const queryParams: any = {
+    const queryParams = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
-    };
+      ...(orderBy && { orderBy }),
+      ...(usernameOrEmail && { usernameOrEmail }),
+      ...(requestId && { requestId }),
+      ...(state && { state }),
+    });
 
-    if (orderBy) queryParams.orderBy = orderBy;
-    if (usernameOrEmail) queryParams.usernameOrEmail = usernameOrEmail;
-    if (requestId) queryParams.requestId = requestId;
-    if (state) queryParams.state = state;
-
-    const queryString = new URLSearchParams(queryParams).toString();
-    const data = await fetchWithAuth(
-      `${this.baseUrl}/Users/GetBeAnAgencyRequests?${queryString}`,
-      {
-        method: "GET",
-      }
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Users/GetBeAnAgencyRequests?${queryParams}`,
+      { method: "GET" }
     );
+    const data = await response.json();
     return data;
   }
+
+  /**
+   * Fetches a list of agencies.
+   * @param page - The page number.
+   * @param size - The number of items per page.
+   * @param agencyName - Optional filter by agency name.
+   * @param province - Optional filter by province.
+   * @param district - Optional filter by district.
+   * @param orderBy - Optional sorting criteria.
+   */
   async getAgencies(
     page: number,
     size: number,
@@ -213,56 +193,58 @@ class UserService {
     province?: string,
     district?: string,
     orderBy?: string
-  ): Promise<{
-    totalCount: number;
-    BeAnAgencyRequests: GetAgencies[];
-  }> {
-    const queryParams: any = {
+  ): Promise<{ totalCount: number; BeAnAgencyRequests: GetAgencies[] }> {
+    const queryParams = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
-    };
+      ...(agencyName && { agencyName }),
+      ...(province && { province }),
+      ...(district && { district }),
+      ...(orderBy && { orderBy }),
+    });
 
-    if (agencyName) queryParams.agencyName = agencyName;
-    if (province) queryParams.province = province;
-    if (district) queryParams.district = district;
-    if (orderBy) queryParams.orderBy = orderBy;
-
-    const queryString = new URLSearchParams(queryParams).toString();
-
-    const data = await fetchWithAuth(
-      `${this.baseUrl}/Users/GetAgencies?${queryString}`,
-      {
-        method: "GET",
-      }
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Users/GetAgencies?${queryParams}`,
+      { method: "GET" }
     );
+    const data = await response.json();
     return data;
   }
+
+  /**
+   * Fetches details of a single agency.
+   * @param agencyId - The ID of the agency.
+   */
   async getSingleAgency(agencyId: string): Promise<GetSingleAgency> {
-    const queryParams: any = {
-      agencyId: agencyId,
-    };
-    const queryString = new URLSearchParams(queryParams).toString();
-    const data = await fetchWithAuth(
-      `${this.baseUrl}/Users/GetAgencies?${queryString}`,
-      {
-        method: "GET",
-      }
+    const queryParams = new URLSearchParams({ agencyId });
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Users/GetSingleAgency?${queryParams}`,
+      { method: "GET" }
     );
+    const data: GetSingleAgency = await response.json();
     return data;
   }
-  async assignRolesToUser(userId: string, roles: string[]) {
+
+  /**
+   * Assigns roles to a user.
+   * @param userId - The ID of the user.
+   * @param roles - The roles to assign.
+   */
+  async assignRolesToUser(userId: string, roles: string[]): Promise<any> {
     const response = await fetchWithAuth(
       `${this.baseUrl}/Users/AssignRolesToUser`,
       {
         method: "POST",
-        body: JSON.stringify({
-          userId,
-          roles,
-        }),
+        body: JSON.stringify({ userId, roles }),
       }
     );
     return response;
   }
+
+  /**
+   * Updates agency information.
+   * @param data - The updated agency details.
+   */
   async updateAgencyInfos(data: {
     name?: string;
     surname?: string;
@@ -291,6 +273,25 @@ class UserService {
       }
     );
     return response.json() as Promise<SucceededMessageResponse>;
+  }
+
+  /**
+   * Parses error responses from the API.
+   * @param errorResponse - The error response object.
+   */
+  private parseErrorResponse(errorResponse: any): string {
+    if (Array.isArray(errorResponse)) {
+      return errorResponse
+        .map((v) =>
+          v.value && Array.isArray(v.value) ? v.value.join("\n") : ""
+        )
+        .join("\n")
+        .trim();
+    } else if (errorResponse?.message) {
+      return errorResponse.message;
+    } else {
+      return "An unknown error occurred.";
+    }
   }
 }
 

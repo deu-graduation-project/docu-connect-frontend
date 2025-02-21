@@ -120,32 +120,34 @@ export default function SignUpForm() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Adınızı Giriniz</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Adınızı giriniz" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="surname"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Soyadınızı Giriniz</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Soyadınızı giriniz" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="flex gap-4 items-center">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adınızı Giriniz</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Adınızı giriniz" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="surname"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Soyadınızı Giriniz</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Soyadınızı giriniz" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="email"

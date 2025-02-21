@@ -8,16 +8,16 @@ export enum OrderState {
 }
 export enum BeAnAgencyRequestState {
   Pending = 0,
-  Confirmed=1,
-  Rejected=2
+  Confirmed = 1,
+  Rejected = 2,
 }
 export class CopyFile {
   fileName!: string;
-  fileCode?:string;
-  filePath?:string;
+  fileCode?: string;
+  filePath?: string;
 }
 export class GetOrders {
-  orderId?:string;
+  orderId?: string;
   OrderCode!: string;
   AgencyName!: string;
   CustomerUserName!: string;
@@ -39,15 +39,15 @@ export class GetSingleOrder {
   CustomerName!: string;
   TotalPrice!: number;
   PricePerPage!: number;
-  TotalPage!:number;
-  PrintType!:string;
-  PaperType!:string;
-  ColorOption!:string;
-  KopyaSayısı!:string;
-  CreatedDate!:Date;
-  OrderState!:OrderState;
-  CopyFiles!:CopyFile[];
-  CompletedCode?:string;
+  TotalPage!: number;
+  PrintType!: string;
+  PaperType!: string;
+  ColorOption!: string;
+  KopyaSayısı!: string;
+  CreatedDate!: Date;
+  OrderState!: OrderState;
+  CopyFiles!: CopyFile[];
+  CompletedCode?: string;
 }
 export class GetAgencyAnalytics {
   Period!: string;
@@ -64,7 +64,7 @@ export class GetAgencyProducts {
   PaperType!: string;
   ColorOption!: string;
   PrintType!: string;
-  Price!:number;
+  Price!: number;
 }
 export class GetProducts {
   Id!: string;
@@ -134,4 +134,23 @@ export interface GetSingleAgency {
   comments: AgencyComment[];
   starRating: number;
   profilePhoto: string | null;
+}
+
+export interface SucceededMessageResponse {
+  success: boolean; // Indicates whether the operation was successful
+  message: string; // A message describing the result of the operation
+}
+
+export interface TokenResponse {
+  token: {
+    accessToken: string; // The access token
+    refreshToken: string; // The refresh token
+  };
+}
+
+export interface SocialUser {
+  id: string; // Unique identifier from the social provider
+  email: string; // User's email
+  name: string; // User's full name
+  imageUrl: string; // URL of the user's profile picture
 }

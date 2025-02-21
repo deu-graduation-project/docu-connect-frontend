@@ -12,7 +12,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import authService from "@/services/auth";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -25,12 +24,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import { UserAuthService } from "@/services/userAuth-service";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UserAuthService } from "@/services/user-auth-service";
+import authService from "@/services/auth";
 
 const formSchema = z.object({
-  email: z.string(),
-  password: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
+  email: z.string().email("Geçerli bir email adresi giriniz."),
+  password: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır."),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,6 +38,8 @@ type FormData = z.infer<typeof formSchema>;
 export default function SignInForm() {
   const userAuthService = UserAuthService();
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -46,15 +48,24 @@ export default function SignInForm() {
     },
   });
 
+  const loginMutation = useMutation({
+    mutationFn: async (values: FormData): Promise<unknown> => {
+      return userAuthService.login(values.email, values.password);
+    },
+    onSuccess: (tokenResponse) => {
+      // Invalidate the authStatus query to refetch the authentication state
+      queryClient.invalidateQueries({ queryKey: ["authStatus"] });
+      // Redirect to the dashboard
+      router.push("/dashboard");
+    },
+    onError: (error) => {
+      console.error("Login failed:", error);
+      // Display an error message to the user
+    },
+  });
+
   async function onSubmit(values: FormData) {
-    try {
-      await userAuthService.login(values.email, values.password, () => {
-        authService.identityCheck();
-        router.push("/dashboard"); // Ana sayfaya yönlendir
-      });
-    } catch (error) {
-      console.error("Login failed", error);
-    }
+    loginMutation.mutate(values);
   }
 
   return (
@@ -114,8 +125,16 @@ export default function SignInForm() {
                 )}
               />
               <div className="flex flex-col gap-4">
-                <Button type="submit" className="w-full">
-                  Giriş Yap
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? (
+                    <Icons.spinner className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Giriş Yap"
+                  )}
                 </Button>
                 <Button
                   className={cn(

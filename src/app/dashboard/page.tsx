@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
-import { getToken } from "@/services/tokens";
+import { getToken } from "@/services/cookies";
 import {
   Breadcrumb,
   BreadcrumbItem,
