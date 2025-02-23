@@ -13,6 +13,10 @@ class AuthService {
   private _isAgency = false;
   private _userId: string | null = null;
   private _username: string | null = null;
+  private _name: string | null = null;
+  private _email: string | null = null;
+  private _avatar: string | null = null;
+  private _surname: string | null = null;
 
   private _authStatusSubject = new BehaviorSubject<{
     isAuthenticated: boolean;

@@ -13,14 +13,14 @@ const LogoutButton = () => {
       // Invalidate the authStatus query to refetch the authentication state
       queryClient.invalidateQueries({ queryKey: ["authStatus"] });
       // Redirect the user to the login page
-      window.location.href = "/login";
+      window.location.href = "/sign-in";
     },
   });
 
   return (
     <button
       onClick={() => logoutMutation.mutate()}
-      className="bg-red-500 text-white p-2 rounded"
+      className="bg-transparent hover:bg-inherit"
     >
       Log Out
     </button>
