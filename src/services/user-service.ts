@@ -6,6 +6,7 @@ import {
   User,
   UserCreate,
   SucceededMessageResponse,
+  GetUserByIdResponse,
 } from "@/types/classes";
 import { fetchWithAuth } from "./fetch-with-auth";
 
@@ -292,6 +293,18 @@ class UserService {
     } else {
       return "An unknown error occurred.";
     }
+  }
+  async getUserById(userId?: string): Promise<GetUserByIdResponse> {
+    const queryParams = new URLSearchParams();
+    if (userId) {
+      queryParams.append("UserId", userId);
+    }
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Users/GetUserById?${queryParams}`,
+      { method: "GET" }
+    );
+    const data: GetUserByIdResponse = await response.json();
+    return data;
   }
 }
 

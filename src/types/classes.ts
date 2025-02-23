@@ -154,3 +154,34 @@ export interface SocialUser {
   name: string; // User's full name
   imageUrl: string; // URL of the user's profile picture
 }
+export interface GetUserByIdResponse {
+  UserId: string;
+  UserName: string;
+  Name: string;
+  Surname: string;
+  Email: string;
+  EmailConfirmed: boolean;
+  UserOrders: {
+    OrderCode: string;
+    OrderState: string;
+    TotalPrice: number;
+    KopyaSayısı: number;
+    SayfaSayısı: number;
+    AgencyName: string;
+    CustomerName: string;
+    Product: {
+      Price: number;
+      PrintType: string;
+      PaperType: string;
+      ColorOption: string;
+    };
+    CopyFiles: {
+      FileName: string;
+      FilePath: string;
+    }[];
+  }[];
+  UserComments: {
+    CommentText: string;
+    StarRating: number;
+  }[];
+}
