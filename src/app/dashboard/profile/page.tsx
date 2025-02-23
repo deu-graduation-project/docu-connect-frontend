@@ -39,7 +39,7 @@ const ProfilePage = () => {
       <div className="pt-32 flex items-center justify-center">
         <div className="flex flex-col gap-2 items-center">
           <h1 className="text-xl font-semibold ">{data.username}</h1>
-          <p className="text-muted-foreground text-sm">Front end developer</p>
+          <p className="text-muted-foreground text-sm">{data.email}</p>
           <div className="flex justify-center gap-4 pt-3">
             <div className="flex items-center justify-center gap-1">
               <h1 className="font-semibold">259</h1>

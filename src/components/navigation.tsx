@@ -64,7 +64,7 @@ export default function Footer({ items }: NavProps) {
         <div className="flex items-center gap-4">
           <ModeToggle />
           <SignInButton />
-          
+
           <div className="md:hidden flex">
             <Drawer>
               <DrawerTrigger>

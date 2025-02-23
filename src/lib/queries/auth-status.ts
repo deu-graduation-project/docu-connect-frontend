@@ -12,6 +12,9 @@ const useAuthStatus = () => {
         isAgency: authService.isAgency,
         userId: authService.userId,
         username: authService.username,
+        name: authService.name,
+        surname: authService.surname,
+        email: authService.email,
         staleTime: 1000 * 60 * 5, // Cache for 5 minutes
       };
     },
