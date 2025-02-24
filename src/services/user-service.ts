@@ -96,7 +96,9 @@ class UserService {
       formData.append("Password", password);
       formData.append("PasswordConfirm", passwordConfirm);
       formData.append("AgencyName", agencyName);
-      formData.append("Address", JSON.stringify(address));
+      formData.append("Address.Province", address.province);
+      formData.append("Address.District", address.district);
+      formData.append("Address.Extra", address.extra); 
       if (agencyBio) formData.append("AgencyBio", agencyBio);
       if (profilePhoto) formData.append("ProfilePhoto", profilePhoto);
 
