@@ -1,4 +1,11 @@
-import { CreateAgencyProduct, GetAgencyAnalytics, GetAgencyProducts, GetOrders, GetProducts, GetSingleOrder } from "@/types/classes";
+import {
+  CreateAgencyProduct,
+  GetAgencyAnalytics,
+  GetAgencyProducts,
+  GetOrders,
+  GetProducts,
+  GetSingleOrder,
+} from "@/types/classes";
 import { fetchWithAuth } from "./fetch-with-auth";
 
 class ProductService {
@@ -7,7 +14,11 @@ class ProductService {
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
   }
-  async createProduct(paperType: string,colorOption: string,printType: string) {
+  async createProduct(
+    paperType: string,
+    colorOption: string,
+    printType: string
+  ) {
     const response = await fetchWithAuth(
       `${this.baseUrl}/Products/CreateProduct`,
       {
@@ -37,27 +48,33 @@ class ProductService {
     const queryString = new URLSearchParams({
       agencyId: agencyId,
     }).toString();
-    const data = await fetchWithAuth(
+    const response = await fetchWithAuth(
       `${this.baseUrl}/Products/GetAgencyProducts?${queryString}`,
       {
         method: "GET",
       }
     );
+    const data: GetAgencyProducts[] = await response.json();
     return data;
   }
-  async getProducts(page: number, size: number): Promise<{totalCount:number,products:GetProducts[]}> {
+  async getProducts(
+    page: number,
+    size: number
+  ): Promise<{ totalCount: number; products: GetProducts[] }> {
     const queryString = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
     }).toString();
-    const data = await fetchWithAuth(
+    const response = await fetchWithAuth(
       `${this.baseUrl}/Products/GetAgencyProducts?${queryString}`,
       {
         method: "GET",
       }
     );
+    const data = await response.json();
     return data;
   }
+
   async deleteProducts(productIds: string[]) {
     if (productIds.length === 0) {
       throw new Error("Silinecek ürün seçilmedi.");
