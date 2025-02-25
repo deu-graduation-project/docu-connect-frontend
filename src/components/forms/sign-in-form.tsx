@@ -56,7 +56,7 @@ export default function SignInForm() {
       // Invalidate the authStatus query to refetch the authentication state
       queryClient.invalidateQueries({ queryKey: ["authStatus"] });
       // Redirect to the dashboard
-      router.push("/dashboard");
+      router.push("/dashboard/profile");
     },
     onError: (error) => {
       console.error("Login failed:", error);

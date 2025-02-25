@@ -38,11 +38,9 @@ const formSchema = z
     passwordConfirm: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
     agencyName: z.string().min(1, "Agency name is required"),
     address: z.object({
-      street: z.string().min(1, "Street is required"),
-      city: z.string().min(1, "City is required"),
-      state: z.string().min(1, "State is required"),
-      postalCode: z.string().min(1, "Postal code is required"),
-      country: z.string().min(1, "Country is required"),
+      province: z.string().min(1, "Province is required"),
+      district: z.string().min(1, "District is required"),
+      extra: z.string().min(1, "Extra is required"),
     }),
     profilePhoto: z.instanceof(File).optional(),
     agencyBio: z.string().optional(),
@@ -69,11 +67,9 @@ export default function BecomeAnAgency() {
       passwordConfirm: "",
       agencyName: "",
       address: {
-        street: "",
-        city: "",
-        state: "",
-        postalCode: "",
-        country: "",
+        province: "",
+        district: "",
+        extra: "",
       },
       profilePhoto: undefined,
       agencyBio: "",
@@ -93,7 +89,11 @@ export default function BecomeAnAgency() {
         values.password,
         values.passwordConfirm,
         values.agencyName,
-        values.address,
+        {
+          province: values.address.province,
+          district: values.address.district,
+          extra: values.address.extra,
+        },
         values.profilePhoto,
         values.agencyBio,
         () => {
@@ -242,10 +242,10 @@ export default function BecomeAnAgency() {
                 <div className="flex items-center justify-center w-full  gap-4">
                   <FormField
                     control={form.control}
-                    name="address.street"
+                    name="address.province"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>Street</FormLabel>
+                        <FormLabel>Province</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter street" {...field} />
                         </FormControl>
@@ -255,10 +255,10 @@ export default function BecomeAnAgency() {
                   />
                   <FormField
                     control={form.control}
-                    name="address.city"
+                    name="address.district"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>City</FormLabel>
+                        <FormLabel>District</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter city" {...field} />
                         </FormControl>
@@ -270,10 +270,10 @@ export default function BecomeAnAgency() {
                 <div className="flex items-center justify-center w-full  gap-4">
                   <FormField
                     control={form.control}
-                    name="address.state"
+                    name="address.extra"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>State</FormLabel>
+                        <FormLabel>Extra</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter state" {...field} />
                         </FormControl>
@@ -281,33 +281,8 @@ export default function BecomeAnAgency() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="address.postalCode"
-                    render={({ field }) => (
-                      <FormItem className="w-full">
-                        <FormLabel>Postal Code</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter postal code" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
-                <FormField
-                  control={form.control}
-                  name="address.country"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter country" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
                 <FormField
                   control={form.control}
                   name="profilePhoto"
@@ -337,20 +312,6 @@ export default function BecomeAnAgency() {
                     </FormItem>
                   )}
                 />
-                <div className="flex flex-col gap-4">
-                  <Button type="submit" className="w-full">
-                    Register
-                  </Button>
-                  <Button
-                    className={cn(
-                      buttonVariants({ variant: "secondary" }),
-                      "w-full"
-                    )}
-                  >
-                    <Icons.google />
-                    Register with Google
-                  </Button>
-                </div>
 
                 <div className="flex w-full gap-2 justify-center">
                   <p>Already have an account?</p>

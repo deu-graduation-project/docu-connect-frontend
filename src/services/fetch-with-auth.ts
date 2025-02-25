@@ -24,7 +24,7 @@ export const fetchWithAuth = async (
       errorResponse = await response.json();
     } catch (e) {
       // If the response is not JSON, use the raw text
-      errorResponse = await response.text();
+      console.log("Error response:", await response.text());
     }
 
     // Throw a meaningful error message

@@ -28,7 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { Icons } from "./icons";
-
+import useAuthStatus from "@/lib/queries/auth-status";
 export function NavMain({
   projects,
 }: {
@@ -40,7 +40,7 @@ export function NavMain({
 }) {
   const { isMobile } = useSidebar();
   const pathname = usePathname();
-
+  const { data, isLoading, error } = useAuthStatus();
   console.log(pathname);
 
   return (
@@ -62,17 +62,21 @@ export function NavMain({
         ))}
         <SidebarSeparator className="my-4" />
         <SidebarMenuItem>
-          <SidebarMenuButton
-            className={
-              "bg-secondary hover:bg-secondary/70 transition-colors duration-150 ease-in-out"
-            }
-            asChild
-          >
-            <a href={"/become-an-agency"}>
-              <Icons.user />
-              <span className="text-sm">Become an agency</span>
-            </a>
-          </SidebarMenuButton>
+          {data?.isAuthenticated && !data?.isAdmin && !data?.isAgency ? (
+            <SidebarMenuButton
+              className={
+                "bg-secondary-muted hover:bg-secondary/70 transition-colors duration-150 ease-in-out"
+              }
+              asChild
+            >
+              <a href={"/become-an-agency"}>
+                <Icons.user />
+                <span className="text-sm">Become an agency</span>
+              </a>
+            </SidebarMenuButton>
+          ) : (
+            ""
+          )}
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>

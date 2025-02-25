@@ -96,26 +96,45 @@ class UserService {
       formData.append("Password", password);
       formData.append("PasswordConfirm", passwordConfirm);
       formData.append("AgencyName", agencyName);
-      formData.append("Address.Province", address.province);
-      formData.append("Address.District", address.district);
-      formData.append("Address.Extra", address.extra); 
+
+      // Initialize address object if it's null
+      const addressData = address || { province: "", district: "", extra: "" };
+
+      formData.append("Address.Province", addressData.province || "");
+      formData.append("Address.District", addressData.district || "");
+      formData.append("Address.Extra", addressData.extra || "");
+
       if (agencyBio) formData.append("AgencyBio", agencyBio);
       if (profilePhoto) formData.append("ProfilePhoto", profilePhoto);
 
-      const response = await fetchWithAuth(`${this.baseUrl}/Users/BeAnAgency`, {
-        method: "POST",
-        body: formData,
-      });
+      // Fix Content-Type handling for FormData
+      const response = await fetch(
+        `http://localhost:5129/api/Users/BeAnAgency`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
-        const errorResponse = await response.json();
-        const errorMessage = this.parseErrorResponse(errorResponse);
+        const contentType = response.headers.get("content-type");
+        let errorMessage = "API request failed.";
+
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          errorMessage =
+            errorData.message || errorData.title || JSON.stringify(errorData);
+        } else {
+          errorMessage = await response.text();
+        }
+
         if (errorCallback) errorCallback(errorMessage);
         throw new Error(errorMessage);
       }
 
+      const responseData = await response.json();
       if (successCallback) successCallback();
-      return response.json();
+      return responseData;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred.";
@@ -123,26 +142,6 @@ class UserService {
       throw new Error(errorMessage);
     }
   }
-
-  /**
-   * Confirms or rejects a "Be an Agency" request.
-   * @param BeAnAgencyRequestId - The ID of the request.
-   * @param IsConfirmed - Whether the request is confirmed.
-   */
-  async beAnAgencyConfirm(
-    BeAnAgencyRequestId: string,
-    IsConfirmed: boolean
-  ): Promise<any> {
-    const response = await fetchWithAuth(
-      `${this.baseUrl}/Users/BeAnAgencyConfirm`,
-      {
-        method: "POST",
-        body: JSON.stringify({ BeAnAgencyRequestId, IsConfirmed }),
-      }
-    );
-    return response;
-  }
-
   /**
    * Fetches "Be an Agency" requests.
    * @param page - The page number.
