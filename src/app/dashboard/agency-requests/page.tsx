@@ -1,9 +1,10 @@
 "use client";
 import React from "react";
 import useAuthStatus from "@/lib/queries/auth-status";
-import userService from "@/services/user-service";
+import { userService } from "@/services/user-service";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { GetBeAnAgencyRequests } from "../../../types/classes";
+import Image from "next/image";
 
 export default function AgencyRequestsPage() {
   const {
@@ -20,7 +21,7 @@ export default function AgencyRequestsPage() {
     error: requestsError,
   } = useQuery({
     queryKey: ["agencyRequests"],
-    queryFn: () => userService.getBeAnAgencyRequests(0, 10), // Pass default pagination values
+    queryFn: () => userService.getBeAnAgencyRequests(1, 10), // Pass default pagination values
   });
 
   // Handle loading state
@@ -45,10 +46,11 @@ export default function AgencyRequestsPage() {
     <div>
       <h1 className="text-2xl font-bold mb-4">Agency Requests</h1>
       <div>
-        {agencyRequests?.BeAnAgencyRequests.map(
+        {agencyRequests?.beAnAgencyRequests.map(
+          // Use lowercase 'b'
           (request: GetBeAnAgencyRequests) => (
             <div
-              key={request.id}
+              key={request.beAnAgencyRequestId} // Use a unique key
               className="bg-white shadow-md rounded-md p-4 my-4"
             >
               <div className="flex justify-between items-center">
@@ -62,7 +64,27 @@ export default function AgencyRequestsPage() {
                   </button>
                 </div>
               </div>
-              <p className="text-gray-600 mt-2">{request.description}</p>
+              <p className="text-gray-600 mt-2">
+                <strong>Name:</strong> {request.name} {request.surname}
+              </p>
+              <p className="text-gray-600">
+                <strong>Email:</strong> {request.email}
+              </p>
+              <p className="text-gray-600">
+                <strong>Address:</strong> {request.address.province},{" "}
+                {request.address.district}
+              </p>
+              {request.profilePhoto && (
+                <div className="mt-4">
+                  <Image
+                    src={`data:image/jpeg;base64,${request.profilePhoto}`} // Ensure this is a valid base64 string
+                    width={100}
+                    height={100}
+                    alt={`Profile of ${request.name}`}
+                    className="rounded-full"
+                  />
+                </div>
+              )}
             </div>
           )
         )}

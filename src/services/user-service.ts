@@ -160,7 +160,7 @@ class UserService {
     state?: string
   ): Promise<{
     totalCount: number;
-    BeAnAgencyRequests: GetBeAnAgencyRequests[];
+    beAnAgencyRequests: GetBeAnAgencyRequests[]; // Note the lowercase 'b'
   }> {
     const queryParams = new URLSearchParams({
       page: page.toString(),
@@ -175,7 +175,18 @@ class UserService {
       `${this.baseUrl}/Users/GetBeAnAgencyRequests?${queryParams}`,
       { method: "GET" }
     );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch agency requests");
+    }
+
     const data = await response.json();
+
+    // Ensure the response has the expected structure
+    if (!data || !Array.isArray(data.beAnAgencyRequests)) {
+      throw new Error("Invalid response format");
+    }
+
     return data;
   }
 

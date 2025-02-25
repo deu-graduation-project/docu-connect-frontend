@@ -312,6 +312,11 @@ export default function BecomeAnAgency() {
                     </FormItem>
                   )}
                 />
+                <div className="flex flex-col gap-4">
+                  <Button type="submit" className="w-full">
+                    Register
+                  </Button>
+                </div>
 
                 <div className="flex w-full gap-2 justify-center">
                   <p>Already have an account?</p>

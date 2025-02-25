@@ -95,7 +95,7 @@ export interface GetBeAnAgencyRequests {
   beAnAgencyRequestId: string;
   agencyName: string;
   agencyId: string;
-  BeAnAgencyRequestState: BeAnAgencyRequestState;
+  beAnAgencyRequestState: BeAnAgencyRequestState; // Note the lowercase 'b'
   address: Address;
   name: string;
   surname: string;
