@@ -6,6 +6,7 @@ import { Plus_Jakarta_Sans as FontJakarta } from "next/font/google";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/sonner";
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], display: "swap" });
 const fontJakartaSans = FontJakarta({
   subsets: ["latin"],
@@ -34,6 +35,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>{children}</Providers>
+          <Toaster />
           <TailwindIndicator />
         </ThemeProvider>
       </body>

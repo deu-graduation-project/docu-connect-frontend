@@ -191,6 +191,26 @@ class UserService {
   }
 
   /**
+   * Approves or rejects a "Be an Agency" request.
+   * @param BeAnAgencyRequestId - The ID of the request.
+   * @param IsConfirmed - Whether to approve or reject the request.
+   */
+
+  async beAnAgencyConfirm(
+    BeAnAgencyRequestId: string,
+    IsConfirmed: boolean
+  ): Promise<any> {
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Users/BeAnAgencyConfirm`,
+      {
+        method: "POST",
+        body: JSON.stringify({ BeAnAgencyRequestId, IsConfirmed }),
+      }
+    );
+    return response;
+  }
+
+  /**
    * Fetches a list of agencies.
    * @param page - The page number.
    * @param size - The number of items per page.
