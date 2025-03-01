@@ -35,9 +35,7 @@ import {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data, isLoading, error } = useAuthStatus();
-  console.log(data?.isAdmin);
-  console.log(data?.isAdmin);
-  console.log(data?.isAuthenticated);
+
   const sideBarConfig = {
     user: {
       name: "kullanıcı adı",

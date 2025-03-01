@@ -20,12 +20,13 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 import { userService } from "@/services/user-service";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User } from "@/types/classes";
 
 const formSchema = z
@@ -53,6 +54,7 @@ const formSchema = z
 type FormData = z.infer<typeof formSchema>;
 
 export default function BecomeAnAgency() {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -75,6 +77,13 @@ export default function BecomeAnAgency() {
       agencyBio: "",
     },
   });
+
+  useEffect(() => {
+    if(form.formState.isSubmitSuccessful) {
+      router.push("/sign-in");
+    }
+
+  }, [form.formState.isSubmitSuccessful])
 
   async function onSubmit(values: FormData) {
     setError(null);
