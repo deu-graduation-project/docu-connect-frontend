@@ -88,11 +88,11 @@ class AuthService {
           ]?.includes("agency") || false;
         this._username =
           decoded[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
           ] || null;
         this._name =
           decoded[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
           ] || null;
         this._surname =
           decoded[
