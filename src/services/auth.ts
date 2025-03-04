@@ -76,7 +76,7 @@ class AuthService {
         this._isAuthenticated = !this.isTokenExpired(decoded);
         this._userId =
           decoded[
-            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/userid"
+            "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
           ] || null;
         this._isAdmin =
           decoded[

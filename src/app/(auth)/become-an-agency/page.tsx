@@ -1,33 +1,30 @@
-"use client";
+"use client"
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Icons } from "@/components/icons";
-import { userService } from "@/services/user-service";
-import { useEffect, useState } from "react";
-import { User } from "@/types/classes";
+} from "@/components/ui/card"
+import { useRouter } from "next/navigation"
+import { Input } from "@/components/ui/input"
+import Link from "next/link"
+import { Icons } from "@/components/icons"
+import { userService } from "@/services/user-service"
+import { useEffect, useState } from "react"
 
 const formSchema = z
   .object({
@@ -49,14 +46,14 @@ const formSchema = z
   .refine((data) => data.password === data.passwordConfirm, {
     message: "Şifreler eşleşmiyor.",
     path: ["passwordConfirm"], // Field to highlight
-  });
+  })
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>
 
 export default function BecomeAnAgency() {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -76,18 +73,17 @@ export default function BecomeAnAgency() {
       profilePhoto: undefined,
       agencyBio: "",
     },
-  });
+  })
 
   useEffect(() => {
-    if(form.formState.isSubmitSuccessful) {
-      router.push("/sign-in");
+    if (form.formState.isSubmitSuccessful) {
+      router.push("/sign-in")
     }
-
-  }, [form.formState.isSubmitSuccessful])
+  }, [form.formState.isSubmitSuccessful, router])
 
   async function onSubmit(values: FormData) {
-    setError(null);
-    setSuccessMessage(null);
+    setError(null)
+    setSuccessMessage(null)
 
     try {
       await userService.beAnAgency(
@@ -106,36 +102,36 @@ export default function BecomeAnAgency() {
         values.profilePhoto,
         values.agencyBio,
         () => {
-          setSuccessMessage("Agency registration successful!");
+          setSuccessMessage("Agency registration successful!")
         },
         (errorMessage) => {
-          setError(errorMessage);
+          setError(errorMessage)
         }
-      );
+      )
     } catch (err) {
-      console.error("Unexpected error:", err);
-      setError("Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.");
+      console.error("Unexpected error:", err)
+      setError("Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.")
     }
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center">
-      <div className="absolute top-5 left-5">
+    <div className="flex min-h-screen w-full items-center justify-center">
+      <div className="absolute left-5 top-5">
         <Link href={"/"}>
           <Icons.arrowLeft strokeWidth={"1.3px"} />
         </Link>
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <Card className="w-full my-16 max-w-md sm:max-w-3xl">
+          <Card className="my-16 w-full max-w-md sm:max-w-3xl">
             <CardHeader>
               <CardTitle>Become an Agency</CardTitle>
               <CardDescription>
                 Please fill in the required information to register your agency.
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-4 flex  w-full flex-col sm:flex-row  gap-6">
-              <div className="w-full pb-4 gap-6 flex flex-col ">
+            <CardContent className="flex w-full flex-col gap-6 p-4 sm:flex-row">
+              <div className="flex w-full flex-col gap-6 pb-4">
                 <FormField
                   control={form.control}
                   name="userName"
@@ -149,7 +145,7 @@ export default function BecomeAnAgency() {
                     </FormItem>
                   )}
                 />
-                <div className="flex gap-4 items-center">
+                <div className="flex items-center gap-4">
                   <FormField
                     control={form.control}
                     name="name"
@@ -231,7 +227,7 @@ export default function BecomeAnAgency() {
               </div>
 
               {/* second section */}
-              <div className="w-full pb-4 gap-6 flex flex-col w-auto">
+              <div className="flex w-auto w-full flex-col gap-6 pb-4">
                 <FormField
                   control={form.control}
                   name="agencyName"
@@ -248,7 +244,7 @@ export default function BecomeAnAgency() {
                     </FormItem>
                   )}
                 />
-                <div className="flex items-center justify-center w-full  gap-4">
+                <div className="flex w-full items-center justify-center gap-4">
                   <FormField
                     control={form.control}
                     name="address.province"
@@ -276,7 +272,7 @@ export default function BecomeAnAgency() {
                     )}
                   />
                 </div>
-                <div className="flex items-center justify-center w-full  gap-4">
+                <div className="flex w-full items-center justify-center gap-4">
                   <FormField
                     control={form.control}
                     name="address.extra"
@@ -327,15 +323,15 @@ export default function BecomeAnAgency() {
                   </Button>
                 </div>
 
-                <div className="flex w-full gap-2 justify-center">
+                <div className="flex w-full justify-center gap-2">
                   <p>Already have an account?</p>
                   <Link href={"/sign-in"} className="underline">
                     Sign In
                   </Link>
                 </div>
-                {error && <p className="text-red-500 text-center">{error}</p>}
+                {error && <p className="text-center text-red-500">{error}</p>}
                 {successMessage && (
-                  <p className="text-green-500 text-center">{successMessage}</p>
+                  <p className="text-center text-green-500">{successMessage}</p>
                 )}
               </div>
             </CardContent>
@@ -343,5 +339,5 @@ export default function BecomeAnAgency() {
         </form>
       </Form>
     </div>
-  );
+  )
 }

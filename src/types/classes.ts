@@ -102,6 +102,18 @@ export interface GetBeAnAgencyRequests {
   email: string;
   profilePhoto: string | null;
 }
+
+export interface UpdateAgencyInfos {
+  name?: string;
+  surname?: string;
+  agencyName?: string;
+  province?: string;
+  district?: string;
+  extra?: string;
+  agencyBio?: string;
+  profilePhoto?: File;
+}
+
 export interface AgencyProduct {
   productId: string;
   printType: string;
@@ -123,17 +135,21 @@ export interface GetAgencies {
   starRating: number;
   profilePhoto: string | null;
 }
-export interface GetSingleAgency {
+export interface Agency {
   agencyId: string;
   agencyName: string;
   agencyBio: string;
   province: string;
   district: string;
-  AddressExtra: string;
+  addressExtra: string;
   agencyProducts: AgencyProduct[];
   comments: AgencyComment[];
   starRating: number;
   profilePhoto: string | null;
+}
+
+export interface GetSingleAgency {
+  agency: Agency;
 }
 
 export interface SucceededMessageResponse {
