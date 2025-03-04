@@ -15,7 +15,7 @@ export const UserAuthService = () => {
   ): Promise<TokenResponse> => {
     try {
       const response = await fetchWithAuth(
-        `${process.env.API_BASE_URL || "http://localhost:5129"}/api/Auth/Login`,
+        `${process.env.NEXT_PUBLIC_API_URL}/Auth/Login`,
         {
           method: "POST",
           headers: {
@@ -65,7 +65,7 @@ export const UserAuthService = () => {
   ): Promise<TokenResponse> => {
     try {
       const response = await fetchWithAuth(
-        `${process.env.API_BASE_URL}/api/Auth/RefreshTokenLogin`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Auth/RefreshTokenLogin`,
         {
           method: "POST",
           headers: {
@@ -73,7 +73,7 @@ export const UserAuthService = () => {
           },
           body: JSON.stringify({ refreshToken }),
         }
-      );
+      )
 
       if (!response.ok) {
         throw new Error("Token refresh failed");
@@ -101,7 +101,7 @@ export const UserAuthService = () => {
   const googleLogin = async (user: SocialUser): Promise<TokenResponse> => {
     try {
       const response = await fetchWithAuth(
-        `${process.env.API_BASE_URL}/api/Auth/GoogleLogin`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Auth/GoogleLogin`,
         {
           method: "POST",
           headers: {
@@ -109,7 +109,7 @@ export const UserAuthService = () => {
           },
           body: JSON.stringify(user),
         }
-      );
+      )
 
       if (!response.ok) {
         throw new Error("Google login failed");

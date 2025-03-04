@@ -5,12 +5,17 @@ export const fetchWithAuth = async (
   options: RequestInit = {}
 ): Promise<Response> => {
   const token = getCookie("accessToken");
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
+  const isFormData = options.body instanceof FormData
+  const headers = isFormData
+    ? {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      }
+    : {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      }
 
   const response = await fetch(url, {
     ...options,
