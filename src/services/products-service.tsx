@@ -5,14 +5,14 @@ import {
   GetOrders,
   GetProducts,
   GetSingleOrder,
-} from "@/types/classes";
-import { fetchWithAuth } from "./fetch-with-auth";
+} from "@/types/classes"
+import { fetchWithAuth } from "./fetch-with-auth"
 
 class ProductService {
-  private baseUrl: string;
+  private baseUrl: string
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || ""
   }
   async createProduct(
     paperType: string,
@@ -29,8 +29,8 @@ class ProductService {
           printType,
         }),
       }
-    );
-    return response;
+    )
+    return response
   }
   async createAgencyProduct(products: CreateAgencyProduct[]) {
     const response = await fetchWithAuth(
@@ -41,21 +41,21 @@ class ProductService {
           UpdateOrCreateAgencyProducts: products,
         }),
       }
-    );
-    return response;
+    )
+    return response
   }
   async getAgencyProducts(agencyId: string): Promise<GetAgencyProducts[]> {
     const queryString = new URLSearchParams({
       agencyId: agencyId,
-    }).toString();
+    }).toString()
     const response = await fetchWithAuth(
       `${this.baseUrl}/Products/GetAgencyProducts?${queryString}`,
       {
         method: "GET",
       }
-    );
-    const data: GetAgencyProducts[] = await response.json();
-    return data;
+    )
+    const data: GetAgencyProducts[] = await response.json()
+    return data
   }
   async getProducts(
     page: number,
@@ -64,20 +64,20 @@ class ProductService {
     const queryString = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
-    }).toString();
+    }).toString()
     const response = await fetchWithAuth(
       `${this.baseUrl}/Products/GetAgencyProducts?${queryString}`,
       {
         method: "GET",
       }
-    );
-    const data = await response.json();
-    return data;
+    )
+    const data = await response.json()
+    return data
   }
 
   async deleteProducts(productIds: string[]) {
     if (productIds.length === 0) {
-      throw new Error("Silinecek ürün seçilmedi.");
+      throw new Error("Silinecek ürün seçilmedi.")
     }
 
     // Adjust this part if fetchWithAuth returns already parsed JSON
@@ -90,13 +90,13 @@ class ProductService {
         },
         body: JSON.stringify({ productIds }),
       }
-    );
+    )
 
-    return response;
+    return response
   }
   async deleteAgencyProducts(AgencyProductIds: string[]) {
     if (AgencyProductIds.length === 0) {
-      throw new Error("Silinecek ürün seçilmedi.");
+      throw new Error("Silinecek ürün seçilmedi.")
     }
 
     const response = await fetchWithAuth(
@@ -108,10 +108,10 @@ class ProductService {
         },
         body: JSON.stringify({ AgencyProductIds }),
       }
-    );
+    )
 
-    return response;
+    return response
   }
 }
 
-export const productService = new ProductService();
+export const productService = new ProductService()

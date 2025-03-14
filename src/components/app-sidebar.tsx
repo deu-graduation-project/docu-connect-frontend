@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import * as React from "react";
+import * as React from "react"
 import {
   AudioWaveform,
   BookOpen,
@@ -16,25 +16,27 @@ import {
   SquareActivity,
   ChartArea,
   Waypoints,
+  Mail,
   Wrench,
-} from "lucide-react";
+} from "lucide-react"
 
-import { NavMain } from "./nav-main";
-import useAuthStatus from "@/lib/queries/auth-status";
+import { NavMain } from "./nav-main"
+import useAuthStatus from "@/lib/queries/auth-status"
 
-import { NavUser } from "@/components/nav-user";
+import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"
+import { Icons } from "./icons"
 
 // This is sample data.
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data, isLoading, error } = useAuthStatus();
+  const { data, isLoading, error } = useAuthStatus()
 
   const sideBarConfig = {
     user: {
@@ -75,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Wrench,
       },
     ],
-  };
+  }
 
   const sideBarConfigForAdmin = {
     user: {
@@ -87,10 +89,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         name: "Agency Requests",
         url: `/dashboard/agency-requests`,
-        icon: Bot,
+        icon: Mail,
+      },
+      {
+        name: "Create Products",
+        url: `/dashboard/create-products`,
+        icon: Icons.addProduct,
       },
     ],
-  };
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -108,5 +115,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-  );
+  )
 }

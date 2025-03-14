@@ -7,6 +7,7 @@ import {
   CreditCard,
   File,
   FileText,
+  LoaderCircle,
   HelpCircle,
   Image,
   Laptop,
@@ -20,6 +21,7 @@ import {
   Settings,
   SunMedium,
   Trash,
+  FilePlus2,
   Twitter,
   Camera,
   User,
@@ -27,11 +29,13 @@ import {
   Stamp,
   type Icon as LucideIcon,
   ArrowLeft,
-} from "lucide-react";
+} from "lucide-react"
 
-export type Icon = typeof LucideIcon;
+export type Icon = typeof LucideIcon
 
 export const Icons = {
+  spinner: LoaderCircle,
+  addProduct: FilePlus2,
   logo: Stamp,
   close: X,
   spinner: Loader2,
@@ -155,4 +159,4 @@ export const Icons = {
   ),
 
   check: Check,
-};
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 import {
   MorphingDialog,
   MorphingDialogTrigger,
@@ -9,21 +9,24 @@ import {
   MorphingDialogClose,
   MorphingDialogDescription,
   MorphingDialogContainer,
-} from "@/components/ui/morphing-dialog";
-import { PlusIcon, DownloadIcon, TrashIcon, EditIcon } from "lucide-react";
-import { getRandomPatternStyle } from "@/lib/generate-pattern";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-
+} from "@/components/ui/morphing-dialog"
+import { PlusIcon, DownloadIcon, TrashIcon, EditIcon } from "lucide-react"
+import { getRandomPatternStyle } from "@/lib/generate-pattern"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button"
+import { useQuery } from "@tanstack/react-query"
+import useAuthStatus from "@/lib/queries/auth-status"
+import { productService } from "@/services/products-service"
+import CreateProductForm from "../../../../components/forms/create-product-form"
 type Note = {
-  id: string;
-  title: string;
-  author: string;
-  uploadDate: string;
-  size: string;
-  isPublic: boolean;
-};
+  id: string
+  title: string
+  author: string
+  uploadDate: string
+  size: string
+  isPublic: boolean
+}
 
 const notes: Note[] = [
   {
@@ -74,22 +77,25 @@ const notes: Note[] = [
     size: "6.7 MB",
     isPublic: true,
   },
-];
+]
 
 export default function NotesLibrary() {
   return (
     <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Uploaded PDFs/Notes Library</h1>
-        <Button className="flex items-center gap-2">
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Products</h1>
+        {/* <Button className="flex items-center gap-2">
           <PlusIcon size={16} /> Upload New Note
-        </Button>
+        </Button> */}
       </div>
+      <CreateProductForm />
 
-      <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3">
+      <div></div>
+
+      {/* <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3">
         {notes.map((note) => (
           <MorphingDialog key={note.id}>
-            <MorphingDialogTrigger className="flex flex-col overflow-hidden border rounded-lg shadow-sm hover:shadow-md">
+            <MorphingDialogTrigger className="flex flex-col overflow-hidden rounded-lg border shadow-sm hover:shadow-md">
               <AspectRatio ratio={16 / 9}>
                 <div
                   className="h-32 w-full"
@@ -101,14 +107,14 @@ export default function NotesLibrary() {
                 <MorphingDialogSubtitle className="text-muted-foreground">
                   {note.author}
                 </MorphingDialogSubtitle>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="mt-2 text-sm text-muted-foreground">
                   {note.uploadDate} <span className="mx-2">•</span> {note.size}
                 </p>
               </div>
             </MorphingDialogTrigger>
 
             <MorphingDialogContainer>
-              <MorphingDialogContent className="w-[600px] bg-background rounded-xl ">
+              <MorphingDialogContent className="w-[600px] rounded-xl bg-background">
                 <AspectRatio ratio={21 / 8}>
                   <div
                     className="h-full w-full"
@@ -125,16 +131,16 @@ export default function NotesLibrary() {
                   <MorphingDialogDescription>
                     <p className="mt-4 text-base">
                       Uploaded on:{" "}
-                      <span className="font-semibold ml-2">
+                      <span className="ml-2 font-semibold">
                         {note.uploadDate}
                       </span>
                     </p>
                     <p>
                       File Size:
-                      <span className="font-semibold ml-2">{note.size}</span>
+                      <span className="ml-2 font-semibold">{note.size}</span>
                     </p>
 
-                    <div className="flex items-center gap-4 mt-6">
+                    <div className="mt-6 flex items-center gap-4">
                       <Switch
                         checked={note.isPublic}
                         className="data-[state=checked]:bg-green-500"
@@ -144,7 +150,7 @@ export default function NotesLibrary() {
                       </span>
                     </div>
 
-                    <div className="flex justify-end gap-4 mt-8">
+                    <div className="mt-8 flex justify-end gap-4">
                       <Button variant="outline" className="flex items-center">
                         <DownloadIcon size={16} className="mr-2" />
                         Download
@@ -162,13 +168,13 @@ export default function NotesLibrary() {
                       </Button>
                     </div>
                   </MorphingDialogDescription>
-                  <MorphingDialogClose className="text-zinc-500 mt-4" />
+                  <MorphingDialogClose className="mt-4 text-zinc-500" />
                 </div>
               </MorphingDialogContent>
             </MorphingDialogContainer>
           </MorphingDialog>
         ))}
-      </div>
+      </div> */}
     </div>
-  );
+  )
 }

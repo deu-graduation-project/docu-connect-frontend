@@ -1,32 +1,23 @@
 "use client"
 import React from "react"
 import { Icons } from "@/components/icons"
-import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import useAuthStatus from "../../../lib/queries/auth-status"
 import withAuth from "@/components/with-auth"
 import { userService } from "@/services/user-service"
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
 import UpdateAgencySheet from "@/components/update-agency-sheet"
+import { getRandomPatternStyle } from "@/lib/generate-pattern"
+
 const ProfilePage = () => {
-  const { data, isLoading, error } = useAuthStatus()
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>
-  }
-
-  if (!data?.isAuthenticated) {
-    return <div>Please log in to view this content.</div>
-  }
+  const { data: authStatus, isLoading, error } = useAuthStatus()
 
   console.log(
-    data.isAgency === true
+    authStatus?.isAgency === true
       ? "this account type is Agency"
-      : "this account type is User"
+      : authStatus?.isAdmin
+        ? "this account type is Admin"
+        : "this account type is User"
   )
 
   // Fetch agency details
@@ -35,14 +26,27 @@ const ProfilePage = () => {
     isLoading: agencyDetailsLoading,
     error: agencyDetailsError,
   } = useQuery({
-    queryKey: ["agencyDetails", data.userId], // Include agencyId in the query key
+    queryKey: ["agencyDetails", authStatus?.userId], // Include agencyId in the query key
     queryFn: () => {
-      if (!data.userId) {
+      if (!authStatus?.userId) {
         throw new Error("Agency ID is missing")
       }
-      return userService.getSingleAgency(data.userId)
+      return userService.getSingleAgency(authStatus.userId)
     },
+    enabled: authStatus?.isAgency,
   })
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>
+  }
+
+  if (!authStatus?.isAuthenticated) {
+    return <div>Please log in to view this content.</div>
+  }
 
   // you have to extract the outer object first before you can access the inner object for that we use .agency
   // console.log(agencyDetails?.agency.profilePhoto);
@@ -54,13 +58,20 @@ const ProfilePage = () => {
           <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_2px,transparent_2px),linear-gradient(to_bottom,#4f4f4f2e_2px,transparent_2px)] bg-[size:24px_36px] [mask-image:radial-gradient(background,transparent_95%)]"></div>
         </div>
         <div className="flex items-center justify-center">
-          <Image
-            src={`data:image/jpeg;base64,${agencyDetails?.agency.profilePhoto}`}
-            alt="Profile"
-            width={192}
-            height={192}
-            className="absolute h-48 w-48 rounded-full border bg-background object-cover"
-          />
+          {authStatus.isAgency ? (
+            <Image
+              src={`data:image/jpeg;base64,${agencyDetails?.agency.profilePhoto}`}
+              alt="Profile"
+              width={192}
+              height={192}
+              className="absolute h-48 w-48 rounded-full border bg-background object-cover"
+            />
+          ) : (
+            <div
+              style={getRandomPatternStyle(`${authStatus.userId}`)}
+              className="absolute h-48 w-48 rounded-full border bg-background"
+            />
+          )}
         </div>
       </div>
       <div className="absolute right-6 top-6">
@@ -69,10 +80,10 @@ const ProfilePage = () => {
       </div>
       <div className="flex items-center justify-center pt-32">
         <div className="flex flex-col items-center gap-2">
-          <h1 className="text-xl font-semibold">{data.username}</h1>
+          <h1 className="text-xl font-semibold">{authStatus.username}</h1>
           <div className="flex items-center justify-center gap-2">
-            <p className="text-sm text-muted-foreground">{data.email}</p>
-            {data.isAgency && (
+            <p className="text-sm text-muted-foreground">{authStatus.email}</p>
+            {authStatus.isAgency && (
               <div className="flex items-center justify-center">
                 <p className="text-sm text-muted-foreground">
                   {agencyDetails?.agency.province}
@@ -109,11 +120,15 @@ const ProfilePage = () => {
         </div>
       </div>
       <div className="flex flex-col items-center justify-center py-6">
-        <h1 className="text-base font-semibold">About Me</h1>
-        <p className="max-w-2xl px-4 py-2 text-center text-muted-foreground">
-          {agencyDetails?.agency.agencyBio === ""
-            ? "No bio available"
-            : agencyDetails?.agency.agencyBio}
+        <h1 className="text-base font-semibold">
+          {authStatus.isAgency ? "About Me" : ""}
+        </h1>
+        <p className="max-w-2xl px-4 py-2 text-center text-sm text-muted-foreground">
+          {authStatus.isAdmin
+            ? "This is an admin account. You can create agency products and confirm accounts as agency"
+            : agencyDetails?.agency.agencyBio === ""
+              ? "No bio available"
+              : agencyDetails?.agency.agencyBio}
         </p>
       </div>
 

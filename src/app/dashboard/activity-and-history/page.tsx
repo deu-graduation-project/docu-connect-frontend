@@ -1,25 +1,23 @@
-import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import OrdersTable from "./components/orders-table";
-import NotesLibrary from "./components/notes-library";
-import Reviews from "./components/reviews";
-
-type Props = {};
+import React from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import OrdersTable from "./components/orders-table"
+import NotesLibrary from "./components/notes-library"
+import Reviews from "./components/reviews"
 
 export default function ActivityAndHistoryPage({}: Props) {
   return (
-    <div className="p-4 w-full max-w-7xl mx-auto container ">
+    <div className="container mx-auto w-full max-w-7xl p-4">
       <Tabs
         defaultValue="Recent Orders & Photocopies"
-        className=" w-full max-w-7xl"
+        className="w-full max-w-7xl"
       >
-        <TabsList className="w-auto  ">
+        <TabsList className="w-auto">
           <TabsTrigger value="Recent Orders & Photocopies">
             Recent Orders & Photocopies
           </TabsTrigger>
-          <div className="w-[1px] h-full mx-1 bg-primary-foreground"></div>
+          <div className="mx-1 h-full w-[1px] bg-primary-foreground"></div>
           <TabsTrigger value="Notes and Uploads">Notes and Uploads</TabsTrigger>
-          <div className="w-[1px] h-full mx-1 bg-primary-foreground"></div>
+          <div className="mx-1 h-full w-[1px] bg-primary-foreground"></div>
 
           <TabsTrigger value="Reviews and Feedback">
             Reviews and Feedback
@@ -36,5 +34,5 @@ export default function ActivityAndHistoryPage({}: Props) {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }
