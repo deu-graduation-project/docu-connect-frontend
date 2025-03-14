@@ -66,11 +66,11 @@ class ProductService {
       size: size.toString(),
     }).toString();
     const response = await fetchWithAuth(
-      `${this.baseUrl}/Products/GetAgencyProducts?${queryString}`,
+      `${this.baseUrl}/Products/GetProducts?${queryString}`,
       {
         method: "GET",
       }
-    );
+    )
     const data = await response.json();
     return data;
   }
