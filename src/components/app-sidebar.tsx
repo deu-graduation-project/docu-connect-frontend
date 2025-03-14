@@ -14,6 +14,7 @@ import {
   SquareTerminal,
   User,
   SquareActivity,
+  List,
   ChartArea,
   Waypoints,
   Mail,
@@ -75,6 +76,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         name: "Account Management",
         url: `/dashboard/account-management`,
         icon: Wrench,
+      },
+      {
+        name: "Product List",
+        url: "/dashboard/product-list",
+        icon: List,
       },
     ],
   }

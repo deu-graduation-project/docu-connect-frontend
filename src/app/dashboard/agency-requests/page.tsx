@@ -24,6 +24,7 @@ export default function AgencyRequestsPage() {
     isLoading: authLoading,
     error: authError,
   } = useAuthStatus()
+
   const queryClient = useQueryClient()
   const router = useRouter()
   const { isLoading: isAuthLoading } = useAuth()
