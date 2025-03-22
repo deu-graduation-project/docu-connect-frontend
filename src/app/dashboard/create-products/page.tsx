@@ -60,10 +60,17 @@ export default function CreateProducts() {
   }
 
   // Function to handle product delete
-  const handleDelete = (productId: string) => {
-    console.log("Delete product:", productId)
-    // Implement delete functionality here
-  }
+  const handleDelete = async (productId: string) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      try {
+        await productService.deleteProducts([productId]); // API'ye DELETE isteği gönder
+        queryClient.invalidateQueries(["viewCreatedProducts"]); // Listeyi güncelle
+        console.log(`Prodcut ${productId} succsessfully deleted.`);
+      } catch (error) {
+        console.error("Error! Coudn't delete product", error);
+      }
+    }
+  };
 
   // Color mapping function for better visual representation
   const getColorClass = (colorOption: string) => {
