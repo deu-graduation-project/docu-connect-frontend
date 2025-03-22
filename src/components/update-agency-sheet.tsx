@@ -8,12 +8,15 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet" // Import SheetTitle
 import { Button } from "./ui/button"
+import useAuthStatus from "@/lib/queries/auth-status"
 
 export default function UpdateAgencySheet() {
+  const { data: authStatus, isLoading, error } = useAuthStatus()
+
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button>Edit bio</Button>
+        {authStatus?.isAgency && <Button>Edit bio</Button>}
       </SheetTrigger>
       <SheetContent className="overflow-y-scroll pt-16">
         {/* Add SheetTitle for accessibility */}
