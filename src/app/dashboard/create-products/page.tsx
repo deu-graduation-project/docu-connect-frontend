@@ -9,6 +9,16 @@ import { Separator } from "@/components/ui/separator"
 import { useQuery } from "@tanstack/react-query"
 import { productService } from "@/services/products-service"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogClose,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+import {
   Card,
   CardContent,
   CardFooter,
@@ -17,7 +27,8 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Pencil, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "../../../lib/utils"
 
 // Define type for products
 type Product = {
@@ -61,16 +72,14 @@ export default function CreateProducts() {
 
   // Function to handle product delete
   const handleDelete = async (productId: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        await productService.deleteProducts([productId]); // API'ye DELETE isteği gönder
-        queryClient.invalidateQueries(["viewCreatedProducts"]); // Listeyi güncelle
-        console.log(`Prodcut ${productId} succsessfully deleted.`);
-      } catch (error) {
-        console.error("Error! Coudn't delete product", error);
-      }
+    try {
+      await productService.deleteProducts([productId]) // API'ye DELETE isteği gönder
+      queryClient.invalidateQueries({ queryKey: ["viewCreatedProducts"] }) // Listeyi güncelle
+      console.log(`Prodcut ${productId} succsessfully deleted.`)
+    } catch (error) {
+      console.error("Error! Coudn't delete product", error)
     }
-  };
+  }
 
   // Color mapping function for better visual representation
   const getColorClass = (colorOption: string) => {
@@ -174,14 +183,47 @@ export default function CreateProducts() {
                 >
                   <Pencil size={16} />
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(product.id)}
-                  className="h-8 w-12"
-                >
-                  <Trash2 size={16} />
-                </Button>
+
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      // onClick={() => handleDelete(product.id)}
+                      className="h-8 w-12"
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="flex w-full flex-col">
+                    <DialogHeader className="flex w-auto flex-col items-center justify-start text-left">
+                      <DialogTitle className="w-full text-start">
+                        Are you sure?
+                      </DialogTitle>
+                      <DialogDescription className="w-full text-start">
+                        Are you sure you want to delete this product?
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center justify-end gap-4">
+                      <DialogClose asChild>
+                        <Button
+                          className={cn(
+                            "text-white",
+                            buttonVariants({ variant: "outline" })
+                          )}
+                        >
+                          Cancel
+                        </Button>
+                      </DialogClose>
+                      <Button
+                        onClick={() => handleDelete(product.id)}
+                        className={buttonVariants({ variant: "destructive" })}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </CardFooter>
             </Card>
           ))}
