@@ -1,10 +1,10 @@
-import { TotalViewChart } from "./components/total-view-chart";
-import { DownloadsChart } from "./components/downloads-chart";
-import { EngagementChart } from "./components/engagement-chart";
-import { AudienceOverviewChart } from "./components/audience-overview-chart";
-import RecentActivitiesTable from "./components/recent-activity-table";
-import { AgencyCharts } from "./components/agency-chart";
-type Props = {};
+import { TotalViewChart } from "./components/total-view-chart"
+import { DownloadsChart } from "./components/downloads-chart"
+import { EngagementChart } from "./components/engagement-chart"
+import { AudienceOverviewChart } from "./components/audience-overview-chart"
+import RecentActivitiesTable from "./components/recent-activity-table"
+import { AgencyCharts } from "./components/agency-chart"
+type Props = {}
 
 export default function Analytics({}: Props) {
   return (
@@ -16,11 +16,11 @@ export default function Analytics({}: Props) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 grid-rows-2 gap-2 sm:grid-cols-5 md:grid-cols-3 lg:grid-cols-5">
+      <AgencyCharts />
+      {/* <div className="grid grid-cols-1 grid-rows-2 gap-2 sm:grid-cols-5 md:grid-cols-3 lg:grid-cols-5">
         <div className="grid sm:col-span-3 md:col-span-2 lg:col-span-3">
-          <AgencyCharts />  
         </div>
-        {/* <div className="grid sm:col-span-3 md:col-span-2 lg:col-span-3">
+        <div className="grid sm:col-span-3 md:col-span-2 lg:col-span-3">
           <TotalViewChart />
         </div>
         <div className="grid sm:col-span-2 md:col-span-1 lg:col-span-2">
@@ -35,8 +35,8 @@ export default function Analytics({}: Props) {
       </div>
       <div className="py-8 flex flex-col w-full">
         <RecentActivitiesTable />
-      </div> */}
       </div>
+      </div> */}
     </div>
   )
 }
