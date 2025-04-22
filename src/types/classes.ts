@@ -125,6 +125,8 @@ export interface AgencyProduct {
 export interface AgencyComment {
   commentText: string;
   starRating: string;
+  userName:string;
+  createdDate:Date;
 }
 export interface GetAgencies {
   agencyId: string;
@@ -171,33 +173,35 @@ export interface SocialUser {
   imageUrl: string; // URL of the user's profile picture
 }
 export interface GetUserByIdResponse {
-  UserId: string;
-  UserName: string;
-  Name: string;
-  Surname: string;
-  Email: string;
-  EmailConfirmed: boolean;
-  UserOrders: {
-    OrderCode: string;
-    OrderState: string;
-    TotalPrice: number;
-    KopyaSayısı: number;
-    SayfaSayısı: number;
-    AgencyName: string;
-    CustomerName: string;
-    Product: {
-      Price: number;
-      PrintType: string;
-      PaperType: string;
-      ColorOption: string;
+  userId: string;
+  userName: string;
+  name: string;
+  surname: string;
+  email: string;
+  emailConfirmed: boolean;
+  userOrders: {
+    orderCode: string;
+    orderState: string;
+    totalPrice: number;
+    kopyaSayısı: number;
+    sayfaSayısı: number;
+    agencyName: string;
+    customerName: string;
+    product: {
+      price: number;
+      printType: string;
+      paperType: string;
+      colorOption: string;
     };
-    CopyFiles: {
-      FileName: string;
-      FilePath: string;
+    copyFiles: {
+      fileName: string;
+      filePath: string;
     }[];
   }[];
-  UserComments: {
-    CommentText: string;
-    StarRating: number;
+  userComments: {
+    commentText: string;
+    starRating: number;
+    createdDate: Date;
+    userName:string;
   }[];
 }
