@@ -18,7 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
+import { cn } from "@/lib/utils"
 // Define type for products
 type Product = {
   id: string
@@ -33,20 +33,17 @@ export default function CreateProducts() {
     isLoading: authLoading,
     error: authError,
   } = useAuthStatus()
-  const queryClient = useQueryClient()
-  const router = useRouter()
-  const { isLoading: isAuthLoading } = useAuth()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["viewCreatedProducts"],
     queryFn: () => {
-      return productService.getProducts(1, 10)
+      return productService.getProducts(0, 10)
     },
     enabled: authData?.isAdmin,
   })
 
   const products: Product[] =
-    data?.products.map((product: GetProducts) => ({
+    data?.products.map((product: any) => ({
       id: product.id,
       colorOption: product.colorOption,
       paperType: product.paperType,
@@ -64,7 +61,6 @@ export default function CreateProducts() {
     console.log("Delete product:", productId)
     // Implement delete functionality here
   }
-
   // Color mapping function for better visual representation
   const getColorClass = (colorOption: string) => {
     switch (colorOption) {
@@ -74,7 +70,19 @@ export default function CreateProducts() {
         return "bg-blue-500 text-white"
     }
   }
-
+  // a color mapping funtion for paper type
+  const getPaperTypeClass = (paperType: string) => {
+    switch (paperType) {
+      case "Mat":
+        return "bg-gray-800 text-white"
+      case "Parlak":
+        return "bg-yellow-500 text-white"
+      case "Saten":
+        return "bg-green-500 text-white"
+      default:
+        return "bg-transparent text-white"
+    }
+  }
   // Handle loading state
   if (authLoading) {
     return (
@@ -105,7 +113,7 @@ export default function CreateProducts() {
   }
 
   return (
-    <div className="p-4 pb-12">
+    <div className="max-w-4xl p-4 pb-12">
       <div className="flex w-full flex-col items-start justify-between sm:flex-row sm:items-center">
         <h1 className="mb-4 text-xl font-bold lg:text-2xl">Created Products</h1>
         <CreateProductSheet />
@@ -128,37 +136,42 @@ export default function CreateProducts() {
           {error instanceof Error ? error.message : "Unknown error"}
         </div>
       ) : products && products.length > 0 ? (
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid w-auto max-w-4xl grid-cols-1 flex-col gap-4 py-4 sm:grid-cols-2">
           {products.map((product: Product) => (
             <Card
               key={product.id}
-              className="overflow-hidden transition-shadow hover:shadow-md"
+              className="flex w-full flex-col items-start overflow-hidden transition-shadow hover:shadow-md"
             >
               <CardHeader className="p-4">
                 <CardTitle className="truncate text-lg">
                   {product.printType}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="mb-4 grid grid-cols-2 gap-2">
-                  <div>
+              <CardContent className="w-full p-4 pt-0">
+                <div className="mb-4 flex w-full items-center justify-start gap-6">
+                  <div className="flex flex-col gap-2">
                     <p className="text-sm text-muted-foreground">
                       Color Option
                     </p>
-                    <Badge className={getColorClass(product.colorOption)}>
+                    <Badge className="flex items-center justify-center">
                       {product.colorOption}
                     </Badge>
                   </div>
-                  <div>
+                  <div className="flex flex-col gap-2">
                     <p className="text-sm text-muted-foreground">Paper Type</p>
-                    <Badge variant="outline">{product.paperType}</Badge>
+                    <Badge
+                      className={cn(
+                        getPaperTypeClass(`${product.paperType}`),
+                        "flex items-center justify-center"
+                      )}
+                      variant="outline"
+                    >
+                      {product.paperType}
+                    </Badge>
                   </div>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  ID: {product.id.substring(0, 8)}...
-                </p>
               </CardContent>
-              <CardFooter className="flex justify-end gap-2 p-4 pt-0">
+              <CardFooter className="flex w-full justify-start gap-2 p-4 pt-0">
                 <Button
                   variant="outline"
                   size="sm"

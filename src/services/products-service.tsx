@@ -61,18 +61,27 @@ class ProductService {
     page: number,
     size: number
   ): Promise<{ totalCount: number; products: GetProducts[] }> {
+    // Ensure page is at least 1
+    const safePageNumber = Math.max(1, page + 1)
+
     const queryString = new URLSearchParams({
-      page: page.toString(),
+      page: safePageNumber.toString(),
       size: size.toString(),
     }).toString()
+
     const response = await fetchWithAuth(
       `${this.baseUrl}/Products/GetProducts?${queryString}`,
       {
         method: "GET",
       }
-    );
-    const data = await response.json();
-    return data;
+    )
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch products")
+    }
+
+    const data = await response.json()
+    return data
   }
 
   async deleteProducts(productIds: string[]) {
