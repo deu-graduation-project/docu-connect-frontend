@@ -1,12 +1,6 @@
-import { TotalViewChart } from "./components/total-view-chart"
-import { DownloadsChart } from "./components/downloads-chart"
-import { EngagementChart } from "./components/engagement-chart"
-import { AudienceOverviewChart } from "./components/audience-overview-chart"
-import RecentActivitiesTable from "./components/recent-activity-table"
 import { AgencyCharts } from "./components/agency-chart"
-type Props = {}
 
-export default function Analytics({}: Props) {
+export default function Analytics() {
   return (
     <div className="container h-full max-w-7xl space-y-12 px-4 py-10">
       <div className="flex flex-col gap-4">

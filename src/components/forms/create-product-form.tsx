@@ -1,3 +1,4 @@
+"use client"
 import React from "react"
 import z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -12,7 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Icons } from "../icons"
-import { Input } from "@/components/ui/input"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { useQueryClient } from "@tanstack/react-query"
 import { productService } from "@/services/products-service"

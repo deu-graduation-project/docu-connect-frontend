@@ -12,114 +12,114 @@ export enum BeAnAgencyRequestState {
   Rejected = 2,
 }
 export class CopyFile {
-  fileName!: string;
-  fileCode?: string;
-  filePath?: string;
+  fileName!: string
+  fileCode?: string
+  filePath?: string
 }
 export class GetOrders {
-  orderId?: string;
-  OrderCode!: string;
-  AgencyName!: string;
-  CustomerUserName!: string;
-  TotalPrice!: number;
-  SayfaSayısı!: number;
-  KopyaSayısı!: number;
-  CreatedDate!: Date;
-  orderState!: OrderState;
-  productPaperType!: string;
-  productColorOption!: string;
-  productPrintType!: string;
-  PricePerPage!: number;
-  CopyFile!: CopyFile[];
+  orderId?: string
+  OrderCode!: string
+  AgencyName!: string
+  CustomerUserName!: string
+  TotalPrice!: number
+  SayfaSayısı!: number
+  KopyaSayısı!: number
+  CreatedDate!: Date
+  orderState!: OrderState
+  productPaperType!: string
+  productColorOption!: string
+  productPrintType!: string
+  PricePerPage!: number
+  CopyFile!: CopyFile[]
 }
 export class GetSingleOrder {
-  orderId?: string;
-  OrderCode!: string;
-  AgencyName!: string;
-  CustomerName!: string;
-  TotalPrice!: number;
-  PricePerPage!: number;
-  TotalPage!: number;
-  PrintType!: string;
-  PaperType!: string;
-  ColorOption!: string;
-  KopyaSayısı!: string;
-  CreatedDate!: Date;
-  OrderState!: OrderState;
-  CopyFiles!: CopyFile[];
-  CompletedCode?: string;
+  orderId?: string
+  OrderCode!: string
+  AgencyName!: string
+  CustomerName!: string
+  TotalPrice!: number
+  PricePerPage!: number
+  TotalPage!: number
+  PrintType!: string
+  PaperType!: string
+  ColorOption!: string
+  KopyaSayısı!: string
+  CreatedDate!: Date
+  OrderState!: OrderState
+  CopyFiles!: CopyFile[]
+  CompletedCode?: string
 }
 export class GetAgencyAnalytics {
-  Period!: string;
-  TotalPrice!: number;
-  TotalPageCount!: number;
-  TotalCompletedOrder!: number;
+  Period!: string
+  TotalPrice!: number
+  TotalPageCount!: number
+  TotalCompletedOrder!: number
 }
 export class CreateAgencyProduct {
-  ProductId!: string;
-  Price!: number;
+  ProductId!: string
+  Price!: number
 }
 export class GetAgencyProducts {
-  Id!: string;
-  PaperType!: string;
-  ColorOption!: string;
-  PrintType!: string;
-  Price!: number;
+  Id!: string
+  PaperType!: string
+  ColorOption!: string
+  PrintType!: string
+  Price!: number
 }
 export class GetProducts {
-  Id!: string;
-  PaperType!: string;
-  ColorOption!: string;
-  PrintType!: string;
+  id!: string
+  paperType!: string
+  colorOption!: string
+  printType!: string
 }
 export interface User {
-  userName: string;
-  name: string;
-  surname: string;
-  email: string;
-  password: string;
-  passwordConfirm: string;
+  userName: string
+  name: string
+  surname: string
+  email: string
+  password: string
+  passwordConfirm: string
 }
 
 export interface UserCreate {
-  id: string;
-  name: string;
-  email: string;
+  id: string
+  name: string
+  email: string
 }
 export interface Address {
-  province: string;
-  district: string;
-  extra: string;
+  province: string
+  district: string
+  extra: string
 }
 export interface GetBeAnAgencyRequests {
-  beAnAgencyRequestId: string;
-  agencyName: string;
-  agencyId: string;
-  beAnAgencyRequestState: BeAnAgencyRequestState; // Note the lowercase 'b'
-  address: Address;
-  name: string;
-  surname: string;
-  email: string;
-  profilePhoto: string | null;
+  beAnAgencyRequestId: string
+  agencyName: string
+  agencyId: string
+  beAnAgencyRequestState: BeAnAgencyRequestState // Note the lowercase 'b'
+  address: Address
+  name: string
+  surname: string
+  email: string
+  profilePhoto: string | null
 }
 
 export interface UpdateAgencyInfos {
-  name?: string;
-  surname?: string;
-  agencyName?: string;
-  province?: string;
-  district?: string;
-  extra?: string;
-  agencyBio?: string;
-  profilePhoto?: File;
+  name?: string
+  surname?: string
+  agencyName?: string
+  province?: string
+  district?: string
+  extra?: string
+  agencyBio?: string
+  profilePhoto?: File
 }
 
 export interface AgencyProduct {
-  productId: string;
-  printType: string;
-  colorOption: string;
-  paperType: string;
-  price: number;
+  productId: string
+  printType: string
+  colorOption: string
+  paperType: string
+  price: number
 }
 
 export interface AgencyComment {
@@ -129,48 +129,48 @@ export interface AgencyComment {
   createdDate:Date;
 }
 export interface GetAgencies {
-  agencyId: string;
-  agencyName: string;
-  province: string;
-  district: string;
-  extra: string;
-  starRating: number;
-  profilePhoto: string | null;
+  agencyId: string
+  agencyName: string
+  province: string
+  district: string
+  extra: string
+  starRating: number
+  profilePhoto: string | null
 }
 export interface Agency {
-  agencyId: string;
-  agencyName: string;
-  agencyBio: string;
-  province: string;
-  district: string;
-  addressExtra: string;
-  agencyProducts: AgencyProduct[];
-  comments: AgencyComment[];
-  starRating: number;
-  profilePhoto: string | null;
+  agencyId: string
+  agencyName: string
+  agencyBio: string
+  province: string
+  district: string
+  addressExtra: string
+  agencyProducts: AgencyProduct[]
+  comments: AgencyComment[]
+  starRating: number
+  profilePhoto: string | null
 }
 
 export interface GetSingleAgency {
-  agency: Agency;
+  agency: Agency
 }
 
 export interface SucceededMessageResponse {
-  success: boolean; // Indicates whether the operation was successful
-  message: string; // A message describing the result of the operation
+  success: boolean // Indicates whether the operation was successful
+  message: string // A message describing the result of the operation
 }
 
 export interface TokenResponse {
   token: {
-    accessToken: string; // The access token
-    refreshToken: string; // The refresh token
-  };
+    accessToken: string // The access token
+    refreshToken: string // The refresh token
+  }
 }
 
 export interface SocialUser {
-  id: string; // Unique identifier from the social provider
-  email: string; // User's email
-  name: string; // User's full name
-  imageUrl: string; // URL of the user's profile picture
+  id: string // Unique identifier from the social provider
+  email: string // User's email
+  name: string // User's full name
+  imageUrl: string // URL of the user's profile picture
 }
 export interface GetUserByIdResponse {
   userId: string;
@@ -204,4 +204,5 @@ export interface GetUserByIdResponse {
     createdDate: Date;
     userName:string;
   }[];
+
 }
