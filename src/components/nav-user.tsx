@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import useAuthStatus from "@/lib/queries/auth-status";
 
-export function NavUser({
+export function   NavUser({
   user,
 }: {
   user: {

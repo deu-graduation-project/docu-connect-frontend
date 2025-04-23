@@ -81,7 +81,7 @@ export function AppearanceForm() {
                     </FormControl>
                     <div
                       onClick={() => setTheme("light")}
-                      className="items-center cursor-pointer rounded-md border-2 border-muted p-1 hover:border-accent hover:opacity-80 transition-all duration-150 ease-in-out"
+                      className="items-center cursor-pointer  rounded-md border-2 border-muted p-1 hover:border-accent hover:opacity-80 transition-all duration-150 ease-in-out"
                     >
                       <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
                         <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">

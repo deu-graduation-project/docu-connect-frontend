@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${jakarta.className} ${fontJakartaSans.variable} mx-auto flex min-h-screen`}
+        className={`${jakarta.className} ${fontJakartaSans.variable} mx-auto min-h-screen`}
       >
         <ThemeProvider
           attribute="class"

@@ -36,7 +36,7 @@ import { Icons } from "./icons"
 
 // This is sample data.
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function   AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data, isLoading, error } = useAuthStatus()
 
   const sideBarConfig = {
@@ -110,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavUser user={sideBarConfig.user} />
       </SidebarFooter>
-      <SidebarContent>
+      <SidebarContent >
         <NavMain
           projects={
             data?.isAdmin
