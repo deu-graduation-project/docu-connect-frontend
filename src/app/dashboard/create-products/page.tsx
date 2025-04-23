@@ -1,9 +1,7 @@
 "use client"
 import React from "react"
 import useAuthStatus from "@/lib/queries/auth-status"
-import { useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
+
 import CreateProductSheet from "./components/create-product-sheet"
 import { Separator } from "@/components/ui/separator"
 import { useQuery } from "@tanstack/react-query"
@@ -17,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-
+import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
   CardContent,

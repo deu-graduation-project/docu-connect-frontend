@@ -1,20 +1,13 @@
 "use client"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { productService } from "@/services/products-service"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { Icons } from "@/components/icons"
 import useAuthStatus from "@/lib/queries/auth-status"
-
-type Product = {
-  id: string
-  colorOption: string
-  paperType: string
-  printType: string
-}
 
 type CreateAgencyProduct = {
   ProductId: string
@@ -33,43 +26,60 @@ export default function CreateAgencyProductForm() {
     error: authError,
   } = useAuthStatus()
 
+  // Query to fetch products with proper typing
   const {
     data: productList,
     isLoading: productListLoading,
     error: productListError,
   } = useQuery({
     queryKey: ["ProductListForAgencies"],
-    queryFn: () => {
+    queryFn: async () => {
       if (!authStatus?.userId) throw new Error("Agency ID is missing")
-      return productService.getAgencyProducts(authStatus.userId)
+      return productService.getProducts(0, 10)
     },
     enabled: !!authStatus?.userId,
   })
 
-  const products: Product[] =
-    productList?.agencyProducts?.map((product: any) => ({
-      id: product.id,
-      colorOption: product.colorOption,
-      paperType: product.paperType,
-      printType: product.printType,
-    })) || []
+  // Get the actual products array from the response
+  const products = productList?.products || []
 
+  // Initialize prices state when product list is loaded
+  useEffect(() => {
+    if (products && products.length > 0) {
+      const initialPrices = products.reduce(
+        (acc, product) => {
+          if (product.price !== undefined && product.price !== null) {
+            acc[product.id] = product.price
+          }
+          return acc
+        },
+        {} as { [key: string]: number }
+      )
+      setProductPrices(initialPrices)
+    }
+  }, [products]) // Dependency on products array
+
+  // Mutation for creating/updating products
   const createAgencyProductMutation = useMutation({
     mutationFn: async () => {
       const agencyProducts: CreateAgencyProduct[] = Object.entries(
         productPrices
       )
-        .filter(([_, price]) => price > 0)
+        .filter(([, price]) => price > 0)
         .map(([productId, price]) => ({
           ProductId: productId,
           Price: price,
         }))
-      return productService.createAgencyProduct(agencyProducts)
+
+      // Send the data to backend
+      return await productService.createAgencyProduct(agencyProducts)
     },
     onSuccess: () => {
+      // Invalidate and refetch to ensure fresh data
       queryClient.invalidateQueries({ queryKey: ["ProductListForAgencies"] })
-      toast.success("Agency products created successfully")
-      setProductPrices({})
+      queryClient.invalidateQueries({ queryKey: ["AgencyProducts"] })
+
+      toast.success("Product prices saved successfully")
     },
     onError: (error: { message: string }) => {
       toast.error(error.message || "Failed to create agency products")
@@ -85,7 +95,12 @@ export default function CreateAgencyProductForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    createAgencyProductMutation.mutate()
+
+    createAgencyProductMutation.mutate(undefined, {
+      onSuccess: () => {
+        setProductPrices({})
+      },
+    })
   }
 
   const isFormValid = Object.values(productPrices).some((price) => price > 0)
@@ -108,12 +123,9 @@ export default function CreateAgencyProductForm() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Create Agency Products</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="mx-auto max-w-4xl">
+      <Card className="border-none">
+        <CardContent className="border-none p-0">
           {products.length === 0 ? (
             <div className="text-center text-muted-foreground">
               No products available to add prices
@@ -131,23 +143,31 @@ export default function CreateAgencyProductForm() {
                       {product.paperType} - {product.colorOption}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <label htmlFor={`price-${product.id}`} className="sr-only">
-                      Price for {product.printType}
-                    </label>
-                    <Input
-                      id={`price-${product.id}`}
-                      type="number"
-                      placeholder="₺ Price"
-                      className="w-32"
-                      value={productPrices[product.id] || ""}
-                      onChange={(e) => {
-                        const price = parseFloat(e.target.value)
-                        handlePriceChange(product.id, isNaN(price) ? 0 : price)
-                      }}
-                      min={0}
-                      step="0.01"
-                    />
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-end gap-1">
+                      <label
+                        htmlFor={`price-${product.id}`}
+                        className="sr-only"
+                      >
+                        Price for {product.printType}
+                      </label>
+                      <Input
+                        id={`price-${product.id}`}
+                        type="number"
+                        placeholder="₺ Price"
+                        className="w-28"
+                        value={productPrices[product.id] || ""}
+                        onChange={(e) => {
+                          const price = parseFloat(e.target.value)
+                          handlePriceChange(
+                            product.id,
+                            isNaN(price) ? 0 : price
+                          )
+                        }}
+                        min={0}
+                        step="0.01"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -159,10 +179,10 @@ export default function CreateAgencyProductForm() {
                 {createAgencyProductMutation.isPending ? (
                   <>
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
+                    Saving...
                   </>
                 ) : (
-                  "Create Agency Products"
+                  "Save Product Prices"
                 )}
               </Button>
             </form>
