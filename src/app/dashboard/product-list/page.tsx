@@ -147,7 +147,7 @@ export default function ProductList() {
             <div className="space-y-4">
               {products.map((product: AgencyProduct) => (
                 <div
-                  key={product.productId}
+                  key={product.id}
                   className="flex items-center justify-between gap-4 rounded-lg border p-4"
                 >
                   <div className="flex flex-grow flex-col gap-4">

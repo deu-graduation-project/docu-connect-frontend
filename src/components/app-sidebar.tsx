@@ -15,6 +15,7 @@ import {
   User,
   SquareActivity,
   List,
+  Landmark,
   ChartArea,
   Waypoints,
   Mail,
@@ -36,7 +37,7 @@ import { Icons } from "./icons"
 
 // This is sample data.
 
-export function   AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data, isLoading, error } = useAuthStatus()
 
   const sideBarConfig = {
@@ -104,18 +105,59 @@ export function   AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
       },
     ],
   }
+  const sideBarConfigForUser = {
+    user: {
+      name: "kullanıcı adı",
+      email: "",
+    },
+    navMain: [],
+    projects: [
+      {
+        name: "Profile",
+        url: `/dashboard/profile`,
+        icon: User,
+      },
+      {
+        name: "Agencies",
+        url: `/dashboard/agencies`,
+        icon: Landmark,
+      },
+      {
+        name: "Activity and History",
+        url: `/dashboard/activity-and-history`,
+        icon: SquareActivity,
+      },
+      {
+        name: "Account Management",
+        url: `/dashboard/account-management`,
+        icon: Wrench,
+      },
+      {
+        name: "Privacy & Preferences",
+        url: `/dashboard/privacy-and-preferences`,
+        icon: PieChart,
+      },
+      {
+        name: "Support & Connections",
+        url: `/dashboard/support-and-connections`,
+        icon: Waypoints,
+      },
+    ],
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarFooter>
         <NavUser user={sideBarConfig.user} />
       </SidebarFooter>
-      <SidebarContent >
+      <SidebarContent>
         <NavMain
           projects={
             data?.isAdmin
               ? sideBarConfigForAdmin.projects
-              : sideBarConfig.projects
+              : sideBarConfigForUser.projects
+                ? sideBarConfigForUser.projects
+                : sideBarConfig.projects
           }
         />
       </SidebarContent>

@@ -25,7 +25,7 @@ import Link from "next/link"
 import { Icons } from "@/components/icons"
 import { userService } from "@/services/user-service"
 import { useEffect, useState } from "react"
-
+import useAuthStatus from "@/lib/queries/auth-status"
 const formSchema = z
   .object({
     userName: z.string().min(1, "Adınızı giriniz"),
@@ -51,6 +51,11 @@ const formSchema = z
 type FormData = z.infer<typeof formSchema>
 
 export default function BecomeAnAgency() {
+  const {
+    data: authData,
+    isLoading: authDataLoading,
+    error: authDataError,
+  } = useAuthStatus()
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -117,7 +122,7 @@ export default function BecomeAnAgency() {
   return (
     <div className="flex min-h-screen w-full items-center justify-center">
       <div className="absolute left-5 top-5">
-        <Link href={"/"}>
+        <Link href={authData?.isAuthenticated ? "/dashboard/profile" : "/"}>
           <Icons.arrowLeft strokeWidth={"1.3px"} />
         </Link>
       </div>

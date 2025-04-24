@@ -22,6 +22,7 @@ import {
   SunMedium,
   Trash,
   FilePlus2,
+  Star,
   Twitter,
   Camera,
   User,
@@ -34,9 +35,10 @@ import {
 export type Icon = typeof LucideIcon
 
 export const Icons = {
-  spinner: LoaderCircle,
+  // Removed duplicate spinner property
   addProduct: FilePlus2,
   logo: Stamp,
+  star: Star,
   close: X,
   spinner: Loader2,
   menu: Menu,
