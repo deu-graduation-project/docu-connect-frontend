@@ -26,6 +26,18 @@ import { Icons } from "@/components/icons"
 import { userService } from "@/services/user-service"
 import { useEffect, useState } from "react"
 import useAuthStatus from "@/lib/queries/auth-status"
+import { useMemo } from "react"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectTrigger,
+  SelectValue,
+  SelectItem,
+  SelectLabel,
+} from "@/components/ui/select"
+import { turkish_cities } from "@/lib/cities"
+
 const formSchema = z
   .object({
     userName: z.string().min(1, "Adınızı giriniz"),
@@ -51,14 +63,14 @@ const formSchema = z
 type FormData = z.infer<typeof formSchema>
 
 export default function BecomeAnAgency() {
+  const router = useRouter()
+  const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const {
     data: authData,
     isLoading: authDataLoading,
     error: authDataError,
   } = useAuthStatus()
-  const router = useRouter()
-  const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -79,6 +91,14 @@ export default function BecomeAnAgency() {
       agencyBio: "",
     },
   })
+
+  // Get available districts based on selected province
+  const selectedProvince = form.watch("address.province")
+  const availableDistricts = useMemo(() => {
+    if (!selectedProvince) return []
+    const city = turkish_cities.find((c) => c.name === selectedProvince)
+    return city ? city.counties : []
+  }, [selectedProvince])
 
   useEffect(() => {
     if (form.formState.isSubmitSuccessful) {
@@ -117,6 +137,13 @@ export default function BecomeAnAgency() {
       console.error("Unexpected error:", err)
       setError("Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.")
     }
+  }
+
+  const capitalizeWords = (str: string) => {
+    return str
+      .split(" ")
+      .map((word) => word.charAt(0).toLocaleUpperCase("tr-TR") + word.slice(1))
+      .join(" ")
   }
 
   return (
@@ -257,7 +284,27 @@ export default function BecomeAnAgency() {
                       <FormItem className="w-full">
                         <FormLabel>Province</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter street" {...field} />
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger className="w-full gap-2">
+                              <SelectValue placeholder="Select province" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Provinces</SelectLabel>
+                                {turkish_cities.map((province) => (
+                                  <SelectItem
+                                    key={province.name}
+                                    value={province.name}
+                                  >
+                                    {capitalizeWords(province.name)}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -270,7 +317,25 @@ export default function BecomeAnAgency() {
                       <FormItem className="w-full">
                         <FormLabel>District</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter city" {...field} />
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                            disabled={!selectedProvince}
+                          >
+                            <SelectTrigger className="w-full gap-2">
+                              <SelectValue placeholder="Select district" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectGroup>
+                                <SelectLabel>Districts</SelectLabel>
+                                {availableDistricts.map((district) => (
+                                  <SelectItem key={district} value={district}>
+                                    {capitalizeWords(district)}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            </SelectContent>
+                          </Select>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

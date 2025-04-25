@@ -74,6 +74,8 @@ export default function AgencyList({
     },
   })
 
+  console.log(agencyList)
+
   // Calculate total pages
   const totalPages = agencyList?.totalCount
     ? Math.ceil(agencyList.totalCount / itemsPerPage)
