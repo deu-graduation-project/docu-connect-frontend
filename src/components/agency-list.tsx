@@ -134,9 +134,14 @@ export default function AgencyList({
                   />
 
                   <h3 className="text-xl font-semibold">{agency.agencyName}</h3>
-                  <div className="flex items-end justify-start gap-2">
+                  <div className="flex items-center justify-start gap-2">
                     <p className="text-sm text-muted-foreground">Location:</p>
-                    {agency.province}, {agency.district}
+                    <span
+                      className="block max-w-[200px] truncate text-sm text-primary"
+                      title={`${agency.province}, ${agency.district}`}
+                    >
+                      {agency.province}, {agency.district}
+                    </span>
                   </div>
                   <div className="flex items-center justify-start gap-2">
                     <p className="text-sm text-muted-foreground">Rating:</p>

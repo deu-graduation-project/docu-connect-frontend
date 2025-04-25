@@ -40,7 +40,7 @@ import { Icons } from "./icons"
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data, isLoading, error } = useAuthStatus()
 
-  const sideBarConfig = {
+  const sideBarConfigForAgency = {
     user: {
       name: `${data?.name} ${data?.surname}` || "kullanıcı adı",
       email: `${data?.email}` || "kullanıcı emaili",
@@ -148,16 +148,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarFooter>
-        <NavUser user={sideBarConfig.user} />
+        <NavUser user={sideBarConfigForAgency.user} />
       </SidebarFooter>
       <SidebarContent>
         <NavMain
           projects={
             data?.isAdmin
               ? sideBarConfigForAdmin.projects
-              : sideBarConfigForUser.projects
-                ? sideBarConfigForUser.projects
-                : sideBarConfig.projects
+              : data?.isAgency
+                ? sideBarConfigForAgency.projects
+                : sideBarConfigForUser.projects
           }
         />
       </SidebarContent>
