@@ -1,3 +1,4 @@
+// components/agency-list.tsx (modified version with links)
 import React from "react"
 import { useQuery } from "@tanstack/react-query"
 import { userService } from "@/services/user-service"
@@ -5,6 +6,8 @@ import { GetAgencies } from "@/types/classes"
 import { getRandomPatternStyle } from "@/lib/generate-pattern"
 import { Icons } from "@/components/icons"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { StarRating } from "@/components/star-rating" // Import the new component
 
 type AgencyListResponse = {
   totalCount: number
@@ -18,26 +21,6 @@ type AgencyListProps = {
   currentPage: number
   itemsPerPage: number
   onPageChange: (page: number) => void
-}
-
-// Star Rating component to show filled and empty stars
-function StarRating({ rating }: { rating: number }) {
-  // Make sure rating is between 0 and 5
-  const safeRating = Math.min(5, Math.max(0, rating))
-
-  // Create an array of 5 stars
-  return (
-    <div className="flex items-center justify-start gap-1">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <Icons.star
-          key={star}
-          color="white"
-          fill={star <= safeRating ? "white" : "transparent"}
-          className="h-4 w-4"
-        />
-      ))}
-    </div>
-  )
 }
 
 export default function AgencyList({
@@ -74,7 +57,7 @@ export default function AgencyList({
     },
   })
 
-  console.log(agencyList)
+  console.log("Agency List:", agencyList)
 
   // Calculate total pages
   const totalPages = agencyList?.totalCount
@@ -139,31 +122,34 @@ export default function AgencyList({
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {agencyList.agencies.map((agency) => (
-              <div
+              <Link
+                href={`/dashboard/agencies/${agency.agencyId}`}
                 key={agency.agencyId}
-                className="mb-2 flex flex-col items-start justify-center gap-2 rounded-md border p-4"
+                className="transition-transform hover:scale-[1.02]"
               >
-                <div
-                  className="h-32 w-full rounded-lg"
-                  style={getRandomPatternStyle(agency.agencyId)}
-                />
+                <div className="mb-2 flex flex-col items-start justify-center gap-2 rounded-md border p-4 hover:shadow-md">
+                  <div
+                    className="h-32 w-full rounded-lg"
+                    style={getRandomPatternStyle(agency.agencyId)}
+                  />
 
-                <h3 className="text-xl font-semibold">{agency.agencyName}</h3>
-                <div className="flex items-end justify-start gap-2">
-                  <p className="text-sm text-muted-foreground">Location:</p>
-                  {agency.province}, {agency.district}
+                  <h3 className="text-xl font-semibold">{agency.agencyName}</h3>
+                  <div className="flex items-end justify-start gap-2">
+                    <p className="text-sm text-muted-foreground">Location:</p>
+                    {agency.province}, {agency.district}
+                  </div>
+                  <div className="flex items-center justify-start gap-2">
+                    <p className="text-sm text-muted-foreground">Rating:</p>
+                    {agency.starRating === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        no rating yet
+                      </p>
+                    ) : (
+                      <StarRating rating={agency.starRating} />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center justify-start gap-2">
-                  <p className="text-sm text-muted-foreground">Rating:</p>
-                  {agency.starRating === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      no rating yet
-                    </p>
-                  ) : (
-                    <StarRating rating={agency.starRating} />
-                  )}
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
 

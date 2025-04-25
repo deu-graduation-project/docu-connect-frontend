@@ -42,8 +42,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const sideBarConfig = {
     user: {
-      name: "kullanıcı adı",
-      email: "mail@example.com",
+      name: `${data?.name} ${data?.surname}` || "kullanıcı adı",
+      email: `${data?.email}` || "kullanıcı emaili",
       avatar: "/avatars/shadcn.jpg",
     },
     navMain: [],
@@ -88,8 +88,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const sideBarConfigForAdmin = {
     user: {
-      name: "kullanıcı adı",
-      email: "",
+      name: `${data?.name} ${data?.surname}` || "kullanıcı adı",
+      email: `${data?.email}` || "kullanıcı emaili",
     },
     navMain: [],
     projects: [
@@ -107,8 +107,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
   const sideBarConfigForUser = {
     user: {
-      name: "kullanıcı adı",
-      email: "",
+      name: `${data?.name} ${data?.surname}` || "kullanıcı adı",
+      email: `${data?.email}` || "kullanıcı emaili",
     },
     navMain: [],
     projects: [
