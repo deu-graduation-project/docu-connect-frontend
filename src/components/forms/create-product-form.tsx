@@ -35,16 +35,7 @@ const formSchema = z.object({
   printType: z.string().min(1, "Print type is required"),
 })
 
-const paperTypeOptions = [
-  "Matte",
-  "Glossy",
-  "Semi-Gloss",
-  "Pearl",
-  "Luster",
-  "Textured",
-  "Canvas",
-  "Fine Art",
-]
+const paperTypeOptions = ["A3", "A4", "A5", "A6"]
 
 // Define options with display labels and backend values
 const colorOptionsMap = [

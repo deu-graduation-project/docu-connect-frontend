@@ -12,6 +12,9 @@ import { getRandomPatternStyle } from "@/lib/generate-pattern"
 import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import CreateOrder from "./components/create-order"
+import UserCart from "./components/user-cart"
 
 export default function AgencyPage() {
   const params = useParams()
@@ -75,7 +78,7 @@ export default function AgencyPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto max-w-6xl p-4">
       <div className="mb-4">
         <Link href="/dashboard/agencies">
           <Button variant="outline" className="mb-4">
@@ -162,38 +165,62 @@ export default function AgencyPage() {
         </div>
       )}
 
-      {/* Agency Products */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Available Products</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {agency.agencyProducts && agency.agencyProducts.length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {agency.agencyProducts.map((product) => (
-                <Card key={product.productId} className="p-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="text-lg font-medium">
-                      {product.printType}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {product.paperType}, {product.colorOption}
-                    </div>
-                    <div className="mt-2 text-lg font-bold">
-                      ₺{product.price.toFixed(2)}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No products available</p>
-          )}
-        </CardContent>
-      </Card>
+      <Tabs
+        defaultValue="available-products"
+        className="min-h-[260px] w-full max-w-6xl pt-12"
+      >
+        <TabsList>
+          <TabsTrigger value="available-products">
+            Available Products
+          </TabsTrigger>
+          <TabsTrigger value="create-order">Create your order</TabsTrigger>
+          <TabsTrigger value="your-cart">Your Cart</TabsTrigger>
+        </TabsList>
+        <TabsContent className="w-full pt-4" value="available-products">
+          {/* Agency Products */}
+          <Card className="mb-8 w-full">
+            <CardContent className="w-full pt-6">
+              {agency.agencyProducts && agency.agencyProducts.length > 0 ? (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {agency.agencyProducts.map((product) => (
+                    <Card key={product.productId} className="p-4">
+                      <div className="flex flex-col gap-2">
+                        <div className="text-lg font-medium">
+                          {product.printType}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {product.paperType}, {product.colorOption}
+                        </div>
+                        <div className="mt-2 text-lg font-bold">
+                          ₺{product.price.toFixed(2)}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No products available</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="create-order">
+          <Card className="mb-8 w-full">
+            <CardHeader>
+              <CardTitle>Create your order</CardTitle>
+            </CardHeader>
+            <CardContent className="w-full pt-6">
+              <CreateOrder agencyId={agencyDetails.agency.agencyId} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent className="py-4" value="your-cart">
+          <UserCart agencyId={agencyDetails.agency.agencyId} />
+        </TabsContent>
+      </Tabs>
 
       {/* Agency Reviews - Using your styling */}
-      <Card>
+      <Card className="my-12">
         <CardHeader>
           <CardTitle>Customer Reviews</CardTitle>
         </CardHeader>

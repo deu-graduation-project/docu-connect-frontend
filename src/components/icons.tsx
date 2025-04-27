@@ -39,6 +39,7 @@ export const Icons = {
   addProduct: FilePlus2,
   logo: Stamp,
   star: Star,
+  file: File,
   close: X,
   spinner: Loader2,
   menu: Menu,

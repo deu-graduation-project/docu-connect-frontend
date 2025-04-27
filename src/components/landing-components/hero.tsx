@@ -1,6 +1,6 @@
 import React from "react"
 import { cn } from "@/lib/utils"
-import { Spotlight } from "./ui/spotlight"
+
 import Link from "next/link"
 import { Button, buttonVariants } from "../ui/button"
 import { Icons } from "../icons"
