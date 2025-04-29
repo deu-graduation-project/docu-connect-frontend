@@ -15,7 +15,7 @@ import {
 import { Icons } from "../icons"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { productService } from "@/services/products-service"
 import { toast } from "sonner"
 import { useMutation } from "@tanstack/react-query"
@@ -26,6 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
+type Product = {
+  id: string
+  colorOption: string
+  paperType: string
+  printType: string
+}
 
 type FormData = z.infer<typeof formSchema>
 
@@ -60,8 +67,34 @@ export default function CreateProductForm() {
     },
   })
 
+  // Fetch existing products to check for duplicates
+  const { data } = useQuery({
+    queryKey: ["viewCreatedProducts"],
+    queryFn: () => productService.getProducts(0, 10),
+  })
+
+  const existingProducts: Product[] =
+    data?.products.map((product: any) => ({
+      id: product.id,
+      colorOption: product.colorOption,
+      paperType: product.paperType,
+      printType: product.printType,
+    })) || []
+
   const createProductMutation = useMutation({
     mutationFn: async (values: FormData): Promise<unknown> => {
+      // Check if product already exists
+      const isDuplicate = existingProducts.some(
+        (product) =>
+          product.paperType === values.paperType &&
+          product.colorOption === values.colorOption &&
+          product.printType === values.printType
+      )
+
+      if (isDuplicate) {
+        throw new Error("This product already exists")
+      }
+
       return productService.createProduct(
         values.paperType,
         values.colorOption,
@@ -69,9 +102,24 @@ export default function CreateProductForm() {
       )
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["Products"] })
+      // Directly invalidate the exact query key used in the product list component
+      queryClient.invalidateQueries({
+        queryKey: ["viewCreatedProducts"],
+      })
+
+      // Force refetch to ensure the data is updated immediately
+      queryClient.refetchQueries({
+        queryKey: ["viewCreatedProducts"],
+      })
+
       toast.success("Product created successfully")
-      form.reset()
+
+      // Reset the form completely
+      form.reset({
+        paperType: "",
+        colorOption: "",
+        printType: "",
+      })
     },
     onError: (error: { message: string }) => {
       toast.error(error.message)
@@ -100,7 +148,7 @@ export default function CreateProductForm() {
                       <FormLabel>Paper Type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -128,7 +176,7 @@ export default function CreateProductForm() {
                       <FormLabel>Color Option</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -156,7 +204,7 @@ export default function CreateProductForm() {
                       <FormLabel>Print Type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        value={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>

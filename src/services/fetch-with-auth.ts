@@ -1,10 +1,10 @@
-import { getCookie } from "@/services/cookies";
+import { getCookie } from "@/services/cookies"
 
 export const fetchWithAuth = async (
   url: string,
   options: RequestInit = {}
 ): Promise<Response> => {
-  const token = getCookie("accessToken");
+  const token = getCookie("accessToken")
   const isFormData = options.body instanceof FormData
   const headers = isFormData
     ? {
@@ -20,23 +20,52 @@ export const fetchWithAuth = async (
   const response = await fetch(url, {
     ...options,
     headers,
-  });
+  })
 
   if (!response.ok) {
+    // Clone the response before attempting to read its body
+    const clonedResponse = response.clone()
+
     // Try to parse the error response as JSON
-    let errorResponse;
+    let errorMessage = "API request failed."
     try {
-      errorResponse = await response.json();
+      const errorResponse = await clonedResponse.json()
+      errorMessage =
+        errorResponse.message ||
+        errorResponse.title ||
+        JSON.stringify(errorResponse)
     } catch (e) {
-      // If the response is not JSON, use the raw text
-      console.log("Error response:", await response.text());
+      // If the response is not JSON, use the raw text from original response
+      try {
+        const errorText = await response.text()
+
+        // Check for .NET exception stack trace in the response
+        if (errorText.includes("System.") && errorText.includes("Exception")) {
+          // Extract the main exception message
+          const firstLine = errorText.split("\n")[0]
+          const exceptionMessage = firstLine.includes(":")
+            ? firstLine.split(":")[1].trim()
+            : firstLine
+
+          // Keep the exception type for debugging and user feedback
+          const exceptionType = firstLine.includes(":")
+            ? firstLine.split(":")[0].trim()
+            : "Exception"
+
+          errorMessage = `${exceptionMessage} (${exceptionType})`
+        } else {
+          errorMessage =
+            errorText || `Request failed with status ${response.status}`
+        }
+      } catch (textError) {
+        // If even text() fails, use the status code
+        errorMessage = `Request failed with status ${response.status}`
+      }
     }
 
     // Throw a meaningful error message
-    const errorMessage =
-      errorResponse.message || errorResponse || "API request failed.";
-    throw new Error(errorMessage);
+    throw new Error(errorMessage)
   }
 
-  return response;
-};
+  return response
+}

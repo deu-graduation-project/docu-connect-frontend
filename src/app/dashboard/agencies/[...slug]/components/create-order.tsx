@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { X, ShoppingBag } from "lucide-react"
 import { productService } from "@/services/products-service"
+import { orderService } from "@/services/orders-service"
+import { userService } from "@/services/user-service"
 import useAuthStatus from "@/lib/queries/auth-status"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -32,7 +34,6 @@ import {
 } from "@/components/ui/form"
 import { toast } from "sonner"
 
-// Modified schema - removed numPages, pricePerPage, and filePrice as direct inputs
 const formSchema = z.object({
   files: z
     .array(z.instanceof(File))
@@ -60,6 +61,7 @@ export default function CreateOrderForm({ agencyId }: Props) {
   const [totalPages, setTotalPages] = useState(0)
   const [pricePerPage, setPricePerPage] = useState(0)
   const [totalPrice, setTotalPrice] = useState(0)
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const queryClient = useQueryClient()
 
   const {
@@ -91,8 +93,7 @@ export default function CreateOrderForm({ agencyId }: Props) {
   // Set files in form whenever they change
   useEffect(() => {
     form.setValue("files", files)
-    // Here we would calculate pages from PDFs
-    // This is a mock implementation - in real app, you'd need PDF.js or similar
+    // Calculate pages from PDFs
     if (files.length > 0) {
       // Mock calculation - in reality you'd parse the PDF
       const estimatedPages = files.reduce((total, file) => {
@@ -112,50 +113,68 @@ export default function CreateOrderForm({ agencyId }: Props) {
     }
   }, [files, form])
 
-  // Query for products
+  // Query for agency products
   const {
-    data: productList,
-    isLoading: productListLoading,
-    error: productListError,
+    data: agencyData,
+    isLoading: agencyLoading,
+    error: agencyError,
   } = useQuery({
-    queryKey: ["AgencyProducts", agencyId],
-    queryFn: () => {
+    queryKey: ["AgencyDetails", agencyId],
+    queryFn: async () => {
       if (!agencyId) throw new Error("Agency ID is required.")
-      return productService.getAgencyProducts(agencyId)
+      return await userService.getSingleAgency(agencyId)
     },
     enabled: !!authData?.userId && !!agencyId,
   })
 
-  // Calculate price per page based on selections
+  // Map print style labels to values in the database
+  const printStyleMap = {
+    SingleFace: "TekYuz",
+    DoubleSided: "CiftYuz",
+  }
+
+  // Map color option labels to values in the database
+  const colorOptionMap = {
+    Colored: "Renkli",
+    BlackWhite: "SiyahBeyaz",
+  }
+
+  // Find matching product based on selections
   useEffect(() => {
-    if (productList?.agencyProducts && paperSize && colorOption) {
-      const selectedProduct = productList.agencyProducts.find(
-        (product) => product.paperType === paperSize
+    if (
+      agencyData?.agency?.agencyProducts &&
+      paperSize &&
+      colorOption &&
+      printStyle
+    ) {
+      const mappedColorOption =
+        colorOptionMap[colorOption as keyof typeof colorOptionMap]
+      const mappedPrintStyle =
+        printStyleMap[printStyle as keyof typeof printStyleMap]
+
+      // Find the product that matches all our criteria
+      const matchingProduct = agencyData.agency.agencyProducts.find(
+        (product) =>
+          product.paperType === paperSize &&
+          product.colorOption === mappedColorOption &&
+          product.printType === mappedPrintStyle
       )
 
-      if (selectedProduct) {
-        // Base price from the selected product
-        let price = selectedProduct.price
-
-        // Apply multipliers based on color option and print style
-        if (colorOption === "Colored") {
-          // Colored prints might cost more
-          price *= 1.5 // Example multiplier
-        }
-
-        if (printStyle === "DoubleSided") {
-          // Double-sided might be cheaper per page
-          price *= 0.85 // Example multiplier
-        }
-
-        setPricePerPage(price)
-        form.setValue("pricePerPage", price)
+      if (matchingProduct) {
+        setSelectedProduct(matchingProduct)
+        setPricePerPage(matchingProduct.price)
+        form.setValue("pricePerPage", matchingProduct.price)
+      } else {
+        setSelectedProduct(null)
+        setPricePerPage(0)
+        form.setValue("pricePerPage", 0)
       }
     } else {
+      setSelectedProduct(null)
       setPricePerPage(0)
       form.setValue("pricePerPage", 0)
     }
-  }, [productList, paperSize, colorOption, printStyle, form])
+  }, [agencyData, paperSize, colorOption, printStyle, form])
 
   // Calculate total price
   useEffect(() => {
@@ -183,23 +202,70 @@ export default function CreateOrderForm({ agencyId }: Props) {
     accept: { "application/pdf": [".pdf"] },
   })
 
+  // Update the addToCartMutation in your CreateOrderForm component
+  console.log(
+    "Agency ID:",
+    agencyId,
+    "Selected Product:",
+    selectedProduct,
+    "Files:",
+    files,
+    "Total Pages:",
+    totalPages,
+    "Price Per Page:",
+    pricePerPage,
+    "Total Price:",
+    totalPrice
+  )
   // Add to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      // Replace with your actual service call
-      // Example: return orderService.addToCart(agencyId, data);
-      return Promise.resolve({ success: true })
+      if (!selectedProduct || !agencyId) {
+        throw new Error("Missing product or agency information")
+      }
+
+      try {
+        // Use the order service to create the order
+        return await orderService.createOrder(
+          selectedProduct.productId, // The selected product's ID
+          agencyId, // The agency ID
+          data.numPrints, // Number of copies
+          data.files // PDF files
+        )
+      } catch (error) {
+        // Check if the error is related to email sending
+        if (
+          error instanceof Error &&
+          error.message.includes("ArgumentNullException") &&
+          error.message.includes("Value cannot be null") &&
+          error.message.includes("MailService")
+        ) {
+          // More specific error message for email issue
+          throw new Error(
+            "The order could not be created due to an email service error. The agency may not have a valid email address set up."
+          )
+        }
+        // Re-throw other errors
+        throw error
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["Cart"] })
+      // Invalidate Cart query to refresh the cart data
+      queryClient.invalidateQueries({ queryKey: ["Cart", agencyId] })
       toast.success("Order added to cart successfully")
       form.reset()
       setFiles([])
       setTotalPages(0)
       setTotalPrice(0)
     },
-    onError: () => {
-      toast.error("Failed to add order to cart")
+    onError: (error) => {
+      console.error("Error adding to cart:", error)
+      // Display more user-friendly error message
+      if (error instanceof Error) {
+        toast.error(`Failed to add order to cart: ${error.message}`)
+      } else {
+        toast.error("Failed to add order to cart. Please try again later.")
+      }
     },
   })
 
@@ -215,10 +281,15 @@ export default function CreateOrderForm({ agencyId }: Props) {
     addToCartMutation.mutate(formData)
   }
 
+  // Get unique paper types from agency products
+  const paperTypes = agencyData?.agency?.agencyProducts
+    ? [...new Set(agencyData.agency.agencyProducts.map((p) => p.paperType))]
+    : []
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
+        <Card className="w-full">
           <CardHeader>
             <CardTitle className="text-lg">Upload PDF</CardTitle>
             <CardDescription>Drop your PDF files here.</CardDescription>
@@ -280,38 +351,32 @@ export default function CreateOrderForm({ agencyId }: Props) {
             <Separator className="my-4" />
 
             {/* Paper Size */}
-            <div className="space-y-2">
+            <div className="w-full space-y-2">
               <FormField
                 control={form.control}
                 name="paperSize"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormLabel>Paper Size</FormLabel>
                     <p className="pb-4 text-xs text-muted-foreground">
-                      A3: 29.70 x 42.00 cm. Twice the size of A4.
-                      <br />
-                      A4: 21.00 x 29.70 cm
-                      <br />
-                      A5: 14.80 x 21.00 cm. Half the size of A4.
-                      <br />
-                      A6: 10.50 x 14.80 cm. Half the size of A5.
+                      Select from available paper types
                     </p>
                     <FormControl>
-                      <div className="grid grid-cols-3 gap-2">
-                        {productList?.agencyProducts.map((product) => (
+                      <div className="grid w-full grid-cols-2 gap-2 lg:grid-cols-3">
+                        {paperTypes.map((paperType) => (
                           <div
-                            key={product?.id}
+                            key={paperType}
                             className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border p-2 ${
-                              field.value === product.paperType
+                              field.value === paperType
                                 ? "border-primary bg-primary/10"
                                 : ""
                             }`}
                             onClick={() =>
-                              form.setValue("paperSize", product.paperType)
+                              form.setValue("paperSize", paperType)
                             }
                           >
                             <p className="text-sm tracking-tighter text-primary">
-                              {product.paperType}
+                              {paperType}
                             </p>
                             <Icons.file
                               strokeWidth={1}
@@ -338,7 +403,7 @@ export default function CreateOrderForm({ agencyId }: Props) {
                   <FormItem>
                     <FormLabel>Color Option</FormLabel>
                     <FormControl>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
                         {[
                           { id: "Colored", label: "Colored" },
                           { id: "BlackWhite", label: "Black & White" },
@@ -374,12 +439,12 @@ export default function CreateOrderForm({ agencyId }: Props) {
             <Separator className="my-4" />
 
             {/* Print Style */}
-            <div className="space-y-2">
+            <div className="w-full space-y-2">
               <FormField
                 control={form.control}
                 name="printStyle"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormLabel>Printing Style</FormLabel>
                     <p className="pb-4 text-xs text-muted-foreground">
                       - Single Face: Refers to printing on only one side of the
@@ -388,7 +453,7 @@ export default function CreateOrderForm({ agencyId }: Props) {
                       (front and back) of the paper.
                     </p>
                     <FormControl>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid w-full grid-cols-2 gap-2 lg:grid-cols-3">
                         {[
                           { id: "SingleFace", label: "Single Face" },
                           { id: "DoubleSided", label: "Double-Sided" },
@@ -455,31 +520,51 @@ export default function CreateOrderForm({ agencyId }: Props) {
               {/* Order Summary */}
               <div className="rounded-md border p-4">
                 <h3 className="mb-2 font-medium">Order Summary</h3>
-                <div className="space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Detected Pages:
-                    </span>
-                    <span>{totalPages}</span>
+                {selectedProduct ? (
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Selected Product:
+                      </span>
+                      <span>
+                        {selectedProduct.paperType} -{" "}
+                        {selectedProduct.colorOption} -{" "}
+                        {selectedProduct.printType}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Detected Pages:
+                      </span>
+                      <span>{totalPages}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Price per Page:
+                      </span>
+                      <span>₺{pricePerPage.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Number of Prints:
+                      </span>
+                      <span>{numPrints}</span>
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="flex justify-between font-medium">
+                      <span>Total Price:</span>
+                      <span>₺{totalPrice.toFixed(2)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Price per Page:
-                    </span>
-                    <span>₺{pricePerPage.toFixed(2)}</span>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    {paperSize && colorOption && printStyle ? (
+                      <p>No matching product found for the selected options.</p>
+                    ) : (
+                      <p>Please select all options to see pricing details.</p>
+                    )}
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      Number of Prints:
-                    </span>
-                    <span>{numPrints}</span>
-                  </div>
-                  <Separator className="my-2" />
-                  <div className="flex justify-between font-medium">
-                    <span>Total Price:</span>
-                    <span>₺{totalPrice.toFixed(2)}</span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -492,7 +577,8 @@ export default function CreateOrderForm({ agencyId }: Props) {
                 files.length === 0 ||
                 !paperSize ||
                 !colorOption ||
-                !printStyle
+                !printStyle ||
+                !selectedProduct
               }
             >
               {addToCartMutation.isPending ? (

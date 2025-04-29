@@ -41,6 +41,8 @@ export default function AgencyPage() {
 
   const agency = agencyDetails?.agency
 
+  console.log("Agency Details:", agencyDetails)
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -158,8 +160,8 @@ export default function AgencyPage() {
       {/* Agency Bio */}
       {agency.agencyBio && (
         <div className="flex flex-col items-center justify-center py-6">
-          <h1 className="text-base font-semibold">About {agency.agencyName}</h1>
-          <p className="max-w-2xl px-4 py-2 text-center text-sm text-muted-foreground">
+          <h1 className="text-lg font-semibold">About {agency.agencyName}</h1>
+          <p className="max-w-2xl px-4 py-2 text-center text-base tracking-wide text-muted-foreground">
             {agency.agencyBio}
           </p>
         </div>
