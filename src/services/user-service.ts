@@ -225,7 +225,10 @@ class UserService {
     agencyName?: string,
     province?: string,
     district?: string,
-    orderBy?: string
+    orderBy?: string,
+    paperType?: string,
+    colorOption?: string,
+    printType?:string
   ): Promise<{ totalCount: number; agencies: GetAgencies[] }> {
     // Changed BeAnAgencyRequests to agencies
     const queryParams = new URLSearchParams({
@@ -235,6 +238,9 @@ class UserService {
       ...(province && { province }),
       ...(district && { district }),
       ...(orderBy && { orderBy }),
+      ...(paperType && { paperType }),
+      ...(colorOption && { colorOption }),
+      ...(printType && { printType }),
     })
 
     const response = await fetchWithAuth(
