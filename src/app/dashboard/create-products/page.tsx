@@ -43,12 +43,12 @@ export default function CreateProducts() {
     error: authError,
   } = useAuthStatus()
 
-  const { data, isLoading, error } = useQuery({
+  // Remove the queryClient.invalidateQueries call from inside queryFn
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["viewCreatedProducts"],
-    queryFn: () => {
-      return productService.getProducts(0, 10)
-    },
+    queryFn: () => productService.getProducts(0, 10),
     enabled: authData?.isAdmin,
+    staleTime: 0, // This ensures the data is always considered stale and will refetch
   })
 
   const products: Product[] =
@@ -68,13 +68,14 @@ export default function CreateProducts() {
   // Function to handle product delete
   const handleDelete = async (productId: string) => {
     try {
-      await productService.deleteProducts([productId]) // API'ye DELETE isteği gönder
-      queryClient.invalidateQueries({ queryKey: ["viewCreatedProducts"] }) // Listeyi güncelle
-      console.log(`Prodcut ${productId} succsessfully deleted.`)
+      await productService.deleteProducts([productId])
+      refetch() // Use the refetch function directly
+      console.log(`Product ${productId} successfully deleted.`)
     } catch (error) {
-      console.error("Error! Coudn't delete product", error)
+      console.error("Error! Couldn't delete product", error)
     }
   }
+
   // Color mapping function for better visual representation
   const getColorClass = (colorOption: string) => {
     switch (colorOption) {
@@ -84,6 +85,7 @@ export default function CreateProducts() {
         return "bg-blue-500 text-white"
     }
   }
+
   // a color mapping funtion for paper type
   const getPaperTypeClass = (paperType: string) => {
     switch (paperType) {
@@ -97,6 +99,7 @@ export default function CreateProducts() {
         return "bg-transparent text-white"
     }
   }
+
   // Handle loading state
   if (authLoading) {
     return (
@@ -200,7 +203,6 @@ export default function CreateProducts() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      // onClick={() => handleDelete(product.id)}
                       className="h-8 w-12"
                     >
                       <Trash2 size={16} />

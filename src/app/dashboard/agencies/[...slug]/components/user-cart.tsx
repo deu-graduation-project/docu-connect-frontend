@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "sonner"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { orderService } from "@/services/orders-service"
 
 type CartItemType = {
   id: string
@@ -29,6 +30,7 @@ type CartItemType = {
   filePrice: number
   totalPrice: number
   createdAt: string
+  orderCode: string // Added for handling order operations
 }
 
 type Props = {
@@ -46,55 +48,68 @@ export default function UserCart({ agencyId }: Props) {
   } = useQuery({
     queryKey: ["Cart", agencyId],
     queryFn: async () => {
-      // Replace with your actual service call
-      // Example: return cartService.getCartItems(agencyId);
+      try {
+        // Fetch orders with state "Cart" or equivalent
+        const orders = await orderService.getOrders(
+          1, // page
+          100, // size - adjust as needed
+          undefined, // orderCode
+          undefined, // search
+          undefined, // orderBy
+          "Cart" // state - assuming "Cart" is the state for cart items
+        )
 
-      // Mock data for demonstration
-      return {
-        items: [
-          {
-            id: "1",
-            fileName: "document.pdf",
-            paperSize: "A4",
-            colorOption: "Colored",
-            printStyle: "Double-Sided",
-            numPrints: 2,
-            numPages: 10,
-            pricePerPage: 0.5,
-            filePrice: 1.0,
-            totalPrice: 11.0, // (numPrints * numPages * pricePerPage) + filePrice
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: "2",
-            fileName: "presentation.pdf",
-            paperSize: "A3",
-            colorOption: "Black & White",
-            printStyle: "Single Face",
-            numPrints: 1,
-            numPages: 20,
-            pricePerPage: 0.3,
-            filePrice: 0.5,
-            totalPrice: 6.5, // (numPrints * numPages * pricePerPage) + filePrice
-            createdAt: new Date().toISOString(),
-          },
-        ] as CartItemType[],
+        // Map to our CartItemType format
+        const items = orders.map((order) => {
+          // Assuming each order has these properties or can be mapped
+          return {
+            id: order.id || order.orderId,
+            fileName: order.fileNames?.[0] || "document.pdf",
+            paperSize: order.paperType || "Unknown",
+            colorOption: order.colorOption?.includes("Renkli")
+              ? "Colored"
+              : "Black & White",
+            printStyle: order.printType?.includes("Tek")
+              ? "Single Face"
+              : "Double-Sided",
+            numPrints: order.printCount || 1,
+            numPages: order.pageCount || 0,
+            pricePerPage: order.price
+              ? order.price / ((order.pageCount || 1) * (order.printCount || 1))
+              : 0,
+            filePrice: order.processingFee || 0,
+            totalPrice: order.price || 0,
+            createdAt: order.createdAt || new Date().toISOString(),
+            orderCode: order.orderCode || "",
+          }
+        })
+
+        return {
+          items: items as CartItemType[],
+        }
+      } catch (error) {
+        console.error("Error fetching cart items:", error)
+        throw error
       }
     },
+    enabled: !!agencyId,
   })
 
   // Remove item mutation
   const removeItemMutation = useMutation({
-    mutationFn: async (itemId: string) => {
-      // Replace with your actual service call
-      // Example: return cartService.removeItem(agencyId, itemId);
-      return Promise.resolve({ success: true })
+    mutationFn: async (orderCode: string) => {
+      // Update the order state to "Cancelled" or equivalent
+      return await orderService.updateOrder(
+        "Cancelled", // orderState
+        orderCode // orderCode
+      )
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["Cart"] })
+      queryClient.invalidateQueries({ queryKey: ["Cart", agencyId] })
       toast.success("Item removed from cart")
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Error removing item:", error)
       toast.error("Failed to remove item")
     },
   })
@@ -102,25 +117,37 @@ export default function UserCart({ agencyId }: Props) {
   // Checkout mutation
   const checkoutMutation = useMutation({
     mutationFn: async () => {
-      // Replace with your actual service call
-      // Example: return orderService.checkout(agencyId);
-      return Promise.resolve({ success: true })
+      // Process all cart items by changing their state to "Processing" or equivalent
+      const promises =
+        cartItems?.items.map((item) =>
+          orderService.updateOrder(
+            "Processing", // orderState
+            item.orderCode // orderCode
+          )
+        ) || []
+
+      return Promise.all(promises)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["Cart"] })
+      queryClient.invalidateQueries({ queryKey: ["Cart", agencyId] })
       toast.success("Order placed successfully")
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Error during checkout:", error)
       toast.error("Failed to place order")
     },
   })
 
-  const handleRemoveItem = (itemId: string) => {
-    removeItemMutation.mutate(itemId)
+  const handleRemoveItem = (orderCode: string) => {
+    removeItemMutation.mutate(orderCode)
   }
 
   const handleCheckout = () => {
-    checkoutMutation.mutate()
+    if (cartItems?.items?.length) {
+      checkoutMutation.mutate()
+    } else {
+      toast.error("Your cart is empty")
+    }
   }
 
   const calculateTotal = () => {
@@ -140,7 +167,7 @@ export default function UserCart({ agencyId }: Props) {
   if (error) {
     return (
       <div className="p-8 text-center text-red-500">
-        Error loading your cart
+        Error loading your cart: {(error as Error).message}
       </div>
     )
   }
@@ -166,7 +193,7 @@ export default function UserCart({ agencyId }: Props) {
             </p>
           </div>
         ) : (
-          <ScrollArea className="h-[400px] pr-4">
+          <ScrollArea className="h-[400px]">
             <div className="space-y-4">
               {cartItems.items.map((item) => (
                 <Card key={item.id} className="overflow-hidden">
@@ -210,7 +237,7 @@ export default function UserCart({ agencyId }: Props) {
                         <Button
                           variant="destructive"
                           size="icon"
-                          onClick={() => handleRemoveItem(item.id)}
+                          onClick={() => handleRemoveItem(item.orderCode)}
                           disabled={removeItemMutation.isPending}
                         >
                           {removeItemMutation.isPending ? (
