@@ -1,9 +1,10 @@
 "use client"
-import React, { useCallback, useState, useEffect } from "react"
-import { useDropzone } from "react-dropzone"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
+import React, { useCallback, useState, useEffect } from "react";
+import { useDropzone } from "react-dropzone";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loadStripe } from "@stripe/stripe-js"; // Removed Stripe
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import {
   Card,
   CardContent,
@@ -12,17 +13,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { Button } from "@/components/ui/button"
-import { Icons } from "@/components/icons"
-import { X, ShoppingBag } from "lucide-react"
-import { productService } from "@/services/products-service"
-import { orderService } from "@/services/orders-service"
-import { userService } from "@/services/user-service"
-import useAuthStatus from "@/lib/queries/auth-status"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator";
+import { useQuery, useMutation } from "@tanstack/react-query"; // Removed useQueryClient
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/icons";
+import { X, ShoppingBag } from "lucide-react";
+// Import orderService
+import { orderService } from "@/services/orders-service";
+import { userService } from "@/services/user-service";
+import useAuthStatus from "@/lib/queries/auth-status";
+import { Input } from "@/components/ui/input";
+// Removed Label import
 import {
   Form,
   FormControl,
@@ -32,7 +33,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { toast } from "sonner"
+import { toast } from "sonner";
+// Remove fetchWithAuth import as it's now used within the service
+// import { fetchWithAuth } from "@/services/fetch-with-auth";
+
+// Load Stripe promise outside component to avoid reloading on every render
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
 
 const formSchema = z.object({
   files: z
@@ -50,25 +58,35 @@ const formSchema = z.object({
   filePrice: z.number().optional(),
 })
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.infer<typeof formSchema>;
 
 type Props = {
-  agencyId: string
-}
+  agencyId: string;
+};
+
+// Define a basic type for the product - replace with actual type if available
+type AgencyProduct = {
+  productId: string;
+  paperType: string;
+  colorOption: string;
+  printType: string;
+  price: number;
+  // Add other relevant product fields if known
+};
 
 export default function CreateOrderForm({ agencyId }: Props) {
-  const [files, setFiles] = useState<File[]>([])
-  const [totalPages, setTotalPages] = useState(0)
-  const [pricePerPage, setPricePerPage] = useState(0)
-  const [totalPrice, setTotalPrice] = useState(0)
-  const [selectedProduct, setSelectedProduct] = useState<any>(null)
-  const queryClient = useQueryClient()
+  const [files, setFiles] = useState<File[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pricePerPage, setPricePerPage] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [selectedProduct, setSelectedProduct] = useState<AgencyProduct | null>(null); // Use defined type
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false); // State for payment processing
+  // Removed unused queryClient
 
   const {
     data: authData,
-    isLoading: authLoading,
-    error: authError,
-  } = useAuthStatus()
+    // Removed unused isLoading and error
+  } = useAuthStatus();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -116,8 +134,7 @@ export default function CreateOrderForm({ agencyId }: Props) {
   // Query for agency products
   const {
     data: agencyData,
-    isLoading: agencyLoading,
-    error: agencyError,
+    // Removed unused isLoading and error
   } = useQuery({
     queryKey: ["AgencyDetails", agencyId],
     queryFn: async () => {
@@ -154,7 +171,7 @@ export default function CreateOrderForm({ agencyId }: Props) {
 
       // Find the product that matches all our criteria
       const matchingProduct = agencyData.agency.agencyProducts.find(
-        (product) =>
+        (product: AgencyProduct) => // Added type annotation here
           product.paperType === paperSize &&
           product.colorOption === mappedColorOption &&
           product.printType === mappedPrintStyle
@@ -215,75 +232,73 @@ export default function CreateOrderForm({ agencyId }: Props) {
     "Price Per Page:",
     pricePerPage,
     "Total Price:",
-    totalPrice
-  )
-  // Add to cart mutation
-  const addToCartMutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      if (!selectedProduct || !agencyId) {
-        throw new Error("Missing product or agency information")
-      }
+    totalPrice,
+  );
 
+  // Mutation for initiating payment - NOW USES THE SERVICE
+  const initiatePaymentMutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      if (!selectedProduct || !agencyId || !data.files || data.files.length === 0) {
+        throw new Error("Missing required information for payment.");
+      }
+      setIsProcessingPayment(true); // Set processing state
+
+      // Call the service method
       try {
-        // Use the order service to create the order
-        return await orderService.createOrder(
-          selectedProduct.productId, // The selected product's ID
-          agencyId, // The agency ID
-          data.numPrints, // Number of copies
-          data.files // PDF files
-        )
+        const sessionId = await orderService.initiatePayment(
+          agencyId,
+          selectedProduct.productId,
+          data.numPrints,
+          data.files
+        );
+        return sessionId; // Return the session ID for onSuccess
       } catch (error) {
-        // Check if the error is related to email sending
-        if (
-          error instanceof Error &&
-          error.message.includes("ArgumentNullException") &&
-          error.message.includes("Value cannot be null") &&
-          error.message.includes("MailService")
-        ) {
-          // More specific error message for email issue
-          throw new Error(
-            "The order could not be created due to an email service error. The agency may not have a valid email address set up."
-          )
-        }
-        // Re-throw other errors
-        throw error
+        // Error is already logged in the service, re-throw for mutation's onError
+        throw error;
       }
     },
-    onSuccess: () => {
-      // Invalidate Cart query to refresh the cart data
-      queryClient.invalidateQueries({ queryKey: ["Cart", agencyId] })
-      toast.success("Order added to cart successfully")
-      form.reset()
-      setFiles([])
-      setTotalPages(0)
-      setTotalPrice(0)
+    onSuccess: async (sessionId: string) => {
+      const stripe = await stripePromise;
+      if (!stripe) {
+        toast.error("Stripe.js failed to load.");
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      const { error } = await stripe.redirectToCheckout({ sessionId });
+
+      if (error) {
+        console.error("Stripe redirection error:", error);
+        toast.error(`Payment failed: ${error.message}`);
+        setIsProcessingPayment(false); // Re-enable button if redirection fails
+      }
+      // If redirection is successful, the user leaves the page.
+      // If they cancel or succeed, they'll be redirected back based on backend config.
     },
     onError: (error) => {
-      console.error("Error adding to cart:", error)
-      // Display more user-friendly error message
-      if (error instanceof Error) {
-        toast.error(`Failed to add order to cart: ${error.message}`)
-      } else {
-        toast.error("Failed to add order to cart. Please try again later.")
-      }
+      console.error("Error initiating payment:", error);
+      toast.error(
+        `Failed to initiate payment: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
+      setIsProcessingPayment(false); // Re-enable button on error
     },
-  })
+  });
 
   function onSubmit(values: FormData) {
-    // Ensure all calculated values are up to date
-    const formData = {
+    // Ensure all calculated values are up to date before payment
+    const paymentData = {
       ...values,
-      numPages: totalPages,
-      pricePerPage: pricePerPage,
-      filePrice: totalPrice,
-    }
-
-    addToCartMutation.mutate(formData)
+      numPages: totalPages, // Include calculated pages
+      pricePerPage: pricePerPage, // Include price per page
+      filePrice: totalPrice, // Include total price
+    };
+    console.log("Submitting for payment:", paymentData);
+    initiatePaymentMutation.mutate(paymentData);
   }
 
   // Get unique paper types from agency products
   const paperTypes = agencyData?.agency?.agencyProducts
-    ? [...new Set(agencyData.agency.agencyProducts.map((p) => p.paperType))]
+    ? [...new Set(agencyData.agency.agencyProducts.map((p: AgencyProduct) => p.paperType))] // Added type annotation
     : []
 
   return (
@@ -309,7 +324,7 @@ export default function CreateOrderForm({ agencyId }: Props) {
                       <p className="text-sm">Drop the PDF here ...</p>
                     ) : (
                       <p className="text-sm">
-                        Drag 'n' drop a PDF file here, or click to select one
+                        Drag 'n' drop a PDF file here, or click to select one {/* Fixed apostrophes again */}
                       </p>
                     )}
                   </div>
@@ -573,23 +588,25 @@ export default function CreateOrderForm({ agencyId }: Props) {
               className="flex w-full items-center gap-3"
               type="submit"
               disabled={
-                addToCartMutation.isPending ||
+                isProcessingPayment || // Disable during payment processing
+                initiatePaymentMutation.isPending || // Also check mutation status
                 files.length === 0 ||
                 !paperSize ||
                 !colorOption ||
                 !printStyle ||
-                !selectedProduct
+                !selectedProduct ||
+                totalPages === 0 // Ensure pages are calculated
               }
             >
-              {addToCartMutation.isPending ? (
+              {isProcessingPayment || initiatePaymentMutation.isPending ? (
                 <>
                   <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                  Adding to cart...
+                  Processing Payment...
                 </>
               ) : (
                 <>
                   <ShoppingBag className="h-4 w-4" />
-                  Add to the cart
+                  Proceed to Payment ({`₺${totalPrice.toFixed(2)}`})
                 </>
               )}
             </Button>
