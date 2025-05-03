@@ -109,7 +109,7 @@ class UserService {
 
       // Fix Content-Type handling for FormData
       const response = await fetch(
-        `${this.baseUrl}/api/Users/BeAnAgency`,
+        `${this.baseUrl}/Users/BeAnAgency`,
         {
           method: "POST",
           body: formData,
