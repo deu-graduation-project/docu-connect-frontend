@@ -123,10 +123,10 @@ export interface AgencyProduct {
 }
 
 export interface AgencyComment {
-  commentText: string;
-  starRating: string;
-  userName:string;
-  createdDate:Date;
+  commentText: string
+  starRating: string
+  userName: string
+  createdDate: Date
 }
 export interface GetAgencies {
   agencyId: string
@@ -154,6 +154,10 @@ export interface GetSingleAgency {
   agency: Agency
 }
 
+export interface VerifyResetTokenResponse {
+  state: boolean
+}
+
 export interface SucceededMessageResponse {
   success: boolean // Indicates whether the operation was successful
   message: string // A message describing the result of the operation
@@ -173,36 +177,35 @@ export interface SocialUser {
   imageUrl: string // URL of the user's profile picture
 }
 export interface GetUserByIdResponse {
-  userId: string;
-  userName: string;
-  name: string;
-  surname: string;
-  email: string;
-  emailConfirmed: boolean;
+  userId: string
+  userName: string
+  name: string
+  surname: string
+  email: string
+  emailConfirmed: boolean
   userOrders: {
-    orderCode: string;
-    orderState: string;
-    totalPrice: number;
-    kopyaSayısı: number;
-    sayfaSayısı: number;
-    agencyName: string;
-    customerName: string;
+    orderCode: string
+    orderState: string
+    totalPrice: number
+    kopyaSayısı: number
+    sayfaSayısı: number
+    agencyName: string
+    customerName: string
     product: {
-      price: number;
-      printType: string;
-      paperType: string;
-      colorOption: string;
-    };
+      price: number
+      printType: string
+      paperType: string
+      colorOption: string
+    }
     copyFiles: {
-      fileName: string;
-      filePath: string;
-    }[];
-  }[];
+      fileName: string
+      filePath: string
+    }[]
+  }[]
   userComments: {
-    commentText: string;
-    starRating: number;
-    createdDate: Date;
-    userName:string;
-  }[];
-
+    commentText: string
+    starRating: number
+    createdDate: Date
+    userName: string
+  }[]
 }

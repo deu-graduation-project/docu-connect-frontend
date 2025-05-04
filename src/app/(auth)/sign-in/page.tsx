@@ -1,8 +1,7 @@
-import React from "react";
+import React from "react"
 
-import SignInForm from "@/components/forms/sign-in-form";
-type Props = {};
+import SignInForm from "@/components/forms/sign-in-form"
 
-export default function SignIn({}: Props) {
-  return <SignInForm />;
+export default function SignIn() {
+  return <SignInForm />
 }

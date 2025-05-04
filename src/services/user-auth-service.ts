@@ -1,6 +1,10 @@
-import { fetchWithAuth } from "@/services/fetch-with-auth";
-import { setCookie } from "@/services/cookies";
-import { TokenResponse, SocialUser } from "@/types/classes";
+import { fetchWithAuth } from "@/services/fetch-with-auth"
+import { setCookie } from "@/services/cookies"
+import {
+  TokenResponse,
+  SocialUser,
+  VerifyResetTokenResponse,
+} from "@/types/classes"
 
 export const UserAuthService = () => {
   /**
@@ -23,37 +27,37 @@ export const UserAuthService = () => {
           },
           body: JSON.stringify({ userNameOrEmail, password }),
         }
-      );
+      )
 
       if (!response.ok) {
         // Try to parse the error response as JSON
-        let errorResponse;
+        let errorResponse
         try {
-          errorResponse = await response.json();
+          errorResponse = await response.json()
         } catch (e) {
           // If the response is not JSON, use the raw text
-          errorResponse = await response.text();
+          errorResponse = await response.text()
         }
 
         // Throw a meaningful error message
         const errorMessage =
-          errorResponse.message || errorResponse || "Login failed.";
-        throw new Error(errorMessage);
+          errorResponse.message || errorResponse || "Login failed."
+        throw new Error(errorMessage)
       }
 
-      const tokenResponse: TokenResponse = await response.json();
+      const tokenResponse: TokenResponse = await response.json()
 
       if (tokenResponse) {
-        setCookie("accessToken", tokenResponse.token.accessToken, 3600); // 1 hour
-        setCookie("refreshToken", tokenResponse.token.refreshToken, 604800); // 7 days
+        setCookie("accessToken", tokenResponse.token.accessToken, 3600) // 1 hour
+        setCookie("refreshToken", tokenResponse.token.refreshToken, 604800) // 7 days
       }
 
-      return tokenResponse;
+      return tokenResponse
     } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+      console.error("Login error:", error)
+      throw error
     }
-  };
+  }
 
   /**
    * Refreshes the access token using the refresh token.
@@ -76,22 +80,22 @@ export const UserAuthService = () => {
       )
 
       if (!response.ok) {
-        throw new Error("Token refresh failed");
+        throw new Error("Token refresh failed")
       }
 
-      const tokenResponse: TokenResponse = await response.json();
+      const tokenResponse: TokenResponse = await response.json()
 
       if (tokenResponse) {
-        setCookie("accessToken", tokenResponse.token.accessToken, 3600); // 1 hour
-        setCookie("refreshToken", tokenResponse.token.refreshToken, 604800); // 7 days
+        setCookie("accessToken", tokenResponse.token.accessToken, 3600) // 1 hour
+        setCookie("refreshToken", tokenResponse.token.refreshToken, 604800) // 7 days
       }
 
-      return tokenResponse;
+      return tokenResponse
     } catch (error) {
-      console.error("Token refresh error:", error);
-      throw error;
+      console.error("Token refresh error:", error)
+      throw error
     }
-  };
+  }
 
   /**
    * Logs in a user using Google authentication.
@@ -112,26 +116,147 @@ export const UserAuthService = () => {
       )
 
       if (!response.ok) {
-        throw new Error("Google login failed");
+        throw new Error("Google login failed")
       }
 
-      const tokenResponse: TokenResponse = await response.json();
+      const tokenResponse: TokenResponse = await response.json()
 
       if (tokenResponse) {
-        setCookie("accessToken", tokenResponse.token.accessToken, 3600); // 1 hour
-        setCookie("refreshToken", tokenResponse.token.refreshToken, 604800); // 7 days
+        setCookie("accessToken", tokenResponse.token.accessToken, 3600) // 1 hour
+        setCookie("refreshToken", tokenResponse.token.refreshToken, 604800) // 7 days
       }
 
-      return tokenResponse;
+      return tokenResponse
     } catch (error) {
-      console.error("Google login error:", error);
-      throw error;
+      console.error("Google login error:", error)
+      throw error
     }
-  };
+  }
+
+  /**
+   * Initiates the password reset process for a user.
+   * Sends the user's email or username to the backend.
+   * The backend is expected to handle sending the reset link/code.
+   * @param emailOrUserName - The email or username of the user requesting password reset.
+   * @returns A promise that resolves when the request is successfully sent (void), or rejects on error.
+   */
+  const passwordReset = async (emailOrUserName: string): Promise<void> => {
+    try {
+      const response = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_API_URL}/Auth/PasswordReset`, // Endpoint from your backend description
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // Body structure matches PasswordResetCommandRequest
+          body: JSON.stringify({ emailOrUserName }),
+        }
+      )
+
+      if (!response.ok) {
+        // Handle potential errors from the backend
+        let errorResponse
+        try {
+          // Attempt to parse potential JSON error response
+          errorResponse = await response.json()
+        } catch (e) {
+          // If not JSON, use the response text
+          errorResponse = await response.text()
+        }
+
+        // Construct a meaningful error message
+        const errorMessage =
+          errorResponse?.message || // Check for a 'message' field in JSON error
+          (typeof errorResponse === "string" ? errorResponse : null) || // Use text if available
+          `Password reset request failed with status: ${response.status}` // Fallback
+        throw new Error(errorMessage)
+      }
+
+      // If response.ok is true, the request was successful.
+      // Since the backend PasswordResetCommandResponse is empty,
+      // there's no JSON body to parse or return here.
+      console.log(
+        `Password reset request sent successfully for: ${emailOrUserName}`
+      )
+    } catch (error) {
+      console.error("Password reset request error:", error)
+      // Re-throw the error so the calling component (e.g., a form)
+      // can catch it and display feedback to the user.
+      throw error
+    }
+  }
+
+  /**
+   * Verifies a password reset token against a user ID.
+   * @param resetToken - The password reset token (likely from the URL or email link).
+   * @param userId - The ID of the user associated with the token.
+   * @returns A promise that resolves to an object { state: boolean } indicating if the token is valid, or rejects on error.
+   */
+  const verifyResetToken = async (
+    resetToken: string,
+    userId: string
+  ): Promise<VerifyResetTokenResponse> => {
+    // Use the defined interface
+    try {
+      const response = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Auth/VerifyResetToken`, // Endpoint from backend description
+        {
+          method: "POST", // Assuming POST based on having a request body
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // Body structure matches the provided JSON example
+          // Note: Using camelCase as shown in the JSON example, which is common
+          //       even if C# properties are PascalCase (due to serializer settings)
+          body: JSON.stringify({ resetToken, userId }),
+        }
+      )
+
+      if (!response.ok) {
+        // Handle potential errors
+        let errorResponse
+        try {
+          errorResponse = await response.json()
+        } catch (e) {
+          errorResponse = await response.text()
+        }
+        const errorMessage =
+          errorResponse?.message ||
+          (typeof errorResponse === "string" ? errorResponse : null) ||
+          `Token verification failed with status: ${response.status}`
+        throw new Error(errorMessage)
+      }
+
+      // Parse the JSON response which should contain the 'state' boolean
+      const result: VerifyResetTokenResponse = await response.json()
+
+      // Optional runtime check for the expected property
+      if (typeof result?.state !== "boolean") {
+        console.warn(
+          "VerifyResetToken response received, but 'state' property is missing or not a boolean:",
+          result
+        )
+        // Depending on requirements, you might throw an error or return a default state
+        throw new Error(
+          "Invalid response format from token verification endpoint."
+        )
+        // Or: return { state: false }; // If you prefer to treat invalid responses as verification failure
+      }
+
+      return result // Return the object like { state: true } or { state: false }
+    } catch (error) {
+      console.error("Verify reset token error:", error)
+      // Re-throw for the calling component to handle
+      throw error
+    }
+  }
 
   return {
     login,
     refreshTokenLogin,
     googleLogin,
-  };
-};
+    passwordReset,
+    verifyResetToken,
+  }
+}
