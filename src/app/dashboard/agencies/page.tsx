@@ -15,14 +15,13 @@ import {
 } from "@/components/ui/select"
 import AgencyList from "../../../components/agency-list"
 import { turkish_cities } from "@/lib/cities"
-// Turkish cities and counties data
 
-// Rating options for sorting
-const ratingOptions = [
-  { label: "Highest Rating", value: "starRating_desc" },
-  { label: "Lowest Rating", value: "starRating_asc" },
-  { label: "Alphabetical (A-Z)", value: "agencyName_asc" },
-  { label: "Alphabetical (Z-A)", value: "agencyName_desc" },
+// Updated sorting options to match backend expectations
+const sortingOptions = [
+  { label: "Highest Rating", value: "stardesc" },
+  { label: "Lowest Rating", value: "starasc" },
+  { label: "Alphabetical (A-Z)", value: "atoz" },
+  { label: "Alphabetical (Z-A)", value: "ztoa" },
 ]
 
 // Function to capitalize first letter of each word
@@ -130,7 +129,7 @@ export default function Agencies() {
           </SelectContent>
         </Select>
 
-        {/* Sorting options */}
+        {/* Updated Sorting options */}
         <Select
           key={selectedSorting || "sort"}
           value={selectedSorting}
@@ -142,7 +141,7 @@ export default function Agencies() {
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Sort by</SelectLabel>
-              {ratingOptions.map((option) => (
+              {sortingOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
