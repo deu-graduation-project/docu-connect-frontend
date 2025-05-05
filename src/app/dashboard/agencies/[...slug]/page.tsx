@@ -176,7 +176,6 @@ export default function AgencyPage() {
             Available Products
           </TabsTrigger>
           <TabsTrigger value="create-order">Create your order</TabsTrigger>
-          <TabsTrigger value="your-cart">Your Cart</TabsTrigger>
         </TabsList>
         <TabsContent className="w-full pt-4" value="available-products">
           {/* Agency Products */}
@@ -215,9 +214,6 @@ export default function AgencyPage() {
               <CreateOrder agencyId={agencyDetails.agency.agencyId} />
             </CardContent>
           </Card>
-        </TabsContent>
-        <TabsContent className="py-4" value="your-cart">
-          <UserCart agencyId={agencyDetails.agency.agencyId} />
         </TabsContent>
       </Tabs>
 

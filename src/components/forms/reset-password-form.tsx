@@ -116,10 +116,10 @@ export default function ResetPasswordForm() {
         values.confirmPassword
       )
     },
-    onSuccess: (response) => {
+    onSuccess: () => {
       toast({
         title: "Başarılı",
-        description: response.message || "Şifreniz başarıyla güncellendi.",
+        description: "Şifreniz başarıyla güncellendi.",
       })
       router.push("/sign-in")
     },

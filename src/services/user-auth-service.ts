@@ -252,11 +252,74 @@ export const UserAuthService = () => {
     }
   }
 
+  /**
+   * Updates a user's password after reset.
+   * @param userId - The ID of the user.
+   * @param resetToken - The reset token for validation.
+   * @param password - The new password.
+   * @param passwordConfirm - Confirmation of the new password.
+   * @returns A promise that resolves when the password is successfully updated.
+   */
+  const updatePassword = async (
+    userId: string,
+    resetToken: string,
+    password: string,
+    passwordConfirm: string
+  ): Promise<void> => {
+    try {
+      // Check if password and passwordConfirm match
+      if (password !== passwordConfirm) {
+        throw new Error("Password and password confirmation do not match.")
+      }
+
+      const response = await fetchWithAuth(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/Users/UpdatePassword`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId,
+            resetToken,
+            password,
+            passwordConfirm,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        // Try to parse the error response as JSON
+        let errorResponse
+        try {
+          errorResponse = await response.json()
+        } catch (e) {
+          // If the response is not JSON, use the raw text
+          errorResponse = await response.text()
+        }
+
+        // Throw a meaningful error message
+        const errorMessage =
+          errorResponse.message ||
+          errorResponse ||
+          `Password update failed with status: ${response.status}`
+        throw new Error(errorMessage)
+      }
+
+      // If successful, there's no data to return based on the C# endpoint
+      console.log("Password successfully updated")
+    } catch (error) {
+      console.error("Password update error:", error)
+      throw error
+    }
+  }
+
   return {
     login,
     refreshTokenLogin,
     googleLogin,
     passwordReset,
     verifyResetToken,
+    updatePassword,
   }
 }
