@@ -150,16 +150,12 @@ export default function Agencies() {
           </SelectContent>
         </Select>
 
-        <Button
-          variant="default"
-          onClick={resetFilters}
-          className="col-span-2 sm:col-span-1"
-        >
+        <Button variant="default" onClick={resetFilters} className="">
           Reset Filters
         </Button>
       </div>
 
-      <div className="w-full">
+      <div className="w-full max-w-7xl">
         <AgencyList
           province={selectedCity ? capitalizeWords(selectedCity) : undefined}
           district={

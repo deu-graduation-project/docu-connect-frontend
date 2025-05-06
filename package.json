@@ -46,6 +46,7 @@
     "motion": "^11.15.0",
     "next": "canary",
     "next-themes": "^0.4.4",
+    "pdf-lib": "^1.17.1",
     "react": "^18",
     "react-day-picker": "8.10.1",
     "react-dom": "^18",

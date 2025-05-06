@@ -13,8 +13,8 @@ import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import CreateOrder from "./components/create-order"
-import UserCart from "./components/user-cart"
+
+import CreateOrderForm from "@/components/forms/create-order-form"
 
 export default function AgencyPage() {
   const params = useParams()
@@ -211,7 +211,7 @@ export default function AgencyPage() {
               <CardTitle>Create your order</CardTitle>
             </CardHeader>
             <CardContent className="w-full pt-6">
-              <CreateOrder agencyId={agencyDetails.agency.agencyId} />
+              <CreateOrderForm agencyId={agencyDetails.agency.agencyId} />
             </CardContent>
           </Card>
         </TabsContent>
