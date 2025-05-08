@@ -1,16 +1,13 @@
 "use client"
 
 import * as React from "react"
+import { useEffect, useState } from "react"
 import {
-  AudioWaveform,
   BookOpen,
-  Bot,
   Command,
   Frame,
   GalleryVerticalEnd,
-  Map,
   PieChart,
-  Settings2,
   SquareTerminal,
   User,
   SquareActivity,
@@ -30,7 +27,6 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { Icons } from "./icons"
@@ -38,7 +34,7 @@ import { Icons } from "./icons"
 // This is sample data.
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data, isLoading, error } = useAuthStatus()
+  const { data } = useAuthStatus()
 
   const sideBarConfigForAgency = {
     user: {
@@ -145,21 +141,51 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
   }
 
+  // Sidebar'da gösterilecek ek menüler (DisplayForm'daki seçenekler)
+  const displaySidebarItems = [
+    { name: "Recents", url: "/dashboard/recents", icon: Frame, id: "recents" },
+    { name: "Home", url: "/dashboard/home", icon: Landmark, id: "home" },
+    { name: "Applications", url: "/dashboard/applications", icon: Command, id: "applications" },
+    { name: "Desktop", url: "/dashboard/desktop", icon: SquareTerminal, id: "desktop" },
+    { name: "Downloads", url: "/dashboard/downloads", icon: GalleryVerticalEnd, id: "downloads" },
+    { name: "Documents", url: "/dashboard/documents", icon: BookOpen, id: "documents" },
+  ];
+
+  const userEmail = data?.email;
+  const [selectedDisplayItems, setSelectedDisplayItems] = useState<string[]>([]);
+  useEffect(() => {
+    if (typeof window !== "undefined" && userEmail) {
+      const stored = localStorage.getItem(`sidebarDisplayItems_${userEmail}`);
+      if (stored) {
+        try {
+          setSelectedDisplayItems(JSON.parse(stored));
+        } catch {}
+      } else {
+        setSelectedDisplayItems([]);
+      }
+    }
+  }, [userEmail]);
+
+  // Kullanıcıya göre ana menüleri seç
+  const baseProjects = data?.isAdmin
+    ? sideBarConfigForAdmin.projects
+    : data?.isAgency
+    ? sideBarConfigForAgency.projects
+    : sideBarConfigForUser.projects;
+
+  // DisplayForm'dan seçilenleri ekle
+  const dynamicProjects = [
+    ...baseProjects,
+    ...displaySidebarItems.filter((item) => selectedDisplayItems.includes(item.id)),
+  ];
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarFooter>
         <NavUser user={sideBarConfigForAgency.user} />
       </SidebarFooter>
       <SidebarContent>
-        <NavMain
-          projects={
-            data?.isAdmin
-              ? sideBarConfigForAdmin.projects
-              : data?.isAgency
-                ? sideBarConfigForAgency.projects
-                : sideBarConfigForUser.projects
-          }
-        />
+        <NavMain projects={dynamicProjects} />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
