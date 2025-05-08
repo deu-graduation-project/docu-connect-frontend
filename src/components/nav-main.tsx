@@ -69,10 +69,7 @@ export function NavMain({
               }
               asChild
             >
-              <a href={"/become-an-agency"}>
-                <Icons.user />
-                <span className="text-sm">Become an agency</span>
-              </a>
+              
             </SidebarMenuButton>
           ) : (
             ""

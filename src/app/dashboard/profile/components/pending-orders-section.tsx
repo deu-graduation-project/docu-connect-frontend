@@ -6,7 +6,9 @@ import { Icons } from "@/components/icons"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
-
+import { Inbox } from "lucide-react"
+ 
+ 
 const PendingOrdersSection = ({ userId }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["userOrders", userId],
@@ -151,7 +153,7 @@ const OrdersEmptyState = () => {
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-12">
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-        <Icons.inbox className="mb-4 h-12 w-12 text-muted-foreground" />
+        <Inbox className="mb-4 h-12 w-12 text-muted-foreground" />
         <h3 className="mb-1 text-lg font-medium">No Pending Orders</h3>
         <p className="max-w-md text-sm text-muted-foreground">
           You don't have any pending orders at the moment. When you place a new

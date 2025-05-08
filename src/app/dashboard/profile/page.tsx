@@ -40,7 +40,11 @@ const ProfilePage = () => {
   return (
     <>
       {authStatus.isAgency ? (
-        <AgencyProfile authStatus={authStatus} agencyDetails={agencyDetails} />
+        <AgencyProfile 
+          authStatus={authStatus} 
+          agencyDetails={agencyDetails} 
+          agencyDetailsLoading={agencyDetailsLoading} 
+        />
       ) : (
         <UserProfile authStatus={authStatus} />
       )}
@@ -99,7 +103,7 @@ const UserProfile = ({ authStatus }) => {
   )
 }
 
-const AgencyProfile = ({ authStatus, agencyDetails }) => {
+const AgencyProfile = ({ authStatus, agencyDetails, agencyDetailsLoading }) => {
   if (!agencyDetails || agencyDetailsLoading) {
     return <div>Loading agency details...</div>
   }
@@ -190,6 +194,9 @@ const AgencyProfile = ({ authStatus, agencyDetails }) => {
           </button>
         </div>
       </div>
+      
+      {/* Add PendingOrdersSection for agency as well */}
+      <PendingOrdersSection userId={authStatus.userId} />
     </div>
   )
 }

@@ -12,24 +12,11 @@ export default function AccountManagement() {
     <div className="p-4 flex flex-col items-start max-w-7xl">
       <Tabs defaultValue="account" className="w-[400px]">
         <TabsList>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="display">Display</TabsTrigger>
         </TabsList>
-        <TabsContent value="profile">
-          <div className="space-y-6 py-4">
-            <div>
-              <h3 className="text-lg font-medium">Profile</h3>
-              <p className="text-sm text-muted-foreground">
-                This is how others will see you on the site.
-              </p>
-            </div>
-            <Separator />
-            <ProfileForm />
-          </div>
-        </TabsContent>
         <TabsContent value="account">
           <div className="space-y-6 py-4">
             <div>

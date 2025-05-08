@@ -16,9 +16,6 @@ export default function ActivityAndHistoryPage({}: Props) {
             Recent Orders & Photocopies
           </TabsTrigger>
           <div className="mx-1 h-full w-[1px] bg-primary-foreground"></div>
-          <TabsTrigger value="Notes and Uploads">Notes and Uploads</TabsTrigger>
-          <div className="mx-1 h-full w-[1px] bg-primary-foreground"></div>
-
           <TabsTrigger value="Reviews and Feedback">
             Reviews and Feedback
           </TabsTrigger>
@@ -26,9 +23,7 @@ export default function ActivityAndHistoryPage({}: Props) {
         <TabsContent value="Recent Orders & Photocopies">
           <OrdersTable />
         </TabsContent>
-        <TabsContent value="Notes and Uploads">
-          <NotesLibrary />
-        </TabsContent>
+        
         <TabsContent value="Reviews and Feedback">
           <Reviews />
         </TabsContent>
