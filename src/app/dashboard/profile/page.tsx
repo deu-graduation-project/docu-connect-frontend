@@ -100,10 +100,6 @@ const UserProfile = ({ authStatus }) => {
 }
 
 const AgencyProfile = ({ authStatus, agencyDetails }) => {
-  if (!agencyDetails || agencyDetailsLoading) {
-    return <div>Loading agency details...</div>
-  }
-
   return (
     <div className="pb-12">
       <div className="relative h-64 w-full">
