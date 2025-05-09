@@ -1,5 +1,6 @@
 import { GetAgencyAnalytics, GetOrders, GetSingleOrder } from "@/types/classes"
 import { fetchWithAuth } from "./fetch-with-auth"
+import { SucceededMessageResponse } from "@/types";
 
 // Define the expected response structure for initiatePayment
 type InitiatePaymentResponse = {
@@ -13,9 +14,9 @@ class OrderService {
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_API_URL || ""
     if (!this.baseUrl) {
-        console.error("API URL is not defined in environment variables.");
-        // Optionally throw an error or handle it as needed
-        // throw new Error("API URL is not configured.");
+      console.error("API URL is not defined in environment variables.")
+      // Optionally throw an error or handle it as needed
+      // throw new Error("API URL is not configured.");
     }
   }
 
@@ -32,45 +33,47 @@ class OrderService {
     agencyProductId: string,
     kopyaSayisi: number,
     copyFiles: File[]
-  ): Promise<string> { // Return only the sessionId string
-    const formData = new FormData();
-    formData.append("agencyId", agencyId);
-    formData.append("agencyProductId", agencyProductId);
-    formData.append("kopyaSayisi", kopyaSayisi.toString()); // Ensure it's a string for FormData
+  ): Promise<string> {
+    // Return only the sessionId string
+    const formData = new FormData()
+    formData.append("agencyId", agencyId)
+    formData.append("agencyProductId", agencyProductId)
+    formData.append("kopyaSayisi", kopyaSayisi.toString()) // Ensure it's a string for FormData
     copyFiles.forEach((file) => {
-      formData.append("copyFiles", file, file.name); // Append each file
-    });
+      formData.append("copyFiles", file, file.name) // Append each file
+    })
 
-    const paymentUrl = `${this.baseUrl}/Checkout/initiate-payment`; // Corrected path
+    const paymentUrl = `${this.baseUrl}/Checkout/initiate-payment` // Corrected path
 
     try {
       const response = await fetchWithAuth(paymentUrl, {
         method: "POST",
         body: formData,
         // No 'Content-Type' header needed; browser sets it for FormData
-      });
+      })
 
       if (!response.ok) {
-        let errorDetails = `Status: ${response.status}`;
+        let errorDetails = `Status: ${response.status}`
         try {
-          const errorData = await response.json();
-          errorDetails += `, Message: ${errorData.message || JSON.stringify(errorData)}`;
-        } catch { // Removed unused 'e' variable
+          const errorData = await response.json()
+          errorDetails += `, Message: ${errorData.message || JSON.stringify(errorData)}`
+        } catch {
+          // Removed unused 'e' variable
           // If response is not JSON or empty
-          errorDetails += `, Body: ${await response.text()}`;
+          errorDetails += `, Body: ${await response.text()}`
         }
-        throw new Error(`Failed to initiate payment: ${errorDetails}`);
+        throw new Error(`Failed to initiate payment: ${errorDetails}`)
       }
 
-      const result: InitiatePaymentResponse = await response.json();
+      const result: InitiatePaymentResponse = await response.json()
       if (!result.sessionId) {
-        throw new Error("Session ID not received from backend.");
+        throw new Error("Session ID not received from backend.")
       }
-      return result.sessionId; // Return only the session ID
+      return result.sessionId // Return only the session ID
     } catch (error) {
-      console.error("Payment initiation error in service:", error);
+      console.error("Payment initiation error in service:", error)
       // Re-throw the error so the mutation hook can handle it
-      throw error instanceof Error ? error : new Error(String(error));
+      throw error instanceof Error ? error : new Error(String(error))
     }
   }
 
@@ -98,17 +101,17 @@ class OrderService {
         method: "GET",
       }
     )
-     if (!response.ok) {
-        // Handle non-OK responses if necessary, e.g., throw an error
-        throw new Error(`Failed to fetch orders: ${response.statusText}`);
+    if (!response.ok) {
+      // Handle non-OK responses if necessary, e.g., throw an error
+      throw new Error(`Failed to fetch orders: ${response.statusText}`)
     }
     // Ensure response is parsed correctly
     try {
-        const data: GetOrders[] = await response.json();
-        return data;
+      const data: GetOrders[] = await response.json()
+      return data
     } catch (error) {
-        console.error("Failed to parse orders response:", error);
-        throw new Error("Invalid response format from server.");
+      console.error("Failed to parse orders response:", error)
+      throw new Error("Invalid response format from server.")
     }
   }
 
@@ -119,15 +122,15 @@ class OrderService {
         method: "GET",
       }
     )
-     if (!response.ok) {
-        throw new Error(`Failed to fetch single order: ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch single order: ${response.statusText}`)
     }
     try {
-        const data: GetSingleOrder = await response.json();
-        return data;
+      const data: GetSingleOrder = await response.json()
+      return data
     } catch (error) {
-        console.error("Failed to parse single order response:", error);
-        throw new Error("Invalid response format from server.");
+      console.error("Failed to parse single order response:", error)
+      throw new Error("Invalid response format from server.")
     }
   }
 
@@ -141,9 +144,9 @@ class OrderService {
   ) {
     const response = await fetchWithAuth(`${this.baseUrl}/Orders/UpdateOrder`, {
       method: "POST",
-       headers: {
-                'Content-Type': 'application/json', // Ensure correct content type
-            },
+      headers: {
+        "Content-Type": "application/json", // Ensure correct content type
+      },
       body: JSON.stringify({
         orderState,
         comment,
@@ -153,23 +156,25 @@ class OrderService {
         completedCode,
       }),
     })
-     if (!response.ok) {
-        // Consider more specific error handling based on status code
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Failed to update order: ${response.statusText} ${errorData.message || ''}`);
+    if (!response.ok) {
+      // Consider more specific error handling based on status code
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        `Failed to update order: ${response.statusText} ${errorData.message || ""}`
+      )
     }
     // Only parse JSON if the response is expected to have a body
     // If the backend sends 204 No Content, response.json() will fail
     if (response.status !== 204) {
-        try {
-            return await response.json();
-        } catch (error) {
-            console.error("Failed to parse update order response:", error);
-            // Decide how to handle: return null, throw, etc.
-            return null; // Or throw new Error("Invalid response format");
-        }
+      try {
+        return await response.json()
+      } catch (error) {
+        console.error("Failed to parse update order response:", error)
+        // Decide how to handle: return null, throw, etc.
+        return null // Or throw new Error("Invalid response format");
+      }
     }
-    return null; // Return null or a success indicator for 204
+    return null // Return null or a success indicator for 204
   }
 
   async getAgencyAnalytics(
@@ -193,16 +198,32 @@ class OrderService {
         method: "GET",
       }
     )
-     if (!response.ok) {
-        throw new Error(`Failed to fetch agency analytics: ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch agency analytics: ${response.statusText}`
+      )
     }
     try {
-        const data: GetAgencyAnalytics[] = await response.json();
-        return data;
+      const data: GetAgencyAnalytics[] = await response.json()
+      return data
     } catch (error) {
-        console.error("Failed to parse agency analytics response:", error);
-        throw new Error("Invalid response format from server.");
+      console.error("Failed to parse agency analytics response:", error)
+      throw new Error("Invalid response format from server.")
     }
+  }
+  async cancelOrder(
+    orderCode: string,
+  ):Promise<SucceededMessageResponse>{
+    const response = await fetchWithAuth(`${this.baseUrl}/Orders/CancelOrder`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json", 
+      },
+      body: JSON.stringify({
+        orderCode
+      }),
+    })
+    return response.json();
   }
 }
 
