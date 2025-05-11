@@ -48,6 +48,8 @@ class ProductService {
     const queryString = new URLSearchParams({
       agencyId: agencyId,
     }).toString()
+
+    console.log('Fetching agency products for:', agencyId)
     const response = await fetchWithAuth(
       `${this.baseUrl}/Products/GetAgencyProducts?${queryString}`,
       {
@@ -55,6 +57,7 @@ class ProductService {
       }
     )
     const data: GetAgencyProducts[] = await response.json()
+    console.log('Received agency products:', data)
     return data
   }
   async getProducts(
@@ -69,6 +72,7 @@ class ProductService {
       size: size.toString(),
     }).toString()
 
+    console.log('Fetching products with params:', { page: safePageNumber, size })
     const response = await fetchWithAuth(
       `${this.baseUrl}/Products/GetProducts?${queryString}`,
       {
@@ -81,6 +85,7 @@ class ProductService {
     }
 
     const data = await response.json()
+    console.log('Received products:', data)
     return data
   }
 

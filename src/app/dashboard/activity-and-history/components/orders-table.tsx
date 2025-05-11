@@ -33,7 +33,9 @@ export default async function OrdersTable() {
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-2xl font-bold mb-6">Recent Orders & Photocopies</h1>
-      <DataTable columns={columns} data={data} />
+      <div className="overflow-x-auto">
+        <DataTable columns={columns} data={data} />
+      </div>
     </div>
   );
 }

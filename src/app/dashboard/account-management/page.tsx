@@ -9,18 +9,33 @@ import { ProfileForm } from "./components/forms/profile-form";
 
 export default function AccountManagement() {
   return (
-    <div className="p-4 flex flex-col items-start max-w-7xl">
-      <Tabs defaultValue="account" className="w-[400px]">
-        <TabsList>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="display">Display</TabsTrigger>
+    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto grid gap-10 text-left">
+      <div className="flex flex-col gap-6 text-left">
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-6">
+          Account Management
+        </h1>
+      </div>
+
+      <Tabs defaultValue="account" className="w-full">
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
+          <TabsTrigger value="account" className="text-sm md:text-base">
+            Account
+          </TabsTrigger>
+          <TabsTrigger value="appearance" className="text-sm md:text-base">
+            Appearance
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="text-sm md:text-base">
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="display" className="text-sm md:text-base">
+            Display
+          </TabsTrigger>
         </TabsList>
+
         <TabsContent value="account">
-          <div className="space-y-6 py-4">
+          <div className="space-y-8 py-6 text-left">
             <div>
-              <h3 className="text-lg font-medium">Account</h3>
+              <h3 className="text-lg font-medium mb-2">Account</h3>
               <p className="text-sm text-muted-foreground">
                 Update your account settings. Set your preferred language and
                 timezone.
@@ -30,10 +45,11 @@ export default function AccountManagement() {
             <AccountForm />
           </div>
         </TabsContent>
+
         <TabsContent value="appearance">
-          <div className="space-y-6 py-4">
+          <div className="space-y-8 py-6 text-left">
             <div>
-              <h3 className="text-lg font-medium">Appearance</h3>
+              <h3 className="text-lg font-medium mb-2">Appearance</h3>
               <p className="text-sm text-muted-foreground">
                 Customize the appearance of the app. Automatically switch
                 between day and night themes.
@@ -43,10 +59,11 @@ export default function AccountManagement() {
             <AppearanceForm />
           </div>
         </TabsContent>
+
         <TabsContent value="notifications">
-          <div className="space-y-6 py-4">
+          <div className="space-y-8 py-6 text-left">
             <div>
-              <h3 className="text-lg font-medium">Notifications</h3>
+              <h3 className="text-lg font-medium mb-2">Notifications</h3>
               <p className="text-sm text-muted-foreground">
                 Configure how you receive notifications.
               </p>
@@ -55,10 +72,11 @@ export default function AccountManagement() {
             <NotificationsForm />
           </div>
         </TabsContent>
+
         <TabsContent value="display">
-          <div className="space-y-6 py-4">
+          <div className="space-y-8 py-6 text-left">
             <div>
-              <h3 className="text-lg font-medium">Display</h3>
+              <h3 className="text-lg font-medium mb-2">Display</h3>
               <p className="text-sm text-muted-foreground">
                 Turn items on or off to control what&apos;s displayed in the
                 app.

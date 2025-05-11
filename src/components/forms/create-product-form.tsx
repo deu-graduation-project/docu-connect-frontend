@@ -70,7 +70,7 @@ export default function CreateProductForm() {
   // Fetch existing products to check for duplicates
   const { data } = useQuery({
     queryKey: ["viewCreatedProducts"],
-    queryFn: () => productService.getProducts(0, 10),
+    queryFn: () => productService.getProducts(0, 20),
   })
 
   const existingProducts: Product[] =
