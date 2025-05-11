@@ -31,15 +31,15 @@ import { User } from "@/types/classes"
 
 const formSchema = z
   .object({
-    userName: z.string().min(1, "Adınızı giriniz"),
-    name: z.string().min(1, "Adınızı giriniz"),
-    surname: z.string().min(1, "Soyadınızı giriniz"),
-    email: z.string().email("Geçerli bir email giriniz"),
-    password: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
-    passwordConfirm: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır"),
+    userName: z.string().min(1, "Enter your username"),
+    name: z.string().min(1, "Enter your name"),
+    surname: z.string().min(1, "Enter your surname"),
+    email: z.string().email("Enter a valid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    passwordConfirm: z.string().min(6, "Password must be at least 6 characters"),
   })
   .refine((data) => data.password === data.passwordConfirm, {
-    message: "Şifreler eşleşmiyor.",
+    message: "Password does not match.",
     path: ["passwordConfirm"], // Field to highlight
   })
 
@@ -78,7 +78,7 @@ export default function SignUpForm() {
       await userService.createUser(
         userPayload,
         (data) => {
-          setSuccessMessage(`Kullanıcı başarıyla oluşturuldu!`)
+          setSuccessMessage(`User account succsessfully created!`)
         },
         (errorMessage) => {
           setError(errorMessage)
@@ -86,7 +86,7 @@ export default function SignUpForm() {
       )
     } catch (err) {
       console.error("Unexpected error:", err)
-      setError("Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.")
+      setError("Unexpexted error.Try again later.")
     }
   }
 
@@ -102,9 +102,9 @@ export default function SignUpForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Card>
             <CardHeader>
-              <CardTitle>Kayıt Ol</CardTitle>
+              <CardTitle>Sign Up</CardTitle>
               <CardDescription>
-                Lütfen bilgilerinizi doldurup kayıt olun
+                Fill your details to create an account
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6 p-4">
@@ -115,7 +115,7 @@ export default function SignUpForm() {
                   <FormItem>
                     <FormLabel>Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="Adınızı giriniz" {...field} />
+                      <Input placeholder="Username" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -127,9 +127,9 @@ export default function SignUpForm() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Adınızı Giriniz</FormLabel>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Adınızı giriniz" {...field} />
+                        <Input placeholder="Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -140,9 +140,9 @@ export default function SignUpForm() {
                   name="surname"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Soyadınızı Giriniz</FormLabel>
+                      <FormLabel>Surname</FormLabel>
                       <FormControl>
-                        <Input placeholder="Soyadınızı giriniz" {...field} />
+                        <Input placeholder="Surname" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -154,11 +154,11 @@ export default function SignUpForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Emailinizi Giriniz</FormLabel>
+                    <FormLabel>Email adress</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="Emailinizi giriniz"
+                        placeholder="example@example.com"
                         {...field}
                       />
                     </FormControl>
@@ -171,11 +171,11 @@ export default function SignUpForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Şifrenizi Giriniz</FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
                       <InputPassWord
                         type="password"
-                        placeholder="Şifrenizi giriniz"
+                        placeholder="Password"
                         {...field}
                       />
                     </FormControl>
@@ -188,11 +188,11 @@ export default function SignUpForm() {
                 name="passwordConfirm"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Şifrenizi Tekrar Giriniz</FormLabel>
+                    <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Şifrenizi tekrar giriniz"
+                        placeholder="Confirm Password"
                         {...field}
                       />
                     </FormControl>
@@ -202,22 +202,13 @@ export default function SignUpForm() {
               />
               <div className="flex flex-col gap-4">
                 <Button type="submit" className="w-full">
-                  Kayıt Ol
-                </Button>
-                <Button
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "w-full"
-                  )}
-                >
-                  <Icons.google />
-                  Google ile Kayıt Ol
+                  Sign up
                 </Button>
               </div>
               <div className="flex w-full justify-center gap-2">
-                <p>Hesabınız var mı?</p>
+                <p>Already have an account?</p>
                 <Link href={"/sign-in"} className="underline">
-                  Giriş Yap
+                  Sign in
                 </Link>
               </div>
               {error && <p className="text-center text-red-500">{error}</p>}
