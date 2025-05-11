@@ -7,8 +7,8 @@ import Link from "next/link";
 import { columns } from "../analytics/components/recent-activity-table";
 export default function SupportAndConnectionsPage() {
   return (
-    <div className="p-4 md:p-8 lg:p-12 max-w-4xl mx-auto">
-      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">
+    <div className="grid w-full max-w-5xl gap-10 p-4 md:p-8 lg:p-12 items-start">
+      <h1 className="mb-6 text-left text-xl font-bold md:text-2xl lg:text-3xl">
         Support & Connections
       </h1>
       <div className="flex flex-col items-start">
