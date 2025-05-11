@@ -12,6 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Card,
   CardContent,
@@ -26,6 +27,7 @@ import { Icons } from "@/components/icons"
 import { userService } from "@/services/user-service"
 import { useEffect, useState } from "react"
 import useAuthStatus from "@/lib/queries/auth-status"
+import { InputPassWord } from "@/components/ui/animation-password-input"
 import { useMemo } from "react"
 import {
   Select,
@@ -229,8 +231,7 @@ export default function BecomeAnAgency() {
                     <FormItem className="w-full">
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input
-                          type="password"
+                        <InputPassWord
                           placeholder="Enter your password"
                           {...field}
                         />
@@ -381,7 +382,11 @@ export default function BecomeAnAgency() {
                     <FormItem className="w-full">
                       <FormLabel>Agency Bio</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter agency bio" {...field} />
+                        <Textarea
+                          className="h-[232px] resize-none"
+                          placeholder="Enter agency bio"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

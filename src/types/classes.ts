@@ -183,7 +183,9 @@ export interface GetUserByIdResponse {
   surname: string
   email: string
   emailConfirmed: boolean
+
   userOrders: {
+    createdDate: Date
     orderCode: string
     orderState: string
     totalPrice: number

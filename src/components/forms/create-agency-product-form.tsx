@@ -39,7 +39,7 @@ export default function CreateAgencyProductForm() {
     },
     enabled: !!authStatus?.userId,
   })
-
+  console.log("Product List:", productList)
   // Get the actual products array from the response
   const products = productList?.products || []
 
@@ -123,9 +123,9 @@ export default function CreateAgencyProductForm() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <Card className="border-none">
-        <CardContent className="border-none p-0">
+    <div className="mx-auto h-[550px] max-w-4xl">
+      <Card className="h-[550px] overflow-y-scroll border-none">
+        <CardContent className="border-none p-4">
           {products.length === 0 ? (
             <div className="text-center text-muted-foreground">
               No products available to add prices

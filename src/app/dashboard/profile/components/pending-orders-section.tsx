@@ -351,7 +351,12 @@ const OrderCard = ({ order }) => {
                             {file.fileName}
                           </span>
                         </div>
-                        <button className="rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20">
+                        <button
+                          onClick={() => {
+                            fileService.downloadFile(file.fileUrl)
+                          }}
+                          className="rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20"
+                        >
                           <Icons.download className="h-4 w-4" />
                         </button>
                       </div>
@@ -396,9 +401,6 @@ const OrderCard = ({ order }) => {
               <div className="flex space-x-2">
                 <button className="flex-1 rounded-md border border-destructive bg-destructive/10 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
                   Cancel Order
-                </button>
-                <button className="flex-1 rounded-md bg-primary py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                  Contact Agency
                 </button>
               </div>
             </div>
