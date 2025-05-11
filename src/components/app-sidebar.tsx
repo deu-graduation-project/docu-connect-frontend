@@ -141,15 +141,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
   }
 
-  // Sidebar'da gösterilecek ek menüler (DisplayForm'daki seçenekler)
-  const displaySidebarItems = [
-    { name: "Recents", url: "/dashboard/recents", icon: Frame, id: "recents" },
-    { name: "Home", url: "/dashboard/home", icon: Landmark, id: "home" },
-    { name: "Applications", url: "/dashboard/applications", icon: Command, id: "applications" },
-    { name: "Desktop", url: "/dashboard/desktop", icon: SquareTerminal, id: "desktop" },
-    { name: "Downloads", url: "/dashboard/downloads", icon: GalleryVerticalEnd, id: "downloads" },
-    { name: "Documents", url: "/dashboard/documents", icon: BookOpen, id: "documents" },
-  ];
+ 
+ 
 
   const userEmail = data?.email;
   const [selectedDisplayItems, setSelectedDisplayItems] = useState<string[]>([]);
@@ -173,11 +166,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ? sideBarConfigForAgency.projects
     : sideBarConfigForUser.projects;
 
-  // DisplayForm'dan seçilenleri ekle
-  const dynamicProjects = [
-    ...baseProjects,
-    ...displaySidebarItems.filter((item) => selectedDisplayItems.includes(item.id)),
-  ];
+  
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -185,7 +174,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={sideBarConfigForAgency.user} />
       </SidebarFooter>
       <SidebarContent>
-        <NavMain projects={dynamicProjects} />
+        <NavMain projects={baseProjects} />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

@@ -3,9 +3,7 @@ import { Separator } from "@radix-ui/react-separator";
 import { AccountForm } from "./components/forms/account-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppearanceForm } from "./components/forms/appearance.form";
-import { DisplayForm } from "./components/forms/display-form";
 import { NotificationsForm } from "./components/forms/notifications-form";
-import { ProfileForm } from "./components/forms/profile-form";
 
 export default function AccountManagement() {
   return (
@@ -17,7 +15,7 @@ export default function AccountManagement() {
       </div>
 
       <Tabs defaultValue="account" className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
+        <TabsList className="grid grid-cols-2 md:grid-cols-3 gap-4 text-left">
           <TabsTrigger value="account" className="text-sm md:text-base">
             Account
           </TabsTrigger>
@@ -26,9 +24,6 @@ export default function AccountManagement() {
           </TabsTrigger>
           <TabsTrigger value="notifications" className="text-sm md:text-base">
             Notifications
-          </TabsTrigger>
-          <TabsTrigger value="display" className="text-sm md:text-base">
-            Display
           </TabsTrigger>
         </TabsList>
 
@@ -70,20 +65,6 @@ export default function AccountManagement() {
             </div>
             <Separator />
             <NotificationsForm />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="display">
-          <div className="space-y-8 py-6 text-left">
-            <div>
-              <h3 className="text-lg font-medium mb-2">Display</h3>
-              <p className="text-sm text-muted-foreground">
-                Turn items on or off to control what&apos;s displayed in the
-                app.
-              </p>
-            </div>
-            <Separator />
-            <DisplayForm />
           </div>
         </TabsContent>
       </Tabs>
