@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -12,21 +12,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "../ui/card";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Icons } from "@/components/icons";
-import { userService } from "@/services/user-service";
-import { useState } from "react";
-import { User } from "@/types/classes";
+} from "../ui/card"
+import { InputPassWord } from "@/components/ui/animation-password-input"
+import { Input } from "@/components/ui/input"
+import Link from "next/link"
+import { cn } from "@/lib/utils"
+import { Icons } from "@/components/icons"
+import { userService } from "@/services/user-service"
+import { useState } from "react"
+import { User } from "@/types/classes"
 
 const formSchema = z
   .object({
@@ -40,13 +41,13 @@ const formSchema = z
   .refine((data) => data.password === data.passwordConfirm, {
     message: "Şifreler eşleşmiyor.",
     path: ["passwordConfirm"], // Field to highlight
-  });
+  })
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>
 
 export default function SignUpForm() {
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -58,11 +59,11 @@ export default function SignUpForm() {
       password: "",
       passwordConfirm: "",
     },
-  });
+  })
 
   async function onSubmit(values: FormData) {
-    setError(null);
-    setSuccessMessage(null);
+    setError(null)
+    setSuccessMessage(null)
 
     const userPayload: User = {
       userName: values.userName,
@@ -71,28 +72,28 @@ export default function SignUpForm() {
       email: values.email,
       password: values.password,
       passwordConfirm: values.passwordConfirm,
-    };
+    }
 
     try {
       await userService.createUser(
         userPayload,
         (data) => {
-          setSuccessMessage(`Kullanıcı başarıyla oluşturuldu!`);
+          setSuccessMessage(`Kullanıcı başarıyla oluşturuldu!`)
         },
         (errorMessage) => {
-          setError(errorMessage);
+          setError(errorMessage)
         }
-      );
+      )
     } catch (err) {
-      console.error("Unexpected error:", err);
-      setError("Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.");
+      console.error("Unexpected error:", err)
+      setError("Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.")
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center">
       <div></div>
-      <div className="absolute top-5 left-5">
+      <div className="absolute left-5 top-5">
         <Link href={"/"}>
           <Icons.arrowLeft strokeWidth={"1.3px"} />
         </Link>
@@ -106,7 +107,7 @@ export default function SignUpForm() {
                 Lütfen bilgilerinizi doldurup kayıt olun
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-4 flex flex-col gap-6">
+            <CardContent className="flex flex-col gap-6 p-4">
               <FormField
                 control={form.control}
                 name="userName"
@@ -120,7 +121,7 @@ export default function SignUpForm() {
                   </FormItem>
                 )}
               />
-              <div className="flex gap-4 items-center">
+              <div className="flex items-center gap-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -172,7 +173,7 @@ export default function SignUpForm() {
                   <FormItem>
                     <FormLabel>Şifrenizi Giriniz</FormLabel>
                     <FormControl>
-                      <Input
+                      <InputPassWord
                         type="password"
                         placeholder="Şifrenizi giriniz"
                         {...field}
@@ -213,20 +214,20 @@ export default function SignUpForm() {
                   Google ile Kayıt Ol
                 </Button>
               </div>
-              <div className="flex w-full gap-2 justify-center">
+              <div className="flex w-full justify-center gap-2">
                 <p>Hesabınız var mı?</p>
                 <Link href={"/sign-in"} className="underline">
                   Giriş Yap
                 </Link>
               </div>
-              {error && <p className="text-red-500 text-center">{error}</p>}
+              {error && <p className="text-center text-red-500">{error}</p>}
               {successMessage && (
-                <p className="text-green-500 text-center">{successMessage}</p>
+                <p className="text-center text-green-500">{successMessage}</p>
               )}
             </CardContent>
           </Card>
         </form>
       </Form>
     </div>
-  );
+  )
 }

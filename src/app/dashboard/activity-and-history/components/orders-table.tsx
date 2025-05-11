@@ -1,41 +1,33 @@
-import { Order, columns } from "./columns";
-import { DataTable } from "./data-table";
+"use client"
+import { Order, columns } from "./columns"
+import { DataTable } from "./data-table"
+import { useQuery } from "@tanstack/react-query"
+import useAuthStatus from "@/lib/queries/auth-status"
+import { getOrders } from "@/services/orders-service"
+import { orderService } from "@/services/orders-service"
+import { useEffect, useState } from "react"
 
-async function getData(): Promise<Order[]> {
-  return [
-    {
-      orderId: "123456",
-      agencyName: "Alpha Agency",
-      status: "success",
-      orderDate: new Date().toISOString(),
-      totalCost: 1200,
-    },
-    {
-      orderId: "789101",
-      agencyName: "Beta Corp",
-      status: "pending",
-      orderDate: new Date().toISOString(),
-      totalCost: 800,
-    },
-    {
-      orderId: "111213",
-      agencyName: "Gamma LLC",
-      status: "failed",
-      orderDate: new Date().toISOString(),
-      totalCost: 500,
-    },
-  ];
-}
+export default function OrdersTable() {
+  const { data: authStatus } = useAuthStatus()
 
-export default async function OrdersTable() {
-  const data = await getData();
+  const { data: agencyDetails } = useQuery({
+    queryKey: ["agencyOrders"],
+    queryFn: () => {
+      if (!authStatus?.isAgency) {
+        return []
+      }
+      return orderService.getOrders(0, 10)
+    },
+  })
+
+  console.log("agencyDetails", agencyDetails)
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6">Recent Orders & Photocopies</h1>
+      <h1 className="mb-6 text-2xl font-bold">Recent Orders & Photocopies</h1>
       <div className="overflow-x-auto">
         <DataTable columns={columns} data={data} />
       </div>
     </div>
-  );
+  )
 }

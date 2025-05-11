@@ -37,17 +37,23 @@ export default function CreateAgencyProductForm() {
   })
   // Memoize the products array to prevent unnecessary re-renders
   const products = useMemo(() => productList?.products || [], [productList])
+  console.log("Product List:", productList)
+  // Get the actual products array from the response
+
   // Initialize prices state when product list is loaded
   useEffect(() => {
     if (products && products.length > 0) {
-      console.log('Initial product list:', products)
-      const initialPrices = products.reduce((acc, product) => {
-        if ("price" in product && typeof product.price === "number") {
-          acc[product.id] = product.price
-        }
-        return acc
-      }, {} as { [key: string]: number })
-      console.log('Initial prices:', initialPrices)
+      console.log("Initial product list:", products)
+      const initialPrices = products.reduce(
+        (acc, product) => {
+          if ("price" in product && typeof product.price === "number") {
+            acc[product.id] = product.price
+          }
+          return acc
+        },
+        {} as { [key: string]: number }
+      )
+      console.log("Initial prices:", initialPrices)
       setProductPrices(initialPrices)
     }
   }, [products])
@@ -62,10 +68,10 @@ export default function CreateAgencyProductForm() {
           ProductId: productId,
           Price: price,
         }))
-      console.log('Creating agency products:', {
+      console.log("Creating agency products:", {
         allProducts: products,
         pricesSet: productPrices,
-        productsToCreate: agencyProducts
+        productsToCreate: agencyProducts,
       })
       // Send the data to backend
       return await productService.createAgencyProduct(agencyProducts)
@@ -122,9 +128,9 @@ export default function CreateAgencyProductForm() {
       </div>
     )
   }
- 
+
   return (
-    <div className="mx-auto max-w-4xl max-h-[calc(100vh-200px)] overflow-y-auto">
+    <div className="mx-auto max-h-[calc(100vh-200px)] max-w-4xl overflow-y-auto">
       <Card className="border-none">
         <CardContent className="border-none p-0">
           {products.length === 0 ? (
@@ -138,27 +144,32 @@ export default function CreateAgencyProductForm() {
                 const typeProducts = products.filter(
                   (p) => p.paperType === paperType
                 )
-                
+
                 if (typeProducts.length === 0) return null
-                
+
                 return (
                   <div key={paperType} className="space-y-4">
                     <h3 className="text-lg font-semibold">
                       {paperType} Products
                     </h3>
-                    
+
                     {/* Group by color option */}
-                    {colorOptionsMap.map(colorOption => {
+                    {colorOptionsMap.map((colorOption) => {
                       // Get products for this paper type and color option
                       const colorProducts = typeProducts.filter(
-                        p => p.colorOption === colorOption.value
+                        (p) => p.colorOption === colorOption.value
                       )
-                      
+
                       if (colorProducts.length === 0) return null
-                      
+
                       return (
-                        <div key={`${paperType}-${colorOption.value}`} className="space-y-2">
-                          <h4 className="text-md font-medium ml-2">{colorOption.label}</h4>
+                        <div
+                          key={`${paperType}-${colorOption.value}`}
+                          className="space-y-2"
+                        >
+                          <h4 className="text-md ml-2 font-medium">
+                            {colorOption.label}
+                          </h4>
                           <div className="space-y-2">
                             {colorProducts.map((product) => (
                               <div
@@ -168,7 +179,8 @@ export default function CreateAgencyProductForm() {
                                 <div className="flex-grow">
                                   <div className="font-semibold">
                                     {printTypeOptionsMap.find(
-                                      (option) => option.value === product.printType
+                                      (option) =>
+                                        option.value === product.printType
                                     )?.label || product.printType}
                                   </div>
                                   <div className="text-sm text-muted-foreground">
