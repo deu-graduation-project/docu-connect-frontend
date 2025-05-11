@@ -210,6 +210,8 @@ export default function AgencyPage() {
             <CardHeader>
               <CardTitle>Create your order</CardTitle>
             </CardHeader>
+            <h3 className="text-sm font-bold text-red-500 text-muted-foreground text-center mt-auto mb-4">
+                    Lütfen 0.50$ ve üstü bir sipariş veriniz.</h3>
             <CardContent className="w-full pt-6">
               <CreateOrderForm agencyId={agencyDetails.agency.agencyId} />
             </CardContent>
