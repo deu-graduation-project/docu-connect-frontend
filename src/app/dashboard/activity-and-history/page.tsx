@@ -6,25 +6,19 @@ import Reviews from "./components/reviews"
 
 export default function ActivityAndHistoryPage({}: Props) {
   return (
-    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto grid gap-10">
+    <div className="mx-auto grid w-full max-w-5xl gap-10 p-4 md:p-8 lg:p-12">
       <div className="flex flex-col gap-6">
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-6 text-center">
+        <h1 className="mb-6 text-center text-xl font-bold md:text-2xl lg:text-3xl">
           Activity & History
         </h1>
       </div>
 
       <Tabs defaultValue="Recent Orders & Photocopies" className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <TabsTrigger
-            value="Recent Orders & Photocopies"
-            className="text-sm md:text-base"
-          >
+        <TabsList className="grid w-full grid-cols-2 items-center justify-center">
+          <TabsTrigger value="Recent Orders & Photocopies">
             Recent Orders & Photocopies
           </TabsTrigger>
-          <TabsTrigger
-            value="Reviews and Feedback"
-            className="text-sm md:text-base"
-          >
+          <TabsTrigger value="Reviews and Feedback">
             Reviews and Feedback
           </TabsTrigger>
         </TabsList>

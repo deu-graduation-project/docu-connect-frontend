@@ -79,6 +79,7 @@ const PendingOrdersSection = ({ userId }) => {
     enabled: !!userId,
   })
 
+  console.log()
   // Filter orders based on active filter and sort option
   const filteredOrders = React.useMemo(() => {
     if (!data?.userOrders) return []

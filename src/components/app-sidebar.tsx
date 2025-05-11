@@ -31,18 +31,22 @@ import {
 } from "@/components/ui/sidebar"
 import { Icons } from "./icons"
 
-// This is sample data.
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data } = useAuthStatus()
+  const { data, isLoading } = useAuthStatus()
+
+  // Track whether the component has mounted to avoid hydration issues
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const sideBarConfigForAgency = {
     user: {
-      name: `${data?.name} ${data?.surname}` || "kullanıcı adı",
-      email: `${data?.email}` || "kullanıcı emaili",
+      name:
+        `${data?.name || ""} ${data?.surname || ""}`.trim() || "kullanıcı adı",
+      email: data?.email || "kullanıcı emaili",
       avatar: "/avatars/shadcn.jpg",
     },
-    navMain: [],
     projects: [
       {
         name: "Profile",
@@ -84,10 +88,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const sideBarConfigForAdmin = {
     user: {
-      name: `${data?.name} ${data?.surname}` || "kullanıcı adı",
-      email: `${data?.email}` || "kullanıcı emaili",
+      name:
+        `${data?.name || ""} ${data?.surname || ""}`.trim() || "kullanıcı adı",
+      email: data?.email || "kullanıcı emaili",
+      avatar: "/avatars/shadcn.jpg",
     },
-    navMain: [],
     projects: [
       {
         name: "Agency Requests",
@@ -101,12 +106,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
     ],
   }
+
   const sideBarConfigForUser = {
     user: {
-      name: `${data?.name} ${data?.surname}` || "kullanıcı adı",
-      email: `${data?.email}` || "kullanıcı emaili",
+      name:
+        `${data?.name || ""} ${data?.surname || ""}`.trim() || "kullanıcı adı",
+      email: data?.email || "kullanıcı emaili",
+      avatar: "/avatars/shadcn.jpg",
     },
-    navMain: [],
     projects: [
       {
         name: "Profile",
@@ -141,40 +148,64 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
   }
 
- 
- 
+  const userEmail = data?.email
+  const [selectedDisplayItems, setSelectedDisplayItems] = useState<string[]>([])
 
-  const userEmail = data?.email;
-  const [selectedDisplayItems, setSelectedDisplayItems] = useState<string[]>([]);
   useEffect(() => {
     if (typeof window !== "undefined" && userEmail) {
-      const stored = localStorage.getItem(`sidebarDisplayItems_${userEmail}`);
+      const stored = localStorage.getItem(`sidebarDisplayItems_${userEmail}`)
       if (stored) {
         try {
-          setSelectedDisplayItems(JSON.parse(stored));
+          setSelectedDisplayItems(JSON.parse(stored))
         } catch {}
       } else {
-        setSelectedDisplayItems([]);
+        setSelectedDisplayItems([])
       }
     }
-  }, [userEmail]);
+  }, [userEmail])
 
-  // Kullanıcıya göre ana menüleri seç
-  const baseProjects = data?.isAdmin
-    ? sideBarConfigForAdmin.projects
-    : data?.isAgency
-    ? sideBarConfigForAgency.projects
-    : sideBarConfigForUser.projects;
+  // Determine which configuration to use based on user role
+  const currentConfig = React.useMemo(() => {
+    if (!data) return null
 
-  
+    if (data.isAdmin) {
+      return sideBarConfigForAdmin
+    } else if (data.isAgency) {
+      return sideBarConfigForAgency
+    } else {
+      return sideBarConfigForUser
+    }
+  }, [data])
+
+  // Don't render until we have auth data to avoid flashing
+  if (isLoading || !mounted || !currentConfig) {
+    return (
+      <Sidebar collapsible="icon" {...props}>
+        <SidebarFooter>
+          {/* Simple loading placeholder */}
+          <div className="py-4">
+            <div className="h-10 w-full animate-pulse rounded bg-secondary"></div>
+          </div>
+        </SidebarFooter>
+        <SidebarContent>
+          {/* Simple loading placeholder */}
+          <div className="space-y-2 px-2 py-4">
+            <div className="h-8 w-full animate-pulse rounded bg-secondary"></div>
+            <div className="h-8 w-full animate-pulse rounded bg-secondary"></div>
+          </div>
+        </SidebarContent>
+        <SidebarRail />
+      </Sidebar>
+    )
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarFooter>
-        <NavUser user={sideBarConfigForAgency.user} />
+        <NavUser user={currentConfig.user} />
       </SidebarFooter>
       <SidebarContent>
-        <NavMain projects={baseProjects} />
+        <NavMain projects={currentConfig.projects} />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
