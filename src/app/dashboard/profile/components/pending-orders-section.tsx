@@ -222,6 +222,17 @@ const OrderCard = ({ order }) => {
 
       <div className="mt-2 space-y-1">
         <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Date:</span>
+          <span>
+            {new Date(order.createdDate).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+              hour: "2-digit",
+            })}
+          </span>
+        </div>
+        <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Agency:</span>
           <span>{order.agencyName}</span>
         </div>
@@ -382,7 +393,15 @@ const OrderCard = ({ order }) => {
                         Your order was successfully created
                       </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">Today</p>
+                    <p className="text-xs text-muted-foreground">
+                      {" "}
+                      {new Date(order.createdDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "2-digit",
+                      })}
+                    </p>
                   </div>
 
                   {order.orderState !== "Pending" && (
@@ -394,7 +413,17 @@ const OrderCard = ({ order }) => {
                           Order status updated to {order.orderState}
                         </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">Today</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(order.createdDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "numeric",
+                            day: "numeric",
+                            hour: "2-digit",
+                          }
+                        )}
+                      </p>
                     </div>
                   )}
                 </div>
