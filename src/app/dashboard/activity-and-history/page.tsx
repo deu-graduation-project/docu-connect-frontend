@@ -6,31 +6,35 @@ import Reviews from "./components/reviews"
 
 export default function ActivityAndHistoryPage({}: Props) {
   return (
-    <div className="container mx-auto w-full max-w-7xl p-4">
-      <Tabs
-        defaultValue="Recent Orders & Photocopies"
-        className="w-full max-w-7xl"
-      >
-        <TabsList className="w-auto">
+    <div className="grid w-full max-w-5xl gap-10 p-4 md:p-8 lg:p-12 items-start">
+      <div className="flex flex-col gap-6">
+        <h1 className="mb-6 text-left text-xl font-bold md:text-2xl lg:text-3xl">
+          Activity & History
+        </h1>
+      </div>
+
+      <Tabs defaultValue="Recent Orders & Photocopies" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 items-center justify-center">
           <TabsTrigger value="Recent Orders & Photocopies">
             Recent Orders & Photocopies
           </TabsTrigger>
-          <div className="mx-1 h-full w-[1px] bg-primary-foreground"></div>
-          <TabsTrigger value="Notes and Uploads">Notes and Uploads</TabsTrigger>
-          <div className="mx-1 h-full w-[1px] bg-primary-foreground"></div>
-
           <TabsTrigger value="Reviews and Feedback">
             Reviews and Feedback
           </TabsTrigger>
         </TabsList>
+
         <TabsContent value="Recent Orders & Photocopies">
-          <OrdersTable />
+          <div className="space-y-8 py-6">
+            <div className="min-w-full">
+              <OrdersTable />
+            </div>
+          </div>
         </TabsContent>
-        <TabsContent value="Notes and Uploads">
-          <NotesLibrary />
-        </TabsContent>
+
         <TabsContent value="Reviews and Feedback">
-          <Reviews />
+          <div className="space-y-8 py-6">
+            <Reviews />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

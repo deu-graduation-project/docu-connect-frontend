@@ -40,7 +40,11 @@ const ProfilePage = () => {
   return (
     <>
       {authStatus.isAgency ? (
-        <AgencyProfile authStatus={authStatus} agencyDetails={agencyDetails} />
+        <AgencyProfile
+          authStatus={authStatus}
+          agencyDetails={agencyDetails}
+          agencyDetailsLoading={agencyDetailsLoading}
+        />
       ) : (
         <UserProfile authStatus={authStatus} />
       )}
@@ -170,7 +174,7 @@ const AgencyProfile = ({ authStatus, agencyDetails }) => {
       </div>
 
       <div className="flex flex-col items-center justify-center">
-        <h1 className="text-base font-semibold">Follow me on</h1>
+        <h1 className="text-base font-semibold">Takip Et</h1>
         <div className="flex justify-center gap-4 py-4">
           <button>
             <Icons.twitter className="h-6 w-6 cursor-pointer" />
@@ -186,6 +190,9 @@ const AgencyProfile = ({ authStatus, agencyDetails }) => {
           </button>
         </div>
       </div>
+
+      {/* Add PendingOrdersSection for agency as well */}
+      <PendingOrdersSection userId={authStatus.userId} />
     </div>
   )
 }

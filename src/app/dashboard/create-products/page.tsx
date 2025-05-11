@@ -46,7 +46,7 @@ export default function CreateProducts() {
   // Remove the queryClient.invalidateQueries call from inside queryFn
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["viewCreatedProducts"],
-    queryFn: () => productService.getProducts(0, 10),
+    queryFn: () => productService.getProducts(0, 20),
     enabled: authData?.isAdmin,
     staleTime: 0, // This ensures the data is always considered stale and will refetch
   })

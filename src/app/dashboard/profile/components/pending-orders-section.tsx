@@ -5,6 +5,8 @@ import { userService } from "@/services/user-service"
 import { Icons } from "@/components/icons"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Inbox } from "lucide-react"
 
 import { useOrdersStates } from "./orders-states"
 import {
@@ -77,6 +79,7 @@ const PendingOrdersSection = ({ userId }) => {
     enabled: !!userId,
   })
 
+  console.log()
   // Filter orders based on active filter and sort option
   const filteredOrders = React.useMemo(() => {
     if (!data?.userOrders) return []
@@ -219,6 +222,17 @@ const OrderCard = ({ order }) => {
 
       <div className="mt-2 space-y-1">
         <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Date:</span>
+          <span>
+            {new Date(order.createdDate).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+              hour: "2-digit",
+            })}
+          </span>
+        </div>
+        <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Agency:</span>
           <span>{order.agencyName}</span>
         </div>
@@ -351,7 +365,12 @@ const OrderCard = ({ order }) => {
                             {file.fileName}
                           </span>
                         </div>
-                        <button className="rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20">
+                        <button
+                          onClick={() => {
+                            fileService.downloadFile(file.fileUrl)
+                          }}
+                          className="rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20"
+                        >
                           <Icons.download className="h-4 w-4" />
                         </button>
                       </div>
@@ -374,7 +393,15 @@ const OrderCard = ({ order }) => {
                         Your order was successfully created
                       </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">Today</p>
+                    <p className="text-xs text-muted-foreground">
+                      {" "}
+                      {new Date(order.createdDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "2-digit",
+                      })}
+                    </p>
                   </div>
 
                   {order.orderState !== "Pending" && (
@@ -386,7 +413,17 @@ const OrderCard = ({ order }) => {
                           Order status updated to {order.orderState}
                         </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">Today</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(order.createdDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "numeric",
+                            day: "numeric",
+                            hour: "2-digit",
+                          }
+                        )}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -396,9 +433,6 @@ const OrderCard = ({ order }) => {
               <div className="flex space-x-2">
                 <button className="flex-1 rounded-md border border-destructive bg-destructive/10 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
                   Cancel Order
-                </button>
-                <button className="flex-1 rounded-md bg-primary py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-                  Contact Agency
                 </button>
               </div>
             </div>

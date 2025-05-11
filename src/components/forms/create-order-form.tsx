@@ -20,7 +20,6 @@ import { Icons } from "@/components/icons"
 // Import services
 import { orderService } from "@/services/orders-service"
 import { userService } from "@/services/user-service"
-import { fileService } from "@/services/file-service"
 import useAuthStatus from "@/lib/queries/auth-status"
 import { Form } from "@/components/ui/form"
 import { toast } from "sonner"
@@ -180,6 +179,7 @@ export default function CreateOrderForm({ agencyId, fileCode }: Props) {
     enabled: !!authData?.userId && !!agencyId,
   })
 
+  // Update available paper types to include A4 and A6
   useEffect(() => {
     if (agencyData?.agency?.agencyProducts) {
       const uniquePaperTypes = [
@@ -196,12 +196,10 @@ export default function CreateOrderForm({ agencyId, fileCode }: Props) {
       form.resetField("paperSize")
       form.resetField("colorOption")
       form.resetField("printStyle")
-      setAvailableColorOptions([])
-      setAvailablePrintStyles([])
-      setSelectedProduct(null)
     }
   }, [agencyData, form])
 
+  // Ensure color options and print styles are updated for A4 and A6
   useEffect(() => {
     if (agencyData?.agency?.agencyProducts && paperSize) {
       const matchingProducts = agencyData.agency.agencyProducts.filter(

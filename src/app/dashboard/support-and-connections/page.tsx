@@ -7,12 +7,10 @@ import Link from "next/link";
 import { columns } from "../analytics/components/recent-activity-table";
 export default function SupportAndConnectionsPage() {
   return (
-    <div className="flex flex-col p-4 items-start ">
-      <h1 className="text-4xl font-semibold">Contact</h1>
-      <p className="text-muted-foreground pt-1">
-        Contact us for any questions or concerns about DocuConnect.
-      </p>
-      <div className="w-full h-[1px] bg-secondary my-12 max-w-7xl"></div>
+    <div className="grid w-full max-w-5xl gap-10 p-4 md:p-8 lg:p-12 items-start">
+      <h1 className="mb-6 text-left text-xl font-bold md:text-2xl lg:text-3xl">
+        Support & Connections
+      </h1>
       <div className="flex flex-col items-start">
         <p className="text-base ">
           If you have any questions or concerns about DocuConnect, please

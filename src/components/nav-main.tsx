@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import {
   Folder,
   Forward,
@@ -9,26 +10,16 @@ import {
 } from "lucide-react";
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
-import { Icons } from "./icons";
-import useAuthStatus from "@/lib/queries/auth-status";
+
 export function NavMain({
   projects,
 }: {
@@ -38,9 +29,14 @@ export function NavMain({
     icon: LucideIcon;
   }[];
 }) {
-  const { isMobile } = useSidebar();
   const pathname = usePathname();
-  const { data, isLoading, error } = useAuthStatus();
+  // Sidebar'ın güncellenmesi için force update
+  const [, setRerender] = useState(0);
+  useEffect(() => {
+    const handler = () => setRerender((v) => v + 1);
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
   console.log(pathname);
 
   return (
@@ -61,23 +57,6 @@ export function NavMain({
           </SidebarMenuItem>
         ))}
         <SidebarSeparator className="my-4" />
-        <SidebarMenuItem>
-          {data?.isAuthenticated && !data?.isAdmin && !data?.isAgency ? (
-            <SidebarMenuButton
-              className={
-                "bg-secondary-muted hover:bg-secondary/70 transition-colors duration-150 ease-in-out"
-              }
-              asChild
-            >
-              <a href={"/become-an-agency"}>
-                <Icons.user />
-                <span className="text-sm">Become an agency</span>
-              </a>
-            </SidebarMenuButton>
-          ) : (
-            ""
-          )}
-        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   );

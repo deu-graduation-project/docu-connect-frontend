@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import useAuthStatus from "@/lib/queries/auth-status";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -15,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useEffect } from "react";
 
 const items = [
   {
@@ -58,12 +60,30 @@ const defaultValues: Partial<DisplayFormValues> = {
 
 export function DisplayForm() {
   const toast = useToast();
+  const { data } = useAuthStatus();
+  const userEmail = data?.email;
   const form = useForm<DisplayFormValues>({
     resolver: zodResolver(displayFormSchema),
     defaultValues,
   });
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && userEmail) {
+      const stored = localStorage.getItem(`sidebarDisplayItems_${userEmail}`);
+      if (stored) {
+        try {
+          form.setValue("items", JSON.parse(stored));
+        } catch {}
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userEmail]);
+
   function onSubmit(data: DisplayFormValues) {
+    if (typeof window !== "undefined" && userEmail) {
+      localStorage.setItem(`sidebarDisplayItems_${userEmail}`, JSON.stringify(data.items));
+      window.dispatchEvent(new Event("storage"));
+    }
     toast.toast({
       title: "You submitted the following values:",
       description: (

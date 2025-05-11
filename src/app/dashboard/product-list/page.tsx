@@ -93,7 +93,7 @@ export default function ProductList() {
     <div className="w-full max-w-4xl space-y-4">
       <Card className="m-4">
         <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex max-w-lg flex-col gap-2">
+          <div className="flex max-w-lg flex-col gap-2 px-4">
             <CardTitle>Set Product Prices for Your Agency</CardTitle>
             <CardDescription className="mr-4">
               Assign prices to the products available for your agency. These

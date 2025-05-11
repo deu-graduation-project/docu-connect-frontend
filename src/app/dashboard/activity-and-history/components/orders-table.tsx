@@ -24,8 +24,11 @@ export default function OrdersTable() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="mb-6 text-2xl font-bold">Recent Orders & Photocopies</h1>
-      {/* <DataTable columns={columns} data={data} /> */}
+      <div className="overflow-x-auto">
+        {authStatus?.isAgency && (
+          <DataTable columns={columns} data={agencyDetails ?? []} />
+        )}
+      </div>
     </div>
   )
 }
