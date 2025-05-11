@@ -31,7 +31,7 @@ export default function CreateAgencyProductForm() {
     queryKey: ["ProductListForAgencies"],
     queryFn: async () => {
       if (!authStatus?.userId) throw new Error("Agency ID is missing")
-      return productService.getProducts(0, 10)
+      return productService.getProducts(0, 20)
     },
     enabled: !!authStatus?.userId,
   })
