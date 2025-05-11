@@ -31,6 +31,7 @@ export class GetOrders {
   productPrintType!: string
   PricePerPage!: number
   CopyFile!: CopyFile[]
+  updatedDate!:Date;
 }
 export class GetSingleOrder {
   orderId?: string
@@ -48,6 +49,7 @@ export class GetSingleOrder {
   OrderState!: OrderState
   CopyFiles!: CopyFile[]
   CompletedCode?: string
+  updatedDate!: Date
 }
 export class GetAgencyAnalytics {
   Period!: string
@@ -182,6 +184,7 @@ export interface GetUserByIdResponse {
   name: string
   surname: string
   email: string
+  updatedDate:Date
   emailConfirmed: boolean
   userOrders: {
     orderCode: string
@@ -202,6 +205,7 @@ export interface GetUserByIdResponse {
       filePath: string
     }[]
   }[]
+  
   userComments: {
     commentText: string
     starRating: number
