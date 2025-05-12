@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Inbox } from "lucide-react"
-
+import { fileService } from "@/services/file-service"
 import { useOrdersStates } from "./orders-states"
 import {
   Select,
@@ -294,8 +294,17 @@ const OrderCard = ({ order }) => {
                     <p className="font-medium">{order.totalPrice} TL</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">State</p>
-                    <p className="font-medium">{order.orderState}</p>
+                    <p className="text-xs text-muted-foreground">Order Date</p>
+                    <p className="font-medium">
+                      {" "}
+                      {new Date(order.createdDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+
+                        hour: "2-digit",
+                      })}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -367,7 +376,7 @@ const OrderCard = ({ order }) => {
                         </div>
                         <button
                           onClick={() => {
-                            fileService.downloadFile(file.fileUrl)
+                            fileService.downloadFile(file?.filePath)
                           }}
                           className="rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20"
                         >

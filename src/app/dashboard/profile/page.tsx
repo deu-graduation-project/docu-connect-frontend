@@ -192,7 +192,11 @@ const AgencyProfile = ({ authStatus, agencyDetails }) => {
       </div>
 
       {/* Add PendingOrdersSection for agency as well */}
-      <PendingOrdersSection userId={authStatus.userId} />
+      {authStatus.isAgency ? (
+        ""
+      ) : (
+        <PendingOrdersSection userId={authStatus.userId} />
+      )}
     </div>
   )
 }
