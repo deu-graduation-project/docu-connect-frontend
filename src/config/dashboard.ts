@@ -22,7 +22,7 @@ export const dashboardConfig: DashboardConfig = {
       items: [
         {
           title: "Features",
-          href: "/features",
+          href: "/#features-section",
           external: false,
         },
         {
@@ -37,7 +37,7 @@ export const dashboardConfig: DashboardConfig = {
         },
         {
           title: "FAQs",
-          href: "/faqs",
+          href: "/#faq-section",
           external: false,
         },
       ],

@@ -5,31 +5,31 @@ export const publicMainConfig: PublicMainConfig = {
       id: "1",
       question: "What is DocuConnect?",
       answer:
-        "DocuConnect is a platform that connects you with local photocopy centers, allowing you to manage your documents and streamline your printing process all in one place.",
+        "It’s a web-based system that allows users to order photocopies online, compare local copy centers by price, location, and features, and track their orders in real time—bringing the traditional photocopying process into the digital age.",
     },
     {
       id: "2",
-      question: "How does DocuConnect work?",
+      question: "How do users benefit from the platform?",
       answer:
-        "Simply upload your documents to the DocuConnect platform, select a local photocopy center, and pick up your documents when they're ready.",
+        "Users save time and avoid uncertainty by uploading documents online, making secure payments, and accessing copy center details transparently, without needing to visit in person.",
     },
     {
       id: "3",
-      question: "How do I get started with DocuConnect?",
+      question: "How do copy centers benefit from the system?",
       answer:
-        "Getting started with DocuConnect is easy! Simply sign up for an account, upload your documents, and select a local photocopy center.",
+        "Copy centers can manage orders, monitor customer preferences, and reach a broader audience through a custom management dashboard designed for ease and efficiency.",
     },
     {
       id: "4",
-      question: "How much does DocuConnect cost?",
+      question: "How secure is the payment process?",
       answer:
-        "DocuConnect is free to use, but you will need to pay for printing and photocopying services at the local photocopy center.",
+        "All payments are processed using the Stripe infrastructure, ensuring a safe, fast, and reliable transaction experience.",
     },
     {
       id: "5",
-      question: "How do I find a local photocopy center?",
+      question: "What makes this platform different from others?",
       answer:
-        "You can find a local photocopy center by using the search feature on the DocuConnect platform.",
+        "Unlike general printing services, this system is specifically tailored for photocopy shops—offering real-time store comparison, local access, and a streamlined experience for both customers and vendors.",
     },
   ],
 };
