@@ -1,178 +1,156 @@
 "use client"
 
-import { Order, columns } from "./columns"
-import { DataTable } from "./data-table"
+import React, { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import useAuthStatus from "@/lib/queries/auth-status"
 import { orderService } from "@/services/orders-service"
-import { useState } from "react"
+// Import the specific types needed
+import { GetSingleOrder, OrderState, CopyFile } from "@/types/classes"
+import { columns } from "./columns" // Ensure columns are adapted for GetSingleOrder type
+import { DataTable } from "./data-table"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { OrderDetailsSheet } from "./order-details-sheet"
+import { Icons } from "@/components/icons"
 
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+// Helper function to map API state string to numeric enum
+function mapApiStateToEnum(apiState?: string): OrderState {
+  if (!apiState) return OrderState.Pending // Default state
+  const lowerState = apiState.toLowerCase()
+  switch (lowerState) {
+    case "pending":
+      return OrderState.Pending
+    case "confirmed":
+      return OrderState.Confirmed
+    case "started":
+      return OrderState.Started
+    case "finished":
+      return OrderState.Finished
+    case "completed":
+      return OrderState.Completed
+    case "rejected":
+      return OrderState.Rejected
+    default:
+      console.warn(`Unknown order state from API: ${apiState}`)
+      return OrderState.Pending // Fallback state
+  }
+}
+
 export default function OrdersTable() {
   const { data: authStatus } = useAuthStatus()
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  // State holds the GetSingleOrder object after mapping
+  const [selectedOrder, setSelectedOrder] = useState<GetSingleOrder | null>(
+    null
+  )
   const [isSheetOpen, setIsSheetOpen] = useState(false)
 
   const {
-    data: ordersData,
+    data: ordersResponse,
     isLoading,
     error,
   } = useQuery({
     queryKey: ["agencyOrders", page, pageSize],
-    queryFn: async () => {
+    // Specify the return type of the queryFn for clarity
+    queryFn: async (): Promise<{
+      orders: GetSingleOrder[]
+      totalCount: number
+    }> => {
       if (!authStatus?.isAgency) {
-        return []
+        return { orders: [], totalCount: 0 }
       }
-      // Fetch orders from the service
+      // Fetch raw data from the service
+      // Assuming apiData is like { orders: ApiOrder[], totalCount?: number }
       const apiData = await orderService.getOrders(page, pageSize)
 
-      // Map the API response to match our Order type
-      return apiData.orders.map((order) => ({
-        orderId: order.orderCode || "",
-        agencyName: order.agencyName || "Agency",
-        totalCost: order.totalPrice || 0,
-        status: mapOrderStateToStatus(order.orderState),
-        orderDate: order.createdDate || new Date().toISOString(),
-      })) as Order[]
+      // --- Mapping Step ---
+      const mappedOrders: GetSingleOrder[] = apiData.orders.map((order) => ({
+        // Map fields from API structure to GetSingleOrder structure
+        orderId: order.orderCode, // Use orderCode as orderId
+        OrderCode: order.orderCode,
+        AgencyName: order.agencyName,
+        CustomerName: order.customerUserName || null, // Handle potential null/undefined
+        TotalPrice: order.totalPrice,
+        TotalPage: order.sayfaSayısı, // Map from Turkish name
+        KopyaSayısı: order.kopyaSayısı, // Map from Turkish name
+        CreatedDate: order.createdDate,
+        OrderState: mapApiStateToEnum(order.orderState), // *** Use the mapping helper ***
+        PricePerPage: order.pricePerPage,
+        CopyFiles: order.copyFile
+          ? order.copyFile.map((f: any) => ({ fileName: f.fileName }))
+          : null, // Map file array
+        // Map optional fields if needed
+        ProductPaperType: order.productPaperType,
+        ProductColorOption: order.productColorOption,
+        ProductPrintType: order.productPrintType,
+      }))
+
+      return {
+        orders: mappedOrders,
+        // Pass totalCount if your API provides it, otherwise calculate based on result length maybe?
+        totalCount: apiData.totalCount || mappedOrders.length,
+      }
     },
     enabled: !!authStatus?.isAgency,
   })
 
-  // In your OrdersTable component, update the mapOrderStateToStatus function:
-  function mapOrderStateToStatus(state?: string): Order["status"] {
-    if (!state) return "pending"
+  // Extract the *mapped* orders array for the DataTable
+  const ordersData = ordersResponse?.orders || []
+  const totalOrderCount = ordersResponse?.totalCount || 0 // Use totalCount for pagination
 
-    const lowerState = state.toLowerCase()
-    if (lowerState.includes("completed")) return "completed"
-    if (lowerState.includes("finished")) return "finished"
-    if (lowerState.includes("started")) return "started"
-    if (lowerState.includes("confirmed")) return "confirmed"
-    if (lowerState.includes("rejected")) return "rejected"
-    if (lowerState.includes("pending")) return "pending"
+  const minTableHeight = `calc(${
+    Math.max(
+      ordersData.length, // Use fetched data length for calculation
+      1
+    ) * 53
+  }px + 57px)` // Adjust row height (53px) if needed
 
-    return state // return the original state if no match
+  const handleRowClick = (order: GetSingleOrder) => {
+    // Set the *mapped* GetSingleOrder object
+    setSelectedOrder(order)
+    setIsSheetOpen(true)
   }
-
-  // Calculate the minimum height needed for 10 rows (pageSize) plus header and padding
-  const minTableHeight = `calc(${pageSize * 53}px + 57px)` // 53px per row, 57px for header
 
   return (
     <div className="container mx-auto py-10">
       <div className="overflow-x-auto">
         {isLoading ? (
           <div className="flex h-64 items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-gray-900"></div>
+            <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : error ? (
           <div className="flex h-64 items-center justify-center text-red-500">
-            Error loading orders. Please try again.
+            Error loading orders:{" "}
+            {error instanceof Error ? error.message : "Please try again."}
           </div>
         ) : authStatus?.isAgency ? (
           <>
             <div className="min-h-[600px]">
-              {" "}
-              {/* Fixed height container */}
               <div style={{ minHeight: minTableHeight }}>
                 <DataTable
-                  columns={columns}
-                  data={ordersData || []}
-                  onRowClick={(order) => {
-                    setSelectedOrder(order)
-                    setIsSheetOpen(true)
-                  }}
+                  columns={columns} // *** REMINDER: Ensure columns.ts uses GetSingleOrder properties ***
+                  data={ordersData} // Pass the mapped data
+                  onRowClick={handleRowClick}
                 />
               </div>
-              {selectedOrder && (
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                  <SheetContent className="overflow-y-auto pt-12">
-                    <SheetHeader>
-                      <SheetTitle className="flex items-center justify-between">
-                        <span>Order #{selectedOrder.orderId}</span>
-                        {/* <Badge
-                          className={getStateBadgeClass(selectedOrder.status)}
-                        >
-                          {selectedOrder.status}
-                        </Badge> */}
-                      </SheetTitle>
-                      <SheetDescription>
-                        Complete details for your order
-                      </SheetDescription>
-                    </SheetHeader>
 
-                    <div className="mt-6 space-y-6">
-                      {/* Order Basic Info */}
-                      <div className="rounded-lg border p-4">
-                        <h3 className="text-lg font-medium">
-                          Order Information
-                        </h3>
-                        <div className="my-4 h-[1px] w-full bg-secondary"></div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <p className="text-xs text-muted-foreground">
-                              Agency
-                            </p>
-                            <p className="font-medium">
-                              {selectedOrder.agencyName}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">
-                              Total Price
-                            </p>
-                            <p className="font-medium">
-                              {selectedOrder.totalCost} TL
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">
-                              Order Date
-                            </p>
-                            <p className="font-medium">
-                              {new Date(
-                                selectedOrder.orderDate
-                              ).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "numeric",
-                                day: "numeric",
-                                hour: "2-digit",
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+              {/* Render the imported OrderDetailsSheet with the mapped selectedOrder */}
+              <OrderDetailsSheet
+                selectedOrder={selectedOrder} // Pass the state holding GetSingleOrder | null
+                isSheetOpen={isSheetOpen}
+                setIsSheetOpen={setIsSheetOpen}
+              />
 
-                      {/* Add other sections similarly */}
-                      {/* Print Details, Files, Timeline etc. */}
-
-                      {/* Order Actions */}
-                      <div className="flex space-x-2">
-                        <button className="flex-1 rounded-md border border-destructive bg-destructive/10 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
-                          Cancel Order
-                        </button>
-                      </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              )}
+              {/* Pagination Controls - Using totalOrderCount */}
               <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-gray-500">
-                  Showing {ordersData?.length || 0} entries
+                <div className="text-sm text-muted-foreground">
+                  Showing {ordersData.length} of {totalOrderCount} entries
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <button
                     onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                    disabled={page === 1}
+                    disabled={page === 1 || isLoading}
                     className={cn(
                       buttonVariants({ variant: "outline" }),
                       "disabled:opacity-50"
@@ -180,10 +158,14 @@ export default function OrdersTable() {
                   >
                     Previous
                   </button>
-                  <span className="px-3 py-1 text-xs">Page {page}</span>
+                  <span className="px-3 py-1 text-xs tabular-nums">
+                    Page {page}{" "}
+                    {/* Optional: Calculate total pages: Math.ceil(totalOrderCount / pageSize) */}
+                  </span>
                   <button
                     onClick={() => setPage((prev) => prev + 1)}
-                    disabled={!ordersData || ordersData.length < pageSize}
+                    // Disable 'Next' accurately using totalCount
+                    disabled={page * pageSize >= totalOrderCount || isLoading}
                     className={cn(
                       buttonVariants({ variant: "outline" }),
                       "disabled:opacity-50"

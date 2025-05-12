@@ -14,6 +14,7 @@ import {
 import { Ellipsis } from "lucide-react"
 import { Button, buttonVariants } from "@/components/ui/button"
 // Define the Order type based on your service response
+
 export type Order = {
   orderId: string
   agencyName: string
@@ -27,11 +28,20 @@ export type Order = {
     | "completed"
     | string
   orderDate: string
+  // Keep all your existing fields here
+  fileName?: string
+  paperSize?: string
+  colorOption?: string
+  printStyle?: string
+  numPrints?: number
+  pricePerPage?: number
+  filePrice?: number
+  numPages?: number
+  // ... any other fields you need
 }
 
-// State badge styling function
 const getStateBadgeClass = (state: string) => {
-  switch (state.toLowerCase()) {
+  switch (state) {
     case "pending":
       return "border-yellow-500/50 bg-yellow-500/20 text-yellow-700 hover:bg-yellow-500/30"
     case "confirmed":
@@ -59,15 +69,27 @@ export const columns: ColumnDef<Order>[] = [
     ),
   },
   {
-    accessorKey: "userName",
-    header: "Agency Name",
+    accessorKey: "numPages",
+    header: "Pages",
+    cell: ({ row }) => (
+      <div className="text-center">{row.original.numPages || 0}</div>
+    ),
   },
   {
-    accessorKey: "totalCost",
+    // Optional: Use accessorKey for sorting/filtering consistency
+    accessorKey: "TotalPrice",
     header: "Total Cost",
-    cell: ({ row }) => (
-      <div className="text-start">₺{row.original.totalCost.toFixed(2)}</div>
-    ),
+    cell: ({ row }) => {
+      // Access the correct property name: TotalPrice
+      const totalPrice = row.original.totalCost
+
+      // Add a check: only call toFixed if it's a valid number
+      const displayPrice =
+        typeof totalPrice === "number" ? totalPrice.toFixed(2) : "N/A" // Or display 0.00 or '-'
+
+      // Apply formatting
+      return <div className="text-start font-medium">₺{displayPrice}</div>
+    },
   },
   {
     accessorKey: "status",
@@ -78,7 +100,7 @@ export const columns: ColumnDef<Order>[] = [
         <Badge
           className={cn("px-2 py-1 capitalize", getStateBadgeClass(status))}
         >
-          {status.toLowerCase()}
+          {status}
         </Badge>
       )
     },
