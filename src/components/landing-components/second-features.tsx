@@ -46,9 +46,9 @@ const items = [
     icon: <ClipboardCopy className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "Digital Library Access",
+    title: "Effortless Order Management & Budgeting",
     description:
-      "Build and browse a personal library of shared knowledge and notes.",
+      "Review your orders effortlessly with user-friendly profiles and manage your budget effectively.  ",
     header: (
       <Image
         width={400}
@@ -62,8 +62,8 @@ const items = [
     icon: <TableColumnsSplit className="h-4 w-4 text-neutral-500" />,
   },
   {
-    title: "Customizable Print Options",
-    description: "Edit and prepare your documents to reduce printing costs.",
+    title: "Explore & Experience Our Copy Center Services",
+    description: "Discover and experience all the services you can access at our copy centers with full transparency",
     header: (
       <Image
         width={400}

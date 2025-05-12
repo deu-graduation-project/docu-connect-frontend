@@ -31,7 +31,7 @@ export default function HeroSection({ id }: { id?: string }) {
             <Button className={buttonVariants({ variant: "secondary" })}>
               <Icons.user className="h-4 w-4" />
 
-              <Link href="/sign-up"> Become a User</Link>
+              <Link href="/sign-up"> Become an User</Link>
             </Button>
           </div>
         </div>
