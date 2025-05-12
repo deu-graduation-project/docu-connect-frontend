@@ -4,20 +4,17 @@ export const dashboardConfig: DashboardConfig = {
   mainNav: [
     {
       title: "Home",
-      href: "#hero-section",
+      href: "/#hero-section",
     },
     {
       title: "Features",
-      href: "#features-section",
+      href: "/#features-section",
     },
     {
       title: "Pricing",
       href: "/pricing",
     },
-    {
-      title: "Contact",
-      href: "/contact",
-    },
+    
   ],
   footerNav: [
     {

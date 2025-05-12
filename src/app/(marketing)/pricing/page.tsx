@@ -23,6 +23,7 @@ import React from "react";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
 
+
 interface PlanFeature {
   type: string;
   features: {
@@ -118,7 +119,6 @@ const planFeatures: PlanFeature[] = [
 export default function PricingSectionCards() {
   return (
     <>
-      
       {/* Pricing */}
       <div className="container mx-auto px-4 md:px- 2xl:max-w-[1400px] py-16 lg:py-24">
         {/* Back Button */}
