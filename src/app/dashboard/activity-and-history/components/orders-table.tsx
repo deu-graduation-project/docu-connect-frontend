@@ -1,20 +1,36 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect, useMemo } from "react" // Added useMemo
 import { useQuery } from "@tanstack/react-query"
 import useAuthStatus from "@/lib/queries/auth-status"
 import { orderService } from "@/services/orders-service"
-// Import the specific types needed
 import { GetSingleOrder, OrderState, CopyFile } from "@/types/classes"
-import { columns } from "./columns" // Ensure columns are adapted for GetSingleOrder type
+import { columns } from "./columns"
 import { DataTable } from "./data-table"
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { buttonVariants, Button } from "@/components/ui/button"
 import { OrderDetailsSheet } from "./order-details-sheet"
 import { Icons } from "@/components/icons"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
-// Helper function to map API state string to numeric enum
+// Import table state types
+import {
+  SortingState,
+  ColumnFiltersState,
+  PaginationState,
+} from "@tanstack/react-table" // Added PaginationState
+
+// Mapping helper (keep as is)
+// ... mapApiStateToEnum ...
 function mapApiStateToEnum(apiState?: string): OrderState {
+  // ... (implementation from previous step)
   if (!apiState) return OrderState.Pending // Default state
   const lowerState = apiState.toLowerCase()
   switch (lowerState) {
@@ -36,148 +52,291 @@ function mapApiStateToEnum(apiState?: string): OrderState {
   }
 }
 
+// Status map needed for the filter dropdown
+// ... STATUS_FILTER_OPTIONS ...
+const STATUS_FILTER_OPTIONS = {
+  all: "All Statuses", // Option to clear filter
+  [OrderState.Pending]: "Pending",
+  [OrderState.Confirmed]: "Confirmed",
+  [OrderState.Started]: "Started",
+  [OrderState.Finished]: "Finished",
+  [OrderState.Completed]: "Completed",
+  [OrderState.Rejected]: "Rejected",
+}
+
 export default function OrdersTable() {
   const { data: authStatus } = useAuthStatus()
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  // State holds the GetSingleOrder object after mapping
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  // --- Manage Pagination State ---
+  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
+    pageIndex: 0, // Tanstack table uses 0-based index
+    pageSize: 10,
+  })
+
   const [selectedOrder, setSelectedOrder] = useState<GetSingleOrder | null>(
     null
   )
   const [isSheetOpen, setIsSheetOpen] = useState(false)
 
+  // Debounced Search state
+  const [customerSearch, setCustomerSearch] = useState("")
+  const [debouncedCustomerSearch, setDebouncedCustomerSearch] = useState("")
+
+  // Debounce effect for customer search
+  useEffect(() => {
+    const handler = setTimeout(
+      () => setDebouncedCustomerSearch(customerSearch),
+      500
+    )
+    return () => clearTimeout(handler)
+  }, [customerSearch])
+
+  // Update columnFilters effect for customer search
+  useEffect(() => {
+    setColumnFilters((prev) => {
+      const otherFilters = prev.filter((f) => f.id !== "CustomerName")
+      if (debouncedCustomerSearch) {
+        return [
+          ...otherFilters,
+          { id: "CustomerName", value: debouncedCustomerSearch },
+        ]
+      }
+      return otherFilters
+    })
+  }, [debouncedCustomerSearch])
+
+  // --- Adjust useQuery to use pageIndex + 1 for API call ---
+  const apiPage = pageIndex + 1 // Convert 0-based index to 1-based for API
   const {
     data: ordersResponse,
     isLoading,
     error,
+    isFetching, // Use isFetching for loading indicators during refetch
+    isPreviousData, // Useful for pagination UI
   } = useQuery({
-    queryKey: ["agencyOrders", page, pageSize],
-    // Specify the return type of the queryFn for clarity
+    // Update query key to include pagination
+    queryKey: ["agencyOrders", apiPage, pageSize],
     queryFn: async (): Promise<{
       orders: GetSingleOrder[]
       totalCount: number
     }> => {
-      if (!authStatus?.isAgency) {
-        return { orders: [], totalCount: 0 }
-      }
-      // Fetch raw data from the service
-      // Assuming apiData is like { orders: ApiOrder[], totalCount?: number }
-      const apiData = await orderService.getOrders(page, pageSize)
-
-      // --- Mapping Step ---
-      const mappedOrders: GetSingleOrder[] = apiData.orders.map((order) => ({
-        // Map fields from API structure to GetSingleOrder structure
-        orderId: order.orderCode, // Use orderCode as orderId
-        OrderCode: order.orderCode,
-        AgencyName: order.agencyName,
-        CustomerName: order.customerUserName || null, // Handle potential null/undefined
-        TotalPrice: order.totalPrice,
-        TotalPage: order.sayfaSayısı, // Map from Turkish name
-        KopyaSayısı: order.kopyaSayısı, // Map from Turkish name
-        CreatedDate: order.createdDate,
-        OrderState: mapApiStateToEnum(order.orderState), // *** Use the mapping helper ***
-        PricePerPage: order.pricePerPage,
-        CopyFiles: order.copyFile
-          ? order.copyFile.map((f: any) => ({ fileName: f.fileName }))
-          : null, // Map file array
-        // Map optional fields if needed
-        ProductPaperType: order.productPaperType,
-        ProductColorOption: order.productColorOption,
-        ProductPrintType: order.productPrintType,
-      }))
-
+      if (!authStatus?.isAgency) return { orders: [], totalCount: 0 }
+      // Pass 1-based page index to service
+      const apiData = await orderService.getOrders(apiPage, pageSize)
+      // ... (mapping logic remains the same) ...
+      const mappedOrders: GetSingleOrder[] = apiData.orders.map(
+        (order: any) => ({
+          // Add 'any' temporarily if TS complains about raw type
+          orderId: order.orderCode,
+          OrderCode: order.orderCode,
+          AgencyName: order.agencyName,
+          CustomerName: order.customerUserName || null,
+          TotalPrice: order.totalPrice,
+          TotalPage: order.sayfaSayısı,
+          KopyaSayısı: order.kopyaSayısı,
+          CreatedDate: order.createdDate,
+          OrderState: mapApiStateToEnum(order.orderState),
+          PricePerPage: order.pricePerPage,
+          CopyFiles:
+            order.copyFile?.map((f: any) => ({
+              fileName: f.fileName,
+              filePath: f.filePath,
+            })) ?? null, // Ensure filePath is mapped
+          Product: {
+            // Assuming product details might be flat or nested
+            paperType: order.productPaperType,
+            colorOption: order.productColorOption,
+            printType: order.productPrintType,
+            price: order.productPrice, // Assuming base price might be here
+          },
+        })
+      )
       return {
         orders: mappedOrders,
-        // Pass totalCount if your API provides it, otherwise calculate based on result length maybe?
-        totalCount: apiData.totalCount || mappedOrders.length,
+        totalCount: apiData.totalCount || 0, // Use totalCount from API
       }
     },
     enabled: !!authStatus?.isAgency,
+    keepPreviousData: true, // Recommended for smooth pagination
   })
 
-  // Extract the *mapped* orders array for the DataTable
   const ordersData = ordersResponse?.orders || []
-  const totalOrderCount = ordersResponse?.totalCount || 0 // Use totalCount for pagination
+  const totalOrderCount = ordersResponse?.totalCount || 0
 
-  const minTableHeight = `calc(${
-    Math.max(
-      ordersData.length, // Use fetched data length for calculation
-      1
-    ) * 53
-  }px + 57px)` // Adjust row height (53px) if needed
+  // Calculate page count based on total orders and page size
+  const pageCount = useMemo(() => {
+    return pageSize > 0 ? Math.ceil(totalOrderCount / pageSize) : 0
+  }, [totalOrderCount, pageSize])
 
   const handleRowClick = (order: GetSingleOrder) => {
-    // Set the *mapped* GetSingleOrder object
     setSelectedOrder(order)
     setIsSheetOpen(true)
   }
 
+  const handleStatusFilterChange = (value: string) => {
+    setColumnFilters((prev) => {
+      const otherFilters = prev.filter((f) => f.id !== "OrderState")
+      if (value && value !== "all") {
+        return [...otherFilters, { id: "OrderState", value: value }]
+      }
+      return otherFilters
+    })
+    // Reset to first page when filters change
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+
+  // Handle customer search input change
+  const handleCustomerInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setCustomerSearch(event.target.value)
+    // Reset to first page when filters change (triggered by debounce effect)
+    // Note: Debounce effect handles setting the filter, so pagination reset
+    // should ideally happen there, or here if immediate reset is desired.
+    // Let's keep it simple and reset pagination when the debounced value updates.
+    // (This logic is implicitly handled by the useEffect updating columnFilters)
+  }
+
+  // Effect to reset page index when debounced search changes filters
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }, [debouncedCustomerSearch]) // Reset page when search filter is applied
+
+  // Combine state for DataTable pagination prop
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+    }),
+    [pageIndex, pageSize]
+  )
+
   return (
     <div className="container mx-auto py-10">
+      <div className="flex items-center justify-between gap-4 py-4">
+        <Input
+          placeholder="Filter by customer name..."
+          value={customerSearch}
+          onChange={handleCustomerInputChange} // Use specific handler
+          className="max-w-sm"
+        />
+        <Select
+          onValueChange={handleStatusFilterChange}
+          // Optional: Control the Select value based on current filter state
+          // value={columnFilters.find(f => f.id === 'OrderState')?.value as string ?? 'all'}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by Status" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(STATUS_FILTER_OPTIONS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="overflow-x-auto">
-        {isLoading ? (
+        {isLoading && !isPreviousData ? ( // Show spinner only on initial load or hard refresh
           <div className="flex h-64 items-center justify-center">
             <Icons.spinner className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : error ? (
           <div className="flex h-64 items-center justify-center text-red-500">
-            Error loading orders:{" "}
+            Error:{" "}
             {error instanceof Error ? error.message : "Please try again."}
           </div>
         ) : authStatus?.isAgency ? (
           <>
-            <div className="min-h-[600px]">
-              <div style={{ minHeight: minTableHeight }}>
-                <DataTable
-                  columns={columns} // *** REMINDER: Ensure columns.ts uses GetSingleOrder properties ***
-                  data={ordersData} // Pass the mapped data
-                  onRowClick={handleRowClick}
-                />
-              </div>
+            <DataTable
+              columns={columns}
+              data={ordersData}
+              onRowClick={handleRowClick}
+              columnFilters={columnFilters}
+              setColumnFilters={setColumnFilters}
+              sorting={sorting}
+              setSorting={setSorting}
+              // --- Pass Pagination State ---
+              pagination={pagination}
+              setPagination={setPagination}
+              pageCount={pageCount}
+            />
 
-              {/* Render the imported OrderDetailsSheet with the mapped selectedOrder */}
-              <OrderDetailsSheet
-                selectedOrder={selectedOrder} // Pass the state holding GetSingleOrder | null
-                isSheetOpen={isSheetOpen}
-                setIsSheetOpen={setIsSheetOpen}
-              />
+            <OrderDetailsSheet
+              selectedOrder={selectedOrder}
+              isSheetOpen={isSheetOpen}
+              setIsSheetOpen={setIsSheetOpen}
+            />
 
-              {/* Pagination Controls - Using totalOrderCount */}
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  Showing {ordersData.length} of {totalOrderCount} entries
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                    disabled={page === 1 || isLoading}
-                    className={cn(
-                      buttonVariants({ variant: "outline" }),
-                      "disabled:opacity-50"
-                    )}
-                  >
-                    Previous
-                  </button>
-                  <span className="px-3 py-1 text-xs tabular-nums">
-                    Page {page}{" "}
-                    {/* Optional: Calculate total pages: Math.ceil(totalOrderCount / pageSize) */}
-                  </span>
-                  <button
-                    onClick={() => setPage((prev) => prev + 1)}
-                    // Disable 'Next' accurately using totalCount
-                    disabled={page * pageSize >= totalOrderCount || isLoading}
-                    className={cn(
-                      buttonVariants({ variant: "outline" }),
-                      "disabled:opacity-50"
-                    )}
-                  >
-                    Next
-                  </button>
-                </div>
+            {/* --- Pagination Controls (Using state managed here) --- */}
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                {/* Show total count from API, not affected by client filters */}
+                Total Orders: {totalOrderCount}
               </div>
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      pageIndex: prev.pageIndex - 1,
+                    }))
+                  }
+                  disabled={pageIndex === 0 || isFetching} // Disable based on state
+                >
+                  Previous
+                </Button>
+                <span className="px-3 py-1 text-xs tabular-nums">
+                  Page {pageIndex + 1} of {pageCount}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      pageIndex: prev.pageIndex + 1,
+                    }))
+                  }
+                  disabled={pageIndex >= pageCount - 1 || isFetching} // Disable based on state
+                >
+                  Next
+                </Button>
+                {/* Optional: Page size selector */}
+                <Select
+                  value={pageSize.toString()}
+                  onValueChange={(value) => {
+                    setPagination({
+                      pageIndex: 0, // Reset to first page on size change
+                      pageSize: Number(value),
+                    })
+                  }}
+                >
+                  <SelectTrigger className="w-[80px]">
+                    <SelectValue placeholder={pageSize} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[10, 20, 50, 100].map((size) => (
+                      <SelectItem key={size} value={size.toString()}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {isFetching && (
+                <Icons.spinner className="ml-4 h-4 w-4 animate-spin" />
+              )}{" "}
+              {/* Show loading during refetch */}
             </div>
           </>
         ) : (
+          // ... (Not agency message)
           <div className="flex h-64 items-center justify-center text-muted-foreground">
             You need agency access to view orders.
           </div>

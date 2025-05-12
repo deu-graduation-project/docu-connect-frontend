@@ -414,7 +414,7 @@ const OrderCard = ({ order }) => {
                   </div>
 
                   {order.orderState !== "Pending" && (
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-center space-x-3">
                       <div className="mt-0.5 h-2 w-2 rounded-full bg-blue-500"></div>
                       <div className="flex-1">
                         <p className="font-medium">Order Status Changed</p>
@@ -440,9 +440,11 @@ const OrderCard = ({ order }) => {
 
               {/* Order Actions */}
               <div className="flex space-x-2">
-                <button className="flex-1 rounded-md border border-destructive bg-destructive/10 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
-                  Cancel Order
-                </button>
+                {order.orderState === "Pending" && (
+                  <button className="flex-1 rounded-md border border-destructive bg-destructive/10 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
+                    Cancel Order
+                  </button>
+                )}
               </div>
             </div>
           </SheetContent>

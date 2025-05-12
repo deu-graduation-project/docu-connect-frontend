@@ -4,44 +4,25 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import React from "react"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
-import { Ellipsis } from "lucide-react"
-import { Button, buttonVariants } from "@/components/ui/button"
-// Define the Order type based on your service response
+import { GetSingleOrder, OrderState } from "@/types/classes"
+import { Button } from "@/components/ui/button" // Added for sort button styling
+import { ArrowUpDown } from "lucide-react" // Added for sort icon
 
-export type Order = {
-  orderId: string
-  agencyName: string
-  totalCost: number
-  status:
-    | "pending"
-    | "confirmed"
-    | "rejected"
-    | "started"
-    | "finished"
-    | "completed"
-    | string
-  orderDate: string
-  // Keep all your existing fields here
-  fileName?: string
-  paperSize?: string
-  colorOption?: string
-  printStyle?: string
-  numPrints?: number
-  pricePerPage?: number
-  filePrice?: number
-  numPages?: number
-  // ... any other fields you need
+// Map for status display (keep as is)
+const ORDER_STATES_MAP: { [key in OrderState]: string } = {
+  [OrderState.Pending]: "Pending",
+  [OrderState.Confirmed]: "Confirmed",
+  [OrderState.Started]: "Started",
+  [OrderState.Finished]: "Finished",
+  [OrderState.Completed]: "Completed",
+  [OrderState.Rejected]: "Rejected",
 }
 
-const getStateBadgeClass = (state: string) => {
-  switch (state) {
+// Badge class function (keep as is)
+const getStateBadgeClass = (state: OrderState) => {
+  // ... (implementation from previous step)
+  const stateString = ORDER_STATES_MAP[state]?.toLowerCase() // Get string representation
+  switch (stateString) {
     case "pending":
       return "border-yellow-500/50 bg-yellow-500/20 text-yellow-700 hover:bg-yellow-500/30"
     case "confirmed":
@@ -59,66 +40,102 @@ const getStateBadgeClass = (state: string) => {
   }
 }
 
-// Column Definitions
-export const columns: ColumnDef<Order>[] = [
+// Format date function (keep as is)
+const formatDate = (dateString: string | Date | null | undefined) => {
+  // ... (implementation from previous step)
+  if (!dateString) return "N/A"
+  try {
+    // Simple date format, adjust as needed
+    return new Date(dateString).toLocaleDateString("en-GB") // e.g., DD/MM/YYYY
+  } catch (e) {
+    console.error("Error formatting date:", e)
+    return "Invalid Date"
+  }
+}
+
+// Column Definitions using GetSingleOrder
+export const columns: ColumnDef<GetSingleOrder>[] = [
   {
-    accessorKey: "orderId",
-    header: "Order ID",
+    accessorKey: "OrderCode",
+    header: "Order Code",
     cell: ({ row }) => (
-      <div className="font-medium">{row.original.orderId}</div>
+      <div className="font-medium">{row.original.OrderCode}</div>
     ),
+    enableSorting: false, // Example: Disable sorting for code
+    enableHiding: false, // Example: Prevent hiding this column
+  },
+  // {
+  //   accessorKey: "AgencyName",
+  //   header: "Agency",
+  //   cell: ({ row }) => <div>{row.original.AgencyName || "N/A"}</div>,
+  // },
+  {
+    // Crucial for filtering: Use the correct accessorKey
+    accessorKey: "CustomerName",
+    header: "Customer",
+    cell: ({ row }) => <div>{row.original.CustomerName || "N/A"}</div>,
   },
   {
-    accessorKey: "numPages",
+    accessorKey: "TotalPage",
     header: "Pages",
     cell: ({ row }) => (
-      <div className="text-center">{row.original.numPages || 0}</div>
+      <div className="text-start">{row.original.TotalPage ?? 0}</div>
     ),
   },
   {
-    // Optional: Use accessorKey for sorting/filtering consistency
     accessorKey: "TotalPrice",
     header: "Total Cost",
     cell: ({ row }) => {
-      // Access the correct property name: TotalPrice
-      const totalPrice = row.original.totalCost
-
-      // Add a check: only call toFixed if it's a valid number
+      const totalPrice = row.original.TotalPrice
       const displayPrice =
-        typeof totalPrice === "number" ? totalPrice.toFixed(2) : "N/A" // Or display 0.00 or '-'
-
-      // Apply formatting
+        typeof totalPrice === "number" ? totalPrice.toFixed(2) : "N/A"
       return <div className="text-start font-medium">₺{displayPrice}</div>
     },
   },
   {
-    accessorKey: "status",
+    // Crucial for filtering: Use the correct accessorKey
+    accessorKey: "OrderState",
     header: "Status",
+    // Add a filter function (optional but can improve matching)
+    filterFn: (row, columnId, filterValue) => {
+      // If filter value is 'all' or empty, show row
+      if (!filterValue || filterValue === "all") return true
+      // Compare the row's OrderState (enum value) with the filter value (string representation of enum)
+      return row.original.OrderState === parseInt(filterValue as string, 10)
+    },
     cell: ({ row }) => {
-      const status = row.original.status
+      const statusEnum = row.original.OrderState
+      const statusString = ORDER_STATES_MAP[statusEnum] || "Unknown"
       return (
         <Badge
-          className={cn("px-2 py-1 capitalize", getStateBadgeClass(status))}
+          variant="outline"
+          className={cn("px-2 py-1 capitalize", getStateBadgeClass(statusEnum))}
         >
-          {status}
+          {statusString}
         </Badge>
       )
     },
   },
   {
-    accessorKey: "orderDate",
-    header: "Order Date",
-    cell: ({ row }) => {
-      const [formattedDate, setFormattedDate] = React.useState<string | null>(
-        null
+    // Crucial for sorting: Use the correct accessorKey
+    accessorKey: "CreatedDate",
+    // Make header explicitly sortable
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Order Date
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
       )
-
-      React.useEffect(() => {
-        const date = new Date(row.original.orderDate)
-        setFormattedDate(date.toLocaleDateString())
-      }, [row.original.orderDate])
-
-      return <div>{formattedDate || "Loading..."}</div>
     },
+    cell: ({ row }) => {
+      const formattedDate = formatDate(row.original.CreatedDate)
+      return <div className="pl-4">{formattedDate}</div> // Added padding to align with button header
+    },
+    // Optional: Define a custom sorting function if default doesn't work well for dates
+    // sortingFn: 'datetime', // Tanstack table built-in for dates
   },
 ]
