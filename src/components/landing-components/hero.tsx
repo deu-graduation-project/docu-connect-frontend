@@ -19,20 +19,20 @@ export default function HeroSection() {
             a library of notes that others can access. Empower your agency or
             share your expertise today!
           </p>
+          <div className="z-40 flex justify-center gap-4 mt-10">
+          <Button className={buttonVariants({ variant: "default" })}>
+            <Landmark className="h-4 w-4" />
+
+            <Link href="/become-an-agency">Become an Agency</Link>
+          </Button>
+
+          <Button className={buttonVariants({ variant: "secondary" })}>
+            <Icons.user className="h-4 w-4" />
+
+            <Link href="/sign-up"> Become a User</Link>
+          </Button>
         </div>
-      </div>
-      <div className="z-40 flex justify-center gap-4">
-        <Button className={buttonVariants({ variant: "default" })}>
-          <Landmark className="h-4 w-4" />
-
-          <Link href="/become-an-agency">Become an Agency</Link>
-        </Button>
-
-        <Button className={buttonVariants({ variant: "secondary" })}>
-          <Icons.user className="h-4 w-4" />
-
-          <Link href="/sign-up"> Become a User</Link>
-        </Button>
+        </div>
       </div>
     </div>
   )
