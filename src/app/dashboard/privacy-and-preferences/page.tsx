@@ -34,9 +34,9 @@ export default function PrivacyPreferencesPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto grid gap-6">
+    <div className="grid w-full max-w-5xl gap-10 p-4 md:p-8 lg:p-12 items-start">
       <div className="flex flex-col gap-4">
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">
+        <h1 className="mb-6 text-left text-xl font-bold md:text-2xl lg:text-3xl">
           Privacy & Preferences
         </h1>
         <p className="text-muted-foreground">

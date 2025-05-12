@@ -28,8 +28,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { UserAuthService } from "@/services/user-auth-service"
 
 const formSchema = z.object({
-  email: z.string().email("Geçerli bir email adresi giriniz."),
-  password: z.string().min(6, "Şifreniz en az 6 karakter olmalıdır."),
+  email: z.string().email("Email is wrong."),
+  password: z.string().min(6, "Password is wrong."),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -78,9 +78,9 @@ export default function SignInForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Card>
             <CardHeader>
-              <CardTitle>Giriş Yapınız</CardTitle>
+              <CardTitle>Login</CardTitle>
               <CardDescription>
-                Uygun boşlukları doldurup giriş yapınız
+                Fill necessary spaces
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6 p-4">
@@ -89,11 +89,11 @@ export default function SignInForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Emailinizi Giriniz</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="Emailinizi giriniz"
+                        placeholder="Enter your email"
                         {...field}
                       />
                     </FormControl>
@@ -107,16 +107,16 @@ export default function SignInForm() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex w-full justify-between">
-                      <FormLabel>Şifrenizi Giriniz</FormLabel>
+                      <FormLabel>Password</FormLabel>
 
                       <Link href={"/forgot-your-password"} className="text-sm">
-                        Şifremi Unuttum?
+                        Forgot your password?
                       </Link>
                     </div>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="Şifrenizi giriniz"
+                        placeholder="Enter your password"
                         {...field}
                       />
                     </FormControl>
@@ -133,23 +133,14 @@ export default function SignInForm() {
                   {loginMutation.isPending ? (
                     <Icons.spinner className="h-4 w-4 animate-spin" />
                   ) : (
-                    "Giriş Yap"
+                    "Sign in"
                   )}
-                </Button>
-                <Button
-                  className={cn(
-                    buttonVariants({ variant: "secondary" }),
-                    "w-full"
-                  )}
-                >
-                  <Icons.google />
-                  Google İle Giriş Yap
                 </Button>
               </div>
               <div className="flex w-full justify-center gap-2">
-                <p>Hesabınız yok mu?</p>
+                <p>Don't have an account?</p>
                 <Link href={"/sign-up"} className="underline">
-                  Kayıt Ol
+                  Sign up
                 </Link>
               </div>
             </CardContent>
