@@ -7,6 +7,8 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { Providers } from "@/components/providers"
 import { Toaster } from "@/components/ui/sonner"
+import "leaflet/dist/leaflet.css"
+
 const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], display: "swap" })
 const fontJakartaSans = FontJakarta({
   subsets: ["latin"],

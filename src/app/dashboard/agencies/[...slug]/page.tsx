@@ -4,7 +4,13 @@ import React from "react"
 import { useParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { userService } from "@/services/user-service"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Icons } from "@/components/icons"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -13,7 +19,7 @@ import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
+import AgencyLocationMap from "../../profile/components/agency-location-map"
 import CreateOrderForm from "@/components/forms/create-order-form"
 
 export default function AgencyPage() {
@@ -210,8 +216,7 @@ export default function AgencyPage() {
             <CardHeader>
               <CardTitle>Create your order</CardTitle>
             </CardHeader>
-            <h3 className="text-sm font-bold text-red-500 text-muted-foreground text-center mt-auto mb-4">
-                    Lütfen 0.50$ ve üstü bir sipariş veriniz.</h3>
+
             <CardContent className="w-full pt-6">
               <CreateOrderForm agencyId={agencyDetails.agency.agencyId} />
             </CardContent>
@@ -219,6 +224,12 @@ export default function AgencyPage() {
         </TabsContent>
       </Tabs>
 
+      <AgencyLocationMap
+        agencyName={agency.agencyName}
+        province={agency.province}
+        district={agency.district}
+        // addressExtra={agencyDetails?.agency.addressExtra}
+      />
       {/* Agency Reviews - Using your styling */}
       <Card className="my-12">
         <CardHeader>

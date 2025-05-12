@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import AgencyLocationMap from "@/app/dashboard/profile/components/agency-location-map"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { ShoppingBag, Trash2, Printer, FileText } from "lucide-react"
