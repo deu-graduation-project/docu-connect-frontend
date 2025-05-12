@@ -59,7 +59,7 @@ export const columns: ColumnDef<Order>[] = [
     ),
   },
   {
-    accessorKey: "agencyName",
+    accessorKey: "userName",
     header: "Agency Name",
   },
   {
@@ -98,22 +98,5 @@ export const columns: ColumnDef<Order>[] = [
 
       return <div>{formattedDate || "Loading..."}</div>
     },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            className={cn(
-              buttonVariants({ variant: "outline", size: "icon" }),
-              "items center flex justify-center text-primary"
-            )}
-          >
-            <Ellipsis />
-          </Button>
-        </SheetTrigger>
-      </Sheet>
-    ),
   },
 ]

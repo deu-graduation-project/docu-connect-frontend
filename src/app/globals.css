@@ -13,6 +13,23 @@ body {
   height: 100%;
 }
 
+@layer utilities {
+  .bg-dotted-pattern {
+    background-image:
+      linear-gradient(
+        to right,
+        theme("colors.primary.DEFAULT / 0.1") 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        theme("colors.primary.DEFAULT / 0.1") 1px,
+        transparent 1px
+      );
+    background-size: 20px 20px;
+  }
+}
+
 .mapWrap {
   position: relative;
   width: 100%;

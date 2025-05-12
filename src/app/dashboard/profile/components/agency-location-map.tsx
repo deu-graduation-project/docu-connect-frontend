@@ -176,7 +176,7 @@ const AgencyLocationMap: React.FC<AgencyLocationMapProps> = ({
   }
 
   return (
-    <div className="relative z-20 mx-auto mt-4 w-full max-w-7xl">
+    <div className="relative z-20 mx-auto mt-4 w-full max-w-7xl px-8 py-8">
       <div
         ref={mapRef}
         className="h-[700px] w-full rounded-lg border shadow-lg"
@@ -185,13 +185,13 @@ const AgencyLocationMap: React.FC<AgencyLocationMapProps> = ({
         {mapLoaded && <CustomMapControls />}
       </div>
 
-      {location && (
+      {/* {location && (
         <div className="mt-2 text-center text-sm text-muted-foreground">
           <p>
             {district}, {province}
           </p>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

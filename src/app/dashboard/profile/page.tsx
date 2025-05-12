@@ -172,13 +172,14 @@ const AgencyProfile = ({ authStatus, agencyDetails, agencyDetailsLoading }) => {
             : agencyDetails?.agency.agencyBio}
         </p>
       </div>
-
-      <AgencyLocationMap
-        agencyName={agencyDetails?.agency.agencyName}
-        province={agencyDetails?.agency.province}
-        district={agencyDetails?.agency.district}
-        // addressExtra={agencyDetails?.agency.addressExtra}
-      />
+      <div className="mx-auto w-full max-w-6xl">
+        <AgencyLocationMap
+          agencyName={agencyDetails?.agency.agencyName}
+          province={agencyDetails?.agency.province}
+          district={agencyDetails?.agency.district}
+          // addressExtra={agencyDetails?.agency.addressExtra}
+        />
+      </div>
 
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-base font-semibold">Takip Et</h1>
