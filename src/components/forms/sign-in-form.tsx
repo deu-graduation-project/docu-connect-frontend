@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/card"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { UserAuthService } from "@/services/user-auth-service"
+import { toast } from "sonner"
 
 const formSchema = z.object({
   email: z.string().email("Email is wrong."),
@@ -58,9 +59,13 @@ export default function SignInForm() {
       router.push("/dashboard/profile")
     },
     onError: (error) => {
-      console.error("Login failed:", error)
-      // Display an error message to the user
-    },
+  console.error("Login failed:", error);
+  const customMessage =
+    error.message === "Network Error"
+      ? "Unable to connect to the server. Please try again later."
+      : "Login failed. Please check your credentials.";
+  toast.error(customMessage);
+},
   })
 
   async function onSubmit(values: FormData) {
