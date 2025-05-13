@@ -76,9 +76,9 @@ export function AgencyCharts() {
           formattedEndDate,
           groupBy
         )
-        const jsonData = await response
+        const jsonData = await response;
 
-        return jsonData.agencyAnalytics
+        return jsonData.agencyAnalytics;
       } catch (err: any) {
         console.error("Error fetching data:", err) // Debug log
         if (err.message) {

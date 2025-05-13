@@ -18,6 +18,9 @@ type AgencyListProps = {
   province?: string
   district?: string
   orderBy?: string
+  paperType?: string
+  colorOptions?: number
+  printType?: number
   currentPage: number
   itemsPerPage: number
   onPageChange: (page: number) => void
@@ -27,6 +30,9 @@ export default function AgencyList({
   province,
   district,
   orderBy,
+  paperType,
+  colorOptions,
+  printType,
   currentPage,
   itemsPerPage,
   onPageChange,
@@ -42,6 +48,9 @@ export default function AgencyList({
       province,
       district,
       orderBy,
+      paperType,
+      colorOptions,
+      printType,
       currentPage,
       itemsPerPage,
     ],
@@ -52,7 +61,10 @@ export default function AgencyList({
         undefined, // agencyName is undefined
         province,
         district,
-        orderBy
+        orderBy,
+        paperType,
+        colorOptions?.toString(), // Convert number to string
+        printType?.toString() // Convert number to string
       )
     },
   })
@@ -130,7 +142,7 @@ export default function AgencyList({
                 <div className="mb-2 flex flex-col items-start justify-center gap-2 rounded-md border p-4 hover:shadow-md">
                   <div
                     className="h-32 w-full rounded-lg"
-                    style={getRandomPatternStyle(agency.agencyId)}
+                    style={getRandomPatternStyle(parseInt(agency.agencyId))} // Convert string to number
                   />
 
                   <h3 className="text-xl font-semibold">{agency.agencyName}</h3>
@@ -171,7 +183,7 @@ export default function AgencyList({
                 <Icons.chevronLeft className="h-4 w-4" />
               </Button>
 
-              {paginationRange.map((page, index) =>
+              {paginationRange.map((page) => // Removed unused 'index'
                 typeof page === "string" ? (
                   <span key={page} className="px-2">
                     ...
