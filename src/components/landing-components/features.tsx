@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
 export default function FeaturesSection() {
   const features = [
     {
-      title: "Developer-Friendly",
+      title: "Seller-Friendly Management Panel",
       description:
-        "Seamlessly integrates with agency workflows and developer tools.",
+        "Copy centers can easily manage their orders and boost efficiency through a user-friendly management dashboard.",
       icon: <Code size={30} className="text-primary" />,
     },
     {
@@ -29,14 +29,14 @@ export default function FeaturesSection() {
       icon: <DollarSign size={30} className="text-primary" />,
     },
     {
-      title: "Reliable Uptime",
+      title: "Larger Customer Base",
       description:
-        "Available 24/7 so users and agencies can always access their information.",
+        "Copy centers can reach a broader customer base through the digital platform. Users can easily compare stores based on price, location, and service features.",
       icon: <Cloud size={30} className="text-primary" />,
     },
     {
-      title: "Multi-User Collaboration",
-      description: "Easily collaborate on documents within the platform.",
+      title: "Real-Time Order Tracking",
+      description: "Users can track their copy orders in real-time and quickly see status updates.",
       icon: <Users size={30} className="text-primary" />,
     },
     {
@@ -45,8 +45,8 @@ export default function FeaturesSection() {
       icon: <HelpCircle size={30} className="text-primary" />,
     },
     {
-      title: "Satisfaction Guarantee",
-      description: "Love the platform or receive a full refund within 30 days.",
+      title: "Easy and Secure Payment",
+      description: "Enjoy fast and secure payment options for a hassle-free experience.",
       icon: <Shield size={30} className="text-primary" />,
     },
     {
