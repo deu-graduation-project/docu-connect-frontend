@@ -1,4 +1,5 @@
 "use client"
+import { Copy } from "lucide-react"
 import React, { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { userService } from "@/services/user-service"
@@ -9,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Inbox } from "lucide-react"
 import { fileService } from "@/services/file-service"
 import { useOrdersStates } from "./orders-states"
+import { toast } from "sonner"
 import {
   OrderState,
   getOrderStateLabel,
@@ -466,27 +468,35 @@ const OrderCard = ({ order, userId }) => {
               {/* Completion Code for Finished State */}
               {order.orderState === OrderState.Finished && (
                 <div className="mt-4 rounded-lg border bg-teal-500/10 p-4 text-sm">
-                  <div className="mb-2 flex items-center justify-between">
-                    <h3 className="font-medium text-teal-700">
-                      Your Order is Ready for Pickup
-                    </h3>
-                    {fetchCompletedCodeMutation.isLoading && (
-                      <Icons.loader className="h-4 w-4 animate-spin text-teal-700" />
-                    )}
-                  </div>
-
-                  {completedCode ? (
+                  {order.completedCode ? (
                     <div className="space-y-2">
-                      <p className="text-teal-700">
+                      <p className="pb-1 text-teal-700">
                         Your order is ready! Please show this code to the agency
                         when picking up your order:
                       </p>
-                      <div className="flex items-center justify-center rounded-md border border-teal-300 bg-teal-50 p-4">
-                        <span className="text-xl font-bold tracking-wider text-teal-700">
-                          {completedCode}
+                      <div className="flex items-center justify-between rounded-md border border-teal-300 bg-teal-700 p-4">
+                        <span className="text-xl font-bold tracking-wider text-primary">
+                          {order.completedCode}
                         </span>
+                        <Button
+                          variant="default"
+                          size="icon"
+                          onClick={() => {
+                            navigator.clipboard.writeText(order.completedCode)
+                            toast(
+                              <div className="flex items-center space-x-2">
+                                <Icons.check className="h-4 w-4" />
+                                <span className="ml-2">
+                                  Code copied to clipboard!
+                                </span>
+                              </div>
+                            )
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <p className="text-xs text-teal-600">
+                      <p className="pt-1 text-xs text-teal-600">
                         The agency will use this code to mark your order as
                         completed when you pick it up.
                       </p>
