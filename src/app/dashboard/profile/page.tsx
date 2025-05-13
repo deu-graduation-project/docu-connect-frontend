@@ -85,7 +85,7 @@ const UserProfile = ({ authStatus }) => {
     return <div>Loading...</div>
   }
 
-  if (isError) {
+  if (pendingRequestsError) {
     return <div>Error loading user data</div>
   }
 
@@ -96,11 +96,10 @@ const UserProfile = ({ authStatus }) => {
   return (
     <div className="pb-12">
       {/* Sticky Banner sadece onay bekleyen kullanıcılara */}
-      {isPending && (
-        <StickyBanner className="to-black-600 bg-gradient-to-r from-gray-500">
-          <p className="mx-0 max-w-[90%] text-white drop-shadow-md">
-            Your account is still pending approval. Please wait for
-            confirmation.
+      {pendingRequests?.hasRequest && (
+        <StickyBanner  className="bg-secondary">
+          <p className="mx-0 text-sm  text-primary drop-shadow-md">
+            Your account has not been approved yet. Please wait until the review process is finalized.
           </p>
         </StickyBanner>
       )}
