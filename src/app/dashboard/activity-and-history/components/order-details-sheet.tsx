@@ -245,6 +245,7 @@ export function OrderDetailsSheet({
 
   const stateLabel = ORDER_STATES_MAP[currentStatus]
   const badgeClass = getStateBadgeClass(currentStatus)
+  console.log(selectedOrder, "selectedOrder")
 
   return (
     <>
@@ -341,16 +342,11 @@ export function OrderDetailsSheet({
               </div>
             </div>
             {/* --- Files --- */}
-            {/* Ensure selectedOrder.CopyFiles exists and is an array */}
-            {
-            console.log("CopyFiles:", selectedOrder.CopyFiles) // For debugging
-            
-            selectedOrder.CopyFiles && selectedOrder.CopyFiles.length > 0 && (
+            {selectedOrder.CopyFiles && selectedOrder.CopyFiles.length > 0 && (
               <div className="rounded-lg border p-4">
                 <h3 className="text-lg font-medium">Files</h3>
                 <div className="my-4 h-[1px] w-full bg-secondary"></div>
                 <div className="space-y-2">
-                  {/* Corrected line: Use CopyFiles instead of copyFile */}
                   {selectedOrder.CopyFiles.map((file, index) => (
                     <div
                       key={index}
@@ -365,12 +361,50 @@ export function OrderDetailsSheet({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          fileService.downloadFile(file?.fileCode)
+                        onClick={async () => {
+                          if (!file?.fileCode) {
+                            toast.error("Download Error", {
+                              description:
+                                "File identifier is missing. Cannot download.",
+                            })
+                            return
+                          }
+
+                          try {
+                            // Show loading toast
+                            const loadingToast = toast.loading(
+                              "Downloading file..."
+                            )
+
+                            // Use the fileName from the file object when downloading
+                            await fileService.downloadFile(file.fileCode)
+
+                            // Dismiss loading toast and show success
+                            toast.dismiss(loadingToast)
+                            toast.success("Download successful")
+                          } catch (error) {
+                            // Show error toast with detailed message
+                            toast.error("Download Failed", {
+                              description:
+                                error instanceof Error
+                                  ? error.message
+                                  : "Unknown error occurred",
+                            })
+                          }
                         }}
-                        disabled={!file?.fileCode}
+                        disabled={
+                          !file?.fileCode ||
+                          updateOrderStatusMutation.isPending ||
+                          cancelOrderMutation.isPending
+                        }
                       >
-                        <Icons.download className="mr-2 h-4 w-4" /> Download
+                        {/* Add a loading spinner when downloading */}
+                        {updateOrderStatusMutation.isPending ? (
+                          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Icons.download className="mr-2 h-4 w-4" />
+                        )}
+                        Download
                       </Button>
                     </div>
                   ))}

@@ -142,6 +142,7 @@ export default function OrdersTable() {
             order.copyFile?.map((f: any) => ({
               fileName: f.fileName,
               filePath: f.filePath,
+              fileCode: f.fileCode,
             })) ?? null, // Ensure filePath is mapped
           Product: {
             // Assuming product details might be flat or nested
