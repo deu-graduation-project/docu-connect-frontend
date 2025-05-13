@@ -27,6 +27,7 @@ import { Icons } from "@/components/icons"
 import { userService } from "@/services/user-service"
 import { useState } from "react"
 import { User } from "@/types/classes"
+import { useRouter } from "next/navigation"
 
 const formSchema = z
   .object({
@@ -47,6 +48,7 @@ type FormData = z.infer<typeof formSchema>
 export default function SignUpForm() {
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const router = useRouter()
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -76,7 +78,10 @@ export default function SignUpForm() {
     try {
       await userService.createUser(
         userPayload,
-        () => setSuccessMessage("User account successfully created!"),
+        () => {
+          setSuccessMessage("User account successfully created!")
+          setTimeout(() => router.push("/sign-in"), 2000) // Redirect after 2 seconds
+        },
         (errorMessage) => setError(errorMessage)
       )
     } catch (err) {
