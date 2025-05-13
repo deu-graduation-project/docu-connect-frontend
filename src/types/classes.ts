@@ -202,6 +202,7 @@ export interface GetUserByIdResponse {
       paperType: string
       colorOption: string
     }
+    completedCode?:string
     copyFiles: {
       fileName: string
       filePath: string
