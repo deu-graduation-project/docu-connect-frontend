@@ -79,10 +79,15 @@ const formSchema = z
     profilePhoto: z.instanceof(File).optional(),
     agencyBio: z.string().optional(),
   })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "Şifreler eşleşmiyor.",
-    path: ["passwordConfirm"], // Field to highlight
-  })
+  .superRefine(({ password, passwordConfirm }, ctx) => {
+    if (password !== passwordConfirm) {
+      ctx.addIssue({
+        path: ["passwordConfirm"],
+        code: z.ZodIssueCode.custom,
+        message: "Şifreler eşleşmiyor.",
+      });
+    }
+  });
 
 type FormData = z.infer<typeof formSchema>
 
@@ -265,7 +270,8 @@ export default function BecomeAnAgency() {
                     <FormItem className="w-full">
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <InputPassWord
+                        <Input
+                          type="password"
                           placeholder="Enter your password"
                           {...field}
                         />
@@ -273,7 +279,7 @@ export default function BecomeAnAgency() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                />  
                 <FormField
                   control={form.control}
                   name="passwordConfirm"
@@ -472,7 +478,7 @@ export default function BecomeAnAgency() {
                       <FormLabel>Agency Bio</FormLabel>
                       <FormControl>
                         <Textarea
-                          className="h-[232px] resize-none"
+                          className="h-[100px] resize-none"
                           placeholder="Enter agency bio"
                           {...field}
                         />
