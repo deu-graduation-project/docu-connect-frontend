@@ -25,6 +25,7 @@ const ProfilePage = () => {
     },
     enabled: authStatus?.isAgency,
   })
+  
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -53,8 +54,9 @@ const ProfilePage = () => {
   )
 }
 
+
 const UserProfile = ({ authStatus }) => {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["userDetails", authStatus?.userId],
     queryFn: () => {
       if (!authStatus?.userId) {
@@ -138,7 +140,6 @@ const UserProfile = ({ authStatus }) => {
     </div>
   )
 }
-
 
 const AgencyProfile = ({ authStatus, agencyDetails, agencyDetailsLoading }) => {
   console.log(agencyDetails)

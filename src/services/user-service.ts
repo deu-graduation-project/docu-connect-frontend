@@ -33,7 +33,7 @@ class UserService {
     }
 
     try {
-      const response = await fetchWithAuth(`${this.baseUrl}/Users/CreateUser`, {
+      const response = await fetchWithAuth(${this.baseUrl}/Users/CreateUser, {
         method: "POST",
         headers: {
           "Content-Type": "application/json-patch+json",
@@ -108,7 +108,7 @@ class UserService {
       if (profilePhoto) formData.append("ProfilePhoto", profilePhoto)
 
       // Fix Content-Type handling for FormData
-      const response = await fetch(`${this.baseUrl}/Users/BeAnAgency`, {
+      const response = await fetch(${this.baseUrl}/Users/BeAnAgency, {
         method: "POST",
         body: formData,
       })
@@ -169,7 +169,7 @@ class UserService {
     })
 
     const response = await fetchWithAuth(
-      `${this.baseUrl}/Users/GetBeAnAgencyRequests?${queryParams}`,
+      ${this.baseUrl}/Users/GetBeAnAgencyRequests?${queryParams},
       { method: "GET" }
     )
 
@@ -198,7 +198,7 @@ class UserService {
     IsConfirmed: boolean
   ): Promise<any> {
     const response = await fetchWithAuth(
-      `${this.baseUrl}/Users/BeAnAgencyConfirm`,
+      ${this.baseUrl}/Users/BeAnAgencyConfirm,
       {
         method: "POST",
         body: JSON.stringify({ BeAnAgencyRequestId, IsConfirmed }),
@@ -241,7 +241,7 @@ class UserService {
     })
 
     const response = await fetchWithAuth(
-      `${this.baseUrl}/Users/GetAgencies?${queryParams}`,
+      ${this.baseUrl}/Users/GetAgencies?${queryParams},
       { method: "GET" }
     )
     const data = await response.json()
@@ -255,7 +255,7 @@ class UserService {
   async getSingleAgency(agencyId: string): Promise<GetSingleAgency> {
     const queryParams = new URLSearchParams({ agencyId })
     const response = await fetchWithAuth(
-      `${this.baseUrl}/Users/GetSingleAgency?${queryParams}`,
+      ${this.baseUrl}/Users/GetSingleAgency?${queryParams},
       { method: "GET" }
     )
     const data: GetSingleAgency = await response.json()
@@ -269,7 +269,7 @@ class UserService {
    */
   async assignRolesToUser(userId: string, roles: string[]): Promise<any> {
     const response = await fetchWithAuth(
-      `${this.baseUrl}/Users/AssignRolesToUser`,
+      ${this.baseUrl}/Users/AssignRolesToUser,
       {
         method: "POST",
         body: JSON.stringify({ userId, roles }),
@@ -303,7 +303,7 @@ class UserService {
     if (data.profilePhoto) formData.append("ProfilePhoto", data.profilePhoto)
 
     const response = await fetchWithAuth(
-      `${this.baseUrl}/Users/UpdateAgencyInfos`,
+      ${this.baseUrl}/Users/UpdateAgencyInfos,
       {
         method: "PUT",
         body: formData,
@@ -336,13 +336,14 @@ class UserService {
       queryParams.append("UserId", userId)
     }
     const response = await fetchWithAuth(
-      `${this.baseUrl}/Users/GetUserById?${queryParams}`,
+      ${this.baseUrl}/Users/GetUserById?${queryParams},
       { method: "GET" }
     )
     const data: GetUserByIdResponse = await response.json()
     return data
   }
   async anyPendingBeAnAgencyRequest(): Promise<boolean> {
+ async anyPendingBeAnAgencyRequest(): Promise<boolean> {
     try {
       const data = await fetchWithAuth(
         `${this.baseUrl}/Users/AnyPendingBeAnAgencyRequest`,
@@ -353,7 +354,6 @@ class UserService {
           },
         }
       )
-
       const isPending: boolean = await data.json()
       return isPending
     } catch (error: any) {
@@ -361,5 +361,4 @@ class UserService {
     }
   }
 }
-
 export const userService = new UserService()
