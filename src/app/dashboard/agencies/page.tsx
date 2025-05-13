@@ -13,6 +13,20 @@ import {
   SelectLabel,
   SelectGroup,
 } from "@/components/ui/select"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { ChevronsUpDown, Check } from "lucide-react"
 import AgencyList from "../../../components/agency-list"
 import { turkish_cities } from "@/lib/cities"
 
@@ -86,48 +100,63 @@ export default function Agencies() {
       </div>
       <div className="my-6 h-[1px] w-full max-w-7xl bg-secondary"></div>
       <div className="grid w-full max-w-4xl grid-cols-2 items-center justify-start gap-4 py-4 sm:grid-cols-4">
-        {/* Cities select */}
-        <Select
-          key={selectedCity || "city"}
-          value={selectedCity}
-          onValueChange={handleCityChange}
-        >
-          <SelectTrigger className="w-full gap-2">
-            <SelectValue placeholder="Select city" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Cities</SelectLabel>
-              {turkish_cities.map((city) => (
-                <SelectItem key={city.plate} value={city.name}>
-                  {capitalizeWords(city.name)}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        {/* Cities combobox */}
+        <div className="relative w-full">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+          {selectedCity ? capitalizeWords(selectedCity) : "Select city"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+          <CommandInput placeholder="Search cities..." />
+          <CommandList>
+            {turkish_cities.map((city) => (
+              <CommandItem
+                key={city.plate}
+                onSelect={() => handleCityChange(city.name)}
+              >
+                {capitalizeWords(city.name)}
+              </CommandItem>
+            ))}
+          </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
 
-        {/* Districts select - disabled if no city selected */}
-        <Select
-          key={selectedDistrict || "district"}
-          value={selectedDistrict}
-          onValueChange={handleDistrictChange}
+        {/* Districts combobox - disabled if no city selected */}
+        <div className="relative w-full">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+          variant="outline"
+          className="w-full justify-between"
           disabled={!selectedCity}
-        >
-          <SelectTrigger className="w-full gap-2">
-            <SelectValue placeholder="Select district" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Districts</SelectLabel>
-              {availableDistricts.map((district) => (
-                <SelectItem key={district} value={district}>
-                  {capitalizeWords(district)}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+              >
+          {selectedDistrict
+            ? capitalizeWords(selectedDistrict)
+            : "Select district"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+          <CommandInput placeholder="Search districts..." />
+          <CommandList>
+            {availableDistricts.map((district) => (
+              <CommandItem
+                key={district}
+                onSelect={() => handleDistrictChange(district)}
+              >
+                {capitalizeWords(district)}
+              </CommandItem>
+            ))}
+          </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
 
         {/* Updated Sorting options */}
         <Select
