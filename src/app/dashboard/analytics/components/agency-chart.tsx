@@ -5,7 +5,7 @@ import { orderService } from "@/services/orders-service"
 import { useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { addDays, format } from "date-fns"
-import { tr } from 'date-fns/locale'
+import { tr } from "date-fns/locale"
 import { CalendarIcon, CheckIcon } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
@@ -23,7 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts"
 import { Calendar } from "@/components/ui/calendar"
 
 export function AgencyCharts() {
@@ -31,46 +39,48 @@ export function AgencyCharts() {
     from: new Date(),
     to: addDays(new Date(), 7),
   })
-  
+
   const [groupBy, setGroupBy] = React.useState("day")
 
-  // Tüm seçenekleri içeren sabit dizi
+  // Options array
   const OPTIONS = [
-    { value: 'totalPrice', label: 'Toplam Fiyat' },
-    { value: 'totalPageCount', label: 'Toplam Sayfa' },
-    { value: 'totalCompletedOrder', label: 'Tamamlanan Sipariş' }
+    { value: "totalPrice", label: "Toplam Fiyat" },
+    { value: "totalPageCount", label: "Toplam Sayfa" },
+    { value: "totalCompletedOrder", label: "Tamamlanan Sipariş" },
   ]
 
-  const [selectedValues, setSelectedValues] = React.useState<string[]>(OPTIONS.map(option => option.value))
+  const [selectedValues, setSelectedValues] = React.useState<string[]>(
+    OPTIONS.map((option) => option.value)
+  )
 
   const [visibleLines, setVisibleLines] = React.useState({
     totalPrice: true,
     totalPageCount: true,
-    totalCompletedOrder: true
+    totalCompletedOrder: true,
   })
 
-  const { data: rawData, isLoading, error } = useQuery({
+  const {
+    data: rawData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["agencyCharts", date?.from, date?.to, groupBy],
     queryFn: async () => {
       if (!date?.from || !date?.to) return []
       const formattedStartDate = format(date.from, "dd.MM.yyyy")
       const formattedEndDate = format(date.to, "dd.MM.yyyy")
-      
+
       try {
         const response = await orderService.getAgencyAnalytics(
           formattedStartDate,
           formattedEndDate,
           groupBy
         )
+        const jsonData = await response
 
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.message || "Bir hata oluştu")
-        }
-        
-        const jsonData = await response.json()
         return jsonData.agencyAnalytics
       } catch (err: any) {
+        console.error("Error fetching data:", err) // Debug log
         if (err.message) {
           throw new Error(err.message)
         }
@@ -78,31 +88,54 @@ export function AgencyCharts() {
       }
     },
     enabled: !!date?.from && !!date?.to,
-    retry: false
+    retry: false,
   })
 
-  // Veriyi tarih sırasına göre sırala (eskiden yeniye)
+  // Sort data by date (oldest to newest)
   const sortedData = React.useMemo(() => {
-    if (!rawData) return []
+    if (!rawData || !Array.isArray(rawData)) return []
+
+    console.log("Processing data:", rawData) // Debug log
+
     return [...rawData].sort((a, b) => {
-      const dateA = new Date(a.period.split('.').reverse().join('-'))
-      const dateB = new Date(b.period.split('.').reverse().join('-'))
+      // Parse dates from DD.MM.YYYY format
+      const [dayA, monthA, yearA] = a.period.split(".")
+      const [dayB, monthB, yearB] = b.period.split(".")
+
+      const dateA = new Date(+yearA, +monthA - 1, +dayA)
+      const dateB = new Date(+yearB, +monthB - 1, +dayB)
+
       return dateA.getTime() - dateB.getTime()
     })
   }, [rawData])
 
+  // Debug log for visualization
+  React.useEffect(() => {
+    console.log("Sorted data for chart:", sortedData)
+    console.log("Selected values:", selectedValues)
+    console.log("Visible lines:", visibleLines)
+  }, [sortedData, selectedValues, visibleLines])
+
   const handleSelect = (value: string) => {
-    setSelectedValues(current => {
+    setSelectedValues((current) => {
       if (current.includes(value)) {
-        return current.filter(v => v !== value)
+        return current.filter((v) => v !== value)
       }
       return [...current, value]
     })
-    
-    setVisibleLines(prev => ({
+
+    setVisibleLines((prev) => ({
       ...prev,
-      [value]: !prev[value]
+      [value]: !prev[value],
     }))
+  }
+
+  // Custom tooltip formatter to properly format values
+  const formatTooltipValue = (value: number, name: string) => {
+    if (name === "Toplam Fiyat") {
+      return `${value.toLocaleString("tr-TR")} ₺`
+    }
+    return value.toLocaleString("tr-TR")
   }
 
   return (
@@ -115,56 +148,85 @@ export function AgencyCharts() {
         {/* Chart */}
         <div className="min-h-[300px] sm:min-h-[400px]">
           {isLoading ? (
-            <div className="flex h-[300px] sm:h-[400px] items-center justify-center">
+            <div className="flex h-[300px] items-center justify-center sm:h-[400px]">
               <div>Yükleniyor...</div>
             </div>
           ) : error ? (
-            <div className="flex h-[300px] sm:h-[400px] items-center justify-center">
+            <div className="flex h-[300px] items-center justify-center sm:h-[400px]">
               <div>Firmanın siparişi bulunmamaktadır.</div>
             </div>
           ) : sortedData && sortedData.length > 0 ? (
             selectedValues.length === 0 ? (
-              <div className="flex h-[300px] sm:h-[400px] items-center justify-center">
+              <div className="flex h-[300px] items-center justify-center sm:h-[400px]">
                 <div>Gösterilecek bir veri seçilmedi</div>
               </div>
             ) : (
-              <div className="h-[300px] sm:h-[400px] w-full">
-                <ResponsiveContainer>
-                  <LineChart data={sortedData} margin={{ right: 30, left: 10 }}>
-                    <XAxis 
+              <div className="h-[300px] w-full sm:h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={sortedData}
+                    margin={{ top: 10, right: 30, left: 20, bottom: 70 }}
+                  >
+                    <XAxis
                       dataKey="period"
                       angle={-45}
                       textAnchor="end"
-                      height={60}
+                      height={70}
                       interval={0}
                       tick={{ fontSize: 12 }}
                     />
-                    <YAxis width={80} />
-                    <Tooltip />
-                    <Legend verticalAlign="bottom" height={36}/>
+                    <YAxis
+                      yAxisId="left"
+                      orientation="left"
+                      stroke="#8884d8"
+                      width={80}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      stroke="#82ca9d"
+                      width={80}
+                    />
+                    <Tooltip
+                      formatter={formatTooltipValue}
+                      labelFormatter={(label) => `Tarih: ${label}`}
+                    />
+                    <Legend verticalAlign="top" height={36} />
+
                     {visibleLines.totalPrice && (
                       <Line
+                        yAxisId="left"
                         type="monotone"
                         dataKey="totalPrice"
                         stroke="#8884d8"
+                        strokeWidth={2}
                         name="Toplam Fiyat"
                         dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
                       />
                     )}
                     {visibleLines.totalPageCount && (
                       <Line
+                        yAxisId="right"
                         type="monotone"
                         dataKey="totalPageCount"
                         stroke="#82ca9d"
+                        strokeWidth={2}
                         name="Toplam Sayfa"
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
                       />
                     )}
                     {visibleLines.totalCompletedOrder && (
                       <Line
+                        yAxisId="right"
                         type="monotone"
                         dataKey="totalCompletedOrder"
                         stroke="#ffc658"
+                        strokeWidth={2}
                         name="Tamamlanan Sipariş"
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
                       />
                     )}
                   </LineChart>
@@ -172,21 +234,21 @@ export function AgencyCharts() {
               </div>
             )
           ) : (
-            <div className="flex h-[300px] sm:h-[400px] items-center justify-center">
+            <div className="flex h-[300px] items-center justify-center sm:h-[400px]">
               <div>Veri bulunamadı</div>
             </div>
           )}
         </div>
 
-        {/* Kontrol Paneli */}
+        {/* Controls */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Tarih Seçimi */}
+          {/* Date Selection */}
           <div className="w-full">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-left font-normal min-h-[40px] whitespace-normal"
+                  className="min-h-[40px] w-full justify-start whitespace-normal text-left font-normal"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
                   <span className="line-clamp-1">
@@ -205,8 +267,8 @@ export function AgencyCharts() {
                   </span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent 
-                className="w-auto p-0" 
+              <PopoverContent
+                className="w-auto p-0"
                 align="start"
                 side="bottom"
                 sideOffset={4}
@@ -224,11 +286,14 @@ export function AgencyCharts() {
             </Popover>
           </div>
 
-          {/* Gösterilecek Veriler */}
+          {/* Data Selection */}
           <div className="w-full">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-between min-h-[40px]">
+                <Button
+                  variant="outline"
+                  className="min-h-[40px] w-full justify-between"
+                >
                   <span className="line-clamp-1">Gösterilecek veriler</span>
                   {selectedValues.length > 0 && (
                     <Badge variant="secondary" className="ml-2 flex-shrink-0">
@@ -237,8 +302,8 @@ export function AgencyCharts() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent 
-                className="w-[250px] p-2" 
+              <PopoverContent
+                className="w-[250px] p-2"
                 align="start"
                 side="bottom"
                 sideOffset={4}
@@ -271,10 +336,10 @@ export function AgencyCharts() {
             </Popover>
           </div>
 
-          {/* Gruplama Seçimi */}
+          {/* Grouping Selection */}
           <div className="w-full">
             <Select value={groupBy} onValueChange={setGroupBy}>
-              <SelectTrigger className="w-full min-h-[40px]">
+              <SelectTrigger className="min-h-[40px] w-full">
                 <SelectValue placeholder="Grupla" />
               </SelectTrigger>
               <SelectContent>
