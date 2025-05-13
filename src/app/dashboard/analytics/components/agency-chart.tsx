@@ -62,14 +62,9 @@ export function AgencyCharts() {
           formattedEndDate,
           groupBy
         )
+        const jsonData = await response;
 
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.message || "Bir hata oluştu")
-        }
-        
-        const jsonData = await response.json()
-        return jsonData.agencyAnalytics
+        return jsonData.agencyAnalytics;
       } catch (err: any) {
         if (err.message) {
           throw new Error(err.message)

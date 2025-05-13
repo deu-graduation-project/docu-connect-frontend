@@ -198,13 +198,8 @@ class OrderService {
         method: "GET",
       }
     )
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch agency analytics: ${response.statusText}`
-      )
-    }
     try {
-      const data: GetAgencyAnalytics[] = await response.json()
+      const data: GetAgencyAnalytics[] = await response.json();
       return data
     } catch (error) {
       console.error("Failed to parse agency analytics response:", error)

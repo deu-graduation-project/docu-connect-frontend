@@ -1,9 +1,6 @@
 "use client"
 import React, { useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils" // Utility for classnames
-import Link from "next/link"
 import {
   Select,
   SelectContent,
@@ -16,12 +13,29 @@ import {
 import AgencyList from "../../../components/agency-list"
 import { turkish_cities } from "@/lib/cities"
 
+const paperTypeOptions = [
+  { label: "A3", value: "A3" },
+  { label: "A4", value: "A4" },
+  { label: "A5", value: "A5" },
+  { label: "A6", value: "A6" },
+]
+
+const colorOptionsList = [
+  { label: "Siyah-Beyaz", value: "SiyahBeyaz" },
+  { label: "Renkli", value: "Renkli" },
+]
+
+const printTypesList = [
+  { label: "Tek Yüz", value: "TekYuz" },
+  { label: "Çift Yüz", value: "CiftYuz" },
+]
+
 // Updated sorting options to match backend expectations
 const sortingOptions = [
-  { label: "Highest Rating", value: "stardesc" },
-  { label: "Lowest Rating", value: "starasc" },
-  { label: "Alphabetical (A-Z)", value: "atoz" },
-  { label: "Alphabetical (Z-A)", value: "ztoa" },
+  { label: "Yıldıza göre azalan", value: "stardesc" },
+  { label: "Yıldıza göre artan", value: "starasc" },
+  { label: "Firma adına göre artan", value: "atoz" },
+  { label: "Firma adına göre azalan", value: "ztoa" },
 ]
 
 // Function to capitalize first letter of each word
@@ -37,6 +51,9 @@ export default function Agencies() {
   const [selectedCity, setSelectedCity] = useState<string | undefined>()
   const [selectedDistrict, setSelectedDistrict] = useState<string | undefined>()
   const [selectedSorting, setSelectedSorting] = useState<string | undefined>()
+  const [selectedPaperType, setSelectedPaperType] = useState<string | undefined>()
+  const [selectedColorOption, setSelectedColorOption] = useState<string | undefined>()
+  const [selectedPrintType, setSelectedPrintType] = useState<string | undefined>()
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 9
 
@@ -66,10 +83,28 @@ export default function Agencies() {
     setCurrentPage(1) // Reset to first page when sorting changes
   }
 
+  const handlePaperTypeChange = (value: string) => {
+    setSelectedPaperType(value)
+    setCurrentPage(1)
+  }
+
+  const handleColorOptionChange = (value: string) => {
+    setSelectedColorOption(value)
+    setCurrentPage(1)
+  }
+
+  const handlePrintTypeChange = (value: string) => {
+    setSelectedPrintType(value)
+    setCurrentPage(1)
+  }
+
   const resetFilters = () => {
     setSelectedCity(undefined)
     setSelectedDistrict(undefined)
     setSelectedSorting(undefined)
+    setSelectedPaperType(undefined)
+    setSelectedColorOption(undefined)
+    setSelectedPrintType(undefined)
     setCurrentPage(1)
   }
 
@@ -85,7 +120,7 @@ export default function Agencies() {
         </p>
       </div>
       <div className="my-6 h-[1px] w-full max-w-7xl bg-secondary"></div>
-      <div className="grid w-full max-w-4xl grid-cols-2 items-center justify-start gap-4 py-4 sm:grid-cols-4">
+      <div className="grid w-full max-w-7xl grid-cols-2 items-center justify-start gap-4 py-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
         {/* Cities select */}
         <Select
           key={selectedCity || "city"}
@@ -150,7 +185,70 @@ export default function Agencies() {
           </SelectContent>
         </Select>
 
-        <Button variant="default" onClick={resetFilters} className="">
+        {/* Paper Type select */}
+        <Select
+          key={selectedPaperType || "paperType"}
+          value={selectedPaperType}
+          onValueChange={handlePaperTypeChange}
+        >
+          <SelectTrigger className="w-full gap-2">
+            <SelectValue placeholder="Kağıt Türü" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Kağıt Türü</SelectLabel>
+              {paperTypeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        {/* Color Options select */}
+        <Select
+          key={selectedColorOption || "colorOption"}
+          value={selectedColorOption}
+          onValueChange={handleColorOptionChange}
+        >
+          <SelectTrigger className="w-full gap-2">
+            <SelectValue placeholder="Renk Seçeneği" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Renk Seçenekleri</SelectLabel>
+              {colorOptionsList.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        {/* Print Type select */}
+        <Select
+          key={selectedPrintType || "printType"}
+          value={selectedPrintType}
+          onValueChange={handlePrintTypeChange}
+        >
+          <SelectTrigger className="w-full gap-2">
+            <SelectValue placeholder="Baskı Tipi" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Baskı Tipleri</SelectLabel>
+              {printTypesList.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <Button variant="default" onClick={resetFilters} className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1">
           Reset Filters
         </Button>
       </div>
@@ -162,6 +260,9 @@ export default function Agencies() {
             selectedDistrict ? capitalizeWords(selectedDistrict) : undefined
           }
           orderBy={selectedSorting}
+          paperType={selectedPaperType}
+          colorOptions={selectedColorOption}
+          printType={selectedPrintType}
           currentPage={currentPage}
           itemsPerPage={itemsPerPage}
           onPageChange={setCurrentPage}
