@@ -9,13 +9,13 @@ export default function AccountManagement() {
   return (
     <div className="grid w-full max-w-5xl gap-10 p-4 md:p-8 lg:p-12 items-start">
       <div className="flex flex-col gap-6 text-left">
-        <h1 className="mb-6 text-left text-xl font-bold md:text-2xl lg:text-3xl">
+        <h1 className="mb-6 text- text-xl font-bold md:text-2xl lg:text-3xl">
           Account Management
         </h1>
       </div>
 
       <Tabs defaultValue="account" className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-3 gap-4 text-left">
+        <TabsList className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
           <TabsTrigger value="account" className="text-sm md:text-base">
             Account
           </TabsTrigger>

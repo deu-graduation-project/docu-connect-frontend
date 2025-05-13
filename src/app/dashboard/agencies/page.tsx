@@ -10,6 +10,18 @@ import {
   SelectLabel,
   SelectGroup,
 } from "@/components/ui/select"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+// ChevronsUpDown, Check, CommandEmpty, CommandGroup removed as they were unused
 import AgencyList from "../../../components/agency-list"
 import { turkish_cities } from "@/lib/cities"
 
@@ -38,6 +50,9 @@ const sortingOptions = [
   { label: "Firma adına göre azalan", value: "ztoa" },
 ]
 
+const ALL_OPTION_VALUE = "TUMU" // Using a constant for "All" option
+const ALL_OPTION_LABEL = "Tümü"
+
 // Function to capitalize first letter of each word
 const capitalizeWords = (str: string) => {
   return str
@@ -64,37 +79,56 @@ export default function Agencies() {
     return city ? city.counties : []
   }, [selectedCity])
 
+  const orderByNumericValue = useMemo(() => {
+    if (!selectedSorting) {
+      return undefined
+    }
+    const index = sortingOptions.findIndex(
+      (opt) => opt.value === selectedSorting
+    )
+    return index === -1 ? undefined : index
+  }, [selectedSorting])
+
   // Reset district when city changes
   const handleCityChange = (value: string) => {
-    setSelectedCity(value)
-    setSelectedDistrict(undefined)
+    if (value === ALL_OPTION_VALUE) {
+      setSelectedCity(undefined)
+      setSelectedDistrict(undefined)
+    } else {
+      setSelectedCity(value)
+      setSelectedDistrict(undefined)
+    }
     setCurrentPage(1) // Reset to first page when city changes
   }
 
   // Handle district change
   const handleDistrictChange = (value: string) => {
-    setSelectedDistrict(value)
+    if (value === ALL_OPTION_VALUE) {
+      setSelectedDistrict(undefined)
+    } else {
+      setSelectedDistrict(value)
+    }
     setCurrentPage(1) // Reset to first page when district changes
   }
 
   // Handle sorting change
   const handleSortingChange = (value: string) => {
-    setSelectedSorting(value)
+    setSelectedSorting(value === ALL_OPTION_VALUE ? undefined : value)
     setCurrentPage(1) // Reset to first page when sorting changes
   }
 
   const handlePaperTypeChange = (value: string) => {
-    setSelectedPaperType(value)
+    setSelectedPaperType(value === ALL_OPTION_VALUE ? undefined : value)
     setCurrentPage(1)
   }
 
   const handleColorOptionChange = (value: string) => {
-    setSelectedColorOption(value)
+    setSelectedColorOption(value === ALL_OPTION_VALUE ? undefined : value)
     setCurrentPage(1)
   }
 
   const handlePrintTypeChange = (value: string) => {
-    setSelectedPrintType(value)
+    setSelectedPrintType(value === ALL_OPTION_VALUE ? undefined : value)
     setCurrentPage(1)
   }
 
@@ -120,146 +154,187 @@ export default function Agencies() {
         </p>
       </div>
       <div className="my-6 h-[1px] w-full max-w-7xl bg-secondary"></div>
-      <div className="grid w-full max-w-7xl grid-cols-2 items-center justify-start gap-4 py-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-        {/* Cities select */}
-        <Select
-          key={selectedCity || "city"}
-          value={selectedCity}
-          onValueChange={handleCityChange}
-        >
-          <SelectTrigger className="w-full gap-2">
-            <SelectValue placeholder="Select city" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Cities</SelectLabel>
-              {turkish_cities.map((city) => (
-                <SelectItem key={city.plate} value={city.name}>
-                  {capitalizeWords(city.name)}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
 
-        {/* Districts select - disabled if no city selected */}
-        <Select
-          key={selectedDistrict || "district"}
-          value={selectedDistrict}
-          onValueChange={handleDistrictChange}
-          disabled={!selectedCity}
-        >
-          <SelectTrigger className="w-full gap-2">
-            <SelectValue placeholder="Select district" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Districts</SelectLabel>
-              {availableDistricts.map((district) => (
-                <SelectItem key={district} value={district}>
-                  {capitalizeWords(district)}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+      <div className="flex w-full max-w-4xl flex-col gap-4 py-4">
+        {/* Row 1: City, District, Sorting (Diğerleri) */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* Cities combobox */}
+          <div className="relative w-full">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  {selectedCity ? capitalizeWords(selectedCity) : "Select city"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput placeholder="Search cities..." />
+                  <CommandList>
+                    <CommandItem onSelect={() => handleCityChange(ALL_OPTION_VALUE)}>
+                      {ALL_OPTION_LABEL}
+                    </CommandItem>
+                    {turkish_cities.map((city) => (
+                      <CommandItem
+                        key={city.plate}
+                        onSelect={() => handleCityChange(city.name)}
+                      >
+                        {capitalizeWords(city.name)}
+                      </CommandItem>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
 
-        {/* Updated Sorting options */}
-        <Select
-          key={selectedSorting || "sort"}
-          value={selectedSorting}
-          onValueChange={handleSortingChange}
-        >
-          <SelectTrigger className="w-full gap-2">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Sort by</SelectLabel>
-              {sortingOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          {/* Districts combobox - disabled if no city selected */}
+          <div className="relative w-full">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between"
+                  disabled={!selectedCity}
+                >
+                  {selectedDistrict
+                    ? capitalizeWords(selectedDistrict)
+                    : "Select district"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput placeholder="Search districts..." />
+                  <CommandList>
+                    <CommandItem onSelect={() => handleDistrictChange(ALL_OPTION_VALUE)}>
+                      {ALL_OPTION_LABEL}
+                    </CommandItem>
+                    {availableDistricts.map((district) => (
+                      <CommandItem
+                        key={district}
+                        onSelect={() => handleDistrictChange(district)}
+                      >
+                        {capitalizeWords(district)}
+                      </CommandItem>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
 
-        {/* Paper Type select */}
-        <Select
-          key={selectedPaperType || "paperType"}
-          value={selectedPaperType}
-          onValueChange={handlePaperTypeChange}
-        >
-          <SelectTrigger className="w-full gap-2">
-            <SelectValue placeholder="Kağıt Türü" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Kağıt Türü</SelectLabel>
-              {paperTypeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          {/* Updated Sorting options */}
+          <Select
+            key={selectedSorting || "sort"}
+            value={selectedSorting}
+            onValueChange={handleSortingChange}
+          >
+            <SelectTrigger className="w-full gap-2">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Sort by</SelectLabel>
+                <SelectItem value={ALL_OPTION_VALUE}>{ALL_OPTION_LABEL}</SelectItem>
+                {sortingOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
 
-        {/* Color Options select */}
-        <Select
-          key={selectedColorOption || "colorOption"}
-          value={selectedColorOption}
-          onValueChange={handleColorOptionChange}
-        >
-          <SelectTrigger className="w-full gap-2">
-            <SelectValue placeholder="Renk Seçeneği" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Renk Seçenekleri</SelectLabel>
-              {colorOptionsList.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+        {/* Row 2: Paper Type, Color, Print Type */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* Paper Type select */}
+          <Select
+            key={selectedPaperType || "paperType"}
+            value={selectedPaperType}
+            onValueChange={handlePaperTypeChange}
+          >
+            <SelectTrigger className="w-full gap-2">
+              <SelectValue placeholder="Kağıt Türü" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Kağıt Türü</SelectLabel>
+                <SelectItem value={ALL_OPTION_VALUE}>{ALL_OPTION_LABEL}</SelectItem>
+                {paperTypeOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-        {/* Print Type select */}
-        <Select
-          key={selectedPrintType || "printType"}
-          value={selectedPrintType}
-          onValueChange={handlePrintTypeChange}
-        >
-          <SelectTrigger className="w-full gap-2">
-            <SelectValue placeholder="Baskı Tipi" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Baskı Tipleri</SelectLabel>
-              {printTypesList.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          {/* Color Options select */}
+          <Select
+            key={selectedColorOption || "colorOption"}
+            value={selectedColorOption}
+            onValueChange={handleColorOptionChange}
+          >
+            <SelectTrigger className="w-full gap-2">
+              <SelectValue placeholder="Renk Seçeneği" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Renk Seçenekleri</SelectLabel>
+                <SelectItem value={ALL_OPTION_VALUE}>{ALL_OPTION_LABEL}</SelectItem>
+                {colorOptionsList.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-        <Button variant="default" onClick={resetFilters} className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1">
-          Reset Filters
-        </Button>
+          {/* Print Type select */}
+          <Select
+            key={selectedPrintType || "printType"}
+            value={selectedPrintType}
+            onValueChange={handlePrintTypeChange}
+          >
+            <SelectTrigger className="w-full gap-2">
+              <SelectValue placeholder="Baskı Tipi" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Baskı Tipleri</SelectLabel>
+                <SelectItem value={ALL_OPTION_VALUE}>{ALL_OPTION_LABEL}</SelectItem>
+                {printTypesList.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Reset Filters Button */}
+        <div className="flex pt-2">
+          <Button variant="default" onClick={resetFilters}>
+            Reset Filters
+          </Button>
+        </div>
       </div>
 
       <div className="w-full max-w-7xl">
         <AgencyList
-          province={selectedCity ? capitalizeWords(selectedCity) : undefined}
-          district={
-            selectedDistrict ? capitalizeWords(selectedDistrict) : undefined
+          province={
+            selectedCity
+              ? turkish_cities.find((c) => c.name === selectedCity)?.plate
+              : undefined
           }
-          orderBy={selectedSorting}
+          district={
+            (selectedDistrict
+              ? capitalizeWords(selectedDistrict)
+              : undefined) as any // Cast to any for district
+          }
+          orderBy={orderByNumericValue} // Use the new memoized numeric value
           paperType={selectedPaperType}
           colorOptions={selectedColorOption}
           printType={selectedPrintType}

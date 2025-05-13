@@ -30,9 +30,14 @@ import {
   AlertCircle,
   Download,
   Package,
+  Clock,
   Stamp,
   type Icon as LucideIcon,
   ArrowLeft,
+  CheckCircle,
+  Play,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react"
 
 export type Icon = typeof LucideIcon
@@ -40,9 +45,14 @@ export type Icon = typeof LucideIcon
 export const Icons = {
   // Removed duplicate spinner property
   addProduct: FilePlus2,
+  clock: Clock,
   logo: Stamp,
   star: Star,
   package: Package,
+  checkCircle: CheckCircle,
+  play: Play,
+  checkCircle2: CheckCircle2,
+  xCircle: XCircle,
   file: File,
   alertCircle: AlertCircle,
   fileText: FileText,

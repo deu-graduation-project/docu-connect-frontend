@@ -9,7 +9,7 @@ import Image from "next/image"
 import UpdateAgencySheet from "@/components/update-agency-sheet"
 import { getRandomPatternStyle } from "@/lib/generate-pattern"
 import PendingOrdersSection from "./components/pending-orders-section" // Import the new component
-
+import AgencyLocationMap from "./components/agency-location-map" // Import the new map component
 const ProfilePage = () => {
   const { data: authStatus, isLoading, error } = useAuthStatus()
 
@@ -64,7 +64,6 @@ const UserProfile = ({ authStatus }) => {
     enabled: authStatus?.isAuthenticated,
   })
 
-  console.log("User Details", data)
   return (
     <div className="pb-12">
       <div className="relative h-64 w-full">
@@ -103,7 +102,8 @@ const UserProfile = ({ authStatus }) => {
   )
 }
 
-const AgencyProfile = ({ authStatus, agencyDetails }) => {
+const AgencyProfile = ({ authStatus, agencyDetails, agencyDetailsLoading }) => {
+  console.log(agencyDetails)
   return (
     <div className="pb-12">
       <div className="relative h-64 w-full">
@@ -172,6 +172,14 @@ const AgencyProfile = ({ authStatus, agencyDetails }) => {
             : agencyDetails?.agency.agencyBio}
         </p>
       </div>
+      <div className="mx-auto w-full max-w-6xl">
+        <AgencyLocationMap
+          agencyName={agencyDetails?.agency.agencyName}
+          province={agencyDetails?.agency.province}
+          district={agencyDetails?.agency.district}
+          // addressExtra={agencyDetails?.agency.addressExtra}
+        />
+      </div>
 
       <div className="flex flex-col items-center justify-center">
         <h1 className="text-base font-semibold">Takip Et</h1>
@@ -192,7 +200,11 @@ const AgencyProfile = ({ authStatus, agencyDetails }) => {
       </div>
 
       {/* Add PendingOrdersSection for agency as well */}
-      <PendingOrdersSection userId={authStatus.userId} />
+      {authStatus.isAgency ? (
+        ""
+      ) : (
+        <PendingOrdersSection userId={authStatus.userId} />
+      )}
     </div>
   )
 }

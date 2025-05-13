@@ -30,15 +30,37 @@ import useAuthStatus from "@/lib/queries/auth-status"
 import { InputPassWord } from "@/components/ui/animation-password-input"
 import { useMemo } from "react"
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectTrigger,
-  SelectValue,
-  SelectItem,
-  SelectLabel,
-} from "@/components/ui/select"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { ChevronsUpDown, Check } from "lucide-react"
+export function cn(...inputs: (string | undefined | null | false)[]) {
+  return inputs.filter(Boolean).join(" ")
+}
 import { turkish_cities } from "@/lib/cities"
+
+function normalizeString(str: string) {
+  return str
+    .toLocaleLowerCase("tr-TR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i")
+    .replace(/İ/g, "i")
+    .replace(/ç/g, "c")
+    .replace(/ş/g, "s")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ö/g, "o")
+}
 
 const formSchema = z
   .object({
@@ -93,14 +115,26 @@ export default function BecomeAnAgency() {
       agencyBio: "",
     },
   })
+  const [searchProvince, setSearchProvince] = useState("")
+  const [searchDistrict, setSearchDistrict] = useState("")
 
   // Get available districts based on selected province
   const selectedProvince = form.watch("address.province")
-  const availableDistricts = useMemo(() => {
-    if (!selectedProvince) return []
+
+  const filteredProvinces = useMemo(() => {
+    return turkish_cities.filter((city) =>
+      normalizeString(city.name).includes(normalizeString(searchProvince))
+    )
+  }, [searchProvince])
+
+  const filteredDistricts = useMemo(() => {
     const city = turkish_cities.find((c) => c.name === selectedProvince)
-    return city ? city.counties : []
-  }, [selectedProvince])
+    return city
+      ? city.counties.filter((d) =>
+          normalizeString(d).includes(normalizeString(searchDistrict))
+        )
+      : []
+  }, [selectedProvince, searchDistrict])
 
   useEffect(() => {
     if (form.formState.isSubmitSuccessful) {
@@ -284,60 +318,115 @@ export default function BecomeAnAgency() {
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormLabel>Province</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className="w-full gap-2">
-                              <SelectValue placeholder="Select province" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>Provinces</SelectLabel>
-                                {turkish_cities.map((province) => (
-                                  <SelectItem
-                                    key={province.name}
-                                    value={province.name}
-                                  >
-                                    {capitalizeWords(province.name)}
-                                  </SelectItem>
-                                ))}
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className="w-full justify-between"
+                            >
+                              {field.value
+                                ? capitalizeWords(field.value)
+                                : "Select province"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Search province..."
+                                value={searchProvince}
+                                onValueChange={setSearchProvince}
+                              />
+                              <CommandList>
+                                <CommandEmpty>No province found.</CommandEmpty>
+                                <CommandGroup>
+                                  {filteredProvinces.map((city) => (
+                                    <CommandItem
+                                      key={city.name}
+                                      value={city.name}
+                                      onSelect={(value) => {
+                                        form.setValue("address.province", value)
+                                        form.setValue("address.district", "")
+                                        setSearchProvince("")
+                                      }}
+                                    >
+                                      {capitalizeWords(city.name)}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          field.value === city.name
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="address.district"
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormLabel>District</FormLabel>
-                        <FormControl>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={!selectedProvince}
-                          >
-                            <SelectTrigger className="w-full gap-2">
-                              <SelectValue placeholder="Select district" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>Districts</SelectLabel>
-                                {availableDistricts.map((district) => (
-                                  <SelectItem key={district} value={district}>
-                                    {capitalizeWords(district)}
-                                  </SelectItem>
-                                ))}
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className="w-full justify-between"
+                              disabled={!selectedProvince}
+                            >
+                              {field.value
+                                ? capitalizeWords(field.value)
+                                : "Select district"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-full p-0">
+                            <Command>
+                              <CommandInput
+                                placeholder="Search district..."
+                                value={searchDistrict}
+                                onValueChange={setSearchDistrict}
+                              />
+                              <CommandList>
+                                <CommandEmpty>No district found.</CommandEmpty>
+                                <CommandGroup>
+                                  {filteredDistricts.map((district) => (
+                                    <CommandItem
+                                      key={district}
+                                      value={district}
+                                      onSelect={(value) => {
+                                        form.setValue("address.district", value)
+                                        setSearchDistrict("")
+                                      }}
+                                    >
+                                      {capitalizeWords(district)}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto h-4 w-4",
+                                          field.value === district
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Inbox } from "lucide-react"
-
+import { fileService } from "@/services/file-service"
 import { useOrdersStates } from "./orders-states"
 import {
   Select,
@@ -294,8 +294,17 @@ const OrderCard = ({ order }) => {
                     <p className="font-medium">{order.totalPrice} TL</p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">State</p>
-                    <p className="font-medium">{order.orderState}</p>
+                    <p className="text-xs text-muted-foreground">Order Date</p>
+                    <p className="font-medium">
+                      {" "}
+                      {new Date(order.createdDate).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+
+                        hour: "2-digit",
+                      })}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -367,7 +376,7 @@ const OrderCard = ({ order }) => {
                         </div>
                         <button
                           onClick={() => {
-                            fileService.downloadFile(file.fileUrl)
+                            fileService.downloadFile(file?.filePath)
                           }}
                           className="rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20"
                         >
@@ -405,7 +414,7 @@ const OrderCard = ({ order }) => {
                   </div>
 
                   {order.orderState !== "Pending" && (
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-center space-x-3">
                       <div className="mt-0.5 h-2 w-2 rounded-full bg-blue-500"></div>
                       <div className="flex-1">
                         <p className="font-medium">Order Status Changed</p>
@@ -431,9 +440,11 @@ const OrderCard = ({ order }) => {
 
               {/* Order Actions */}
               <div className="flex space-x-2">
-                <button className="flex-1 rounded-md border border-destructive bg-destructive/10 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
-                  Cancel Order
-                </button>
+                {order.orderState === "Pending" && (
+                  <button className="flex-1 rounded-md border border-destructive bg-destructive/10 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
+                    Cancel Order
+                  </button>
+                )}
               </div>
             </div>
           </SheetContent>
