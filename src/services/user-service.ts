@@ -108,13 +108,10 @@ class UserService {
       if (profilePhoto) formData.append("ProfilePhoto", profilePhoto)
 
       // Fix Content-Type handling for FormData
-      const response = await fetch(
-        `${this.baseUrl}/Users/BeAnAgency`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      )
+      const response = await fetch(`${this.baseUrl}/Users/BeAnAgency`, {
+        method: "POST",
+        body: formData,
+      })
 
       if (!response.ok) {
         const contentType = response.headers.get("content-type")
@@ -228,7 +225,7 @@ class UserService {
     orderBy?: string,
     paperType?: string,
     colorOption?: string,
-    printType?:string
+    printType?: string
   ): Promise<{ totalCount: number; agencies: GetAgencies[] }> {
     // Changed BeAnAgencyRequests to agencies
     const queryParams = new URLSearchParams({
@@ -344,6 +341,21 @@ class UserService {
     )
     const data: GetUserByIdResponse = await response.json()
     return data
+  }
+  async anyPendingBeAnAgencyRequest(
+  ): Promise<boolean> {
+    try {
+      const data = await fetchWithAuth(`${this.baseUrl}/Users/AnyPendingBeAnAgencyRequest}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      const isPending: boolean = await data.json();
+      return isPending;
+    } catch (error: any) {
+      throw error
+    }
   }
 }
 
