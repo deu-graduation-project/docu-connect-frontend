@@ -28,7 +28,7 @@ import { UserAuthService } from "@/services/user-auth-service"
 import { useMutation } from "@tanstack/react-query"
 
 const formSchema = z.object({
-  emailOrUserName: z.string().min(1, "Email veya kullanıcı adı gereklidir."),
+  email: z.string().min(1, "Email is required.").email("Enter a valid email adress."),
 })
 
 type FormData = z.infer<typeof formSchema>
@@ -39,22 +39,22 @@ export default function ForgotYourPassword() {
   const [isResetSent, setIsResetSent] = useState(false)
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      emailOrUserName: "",
-    },
-  })
+  resolver: zodResolver(formSchema),
+  defaultValues: {
+    email: "",
+  },
+})
 
   const resetMutation = useMutation({
     mutationFn: async (values: FormData): Promise<void> => {
-      return userAuthService.passwordReset(values.emailOrUserName)
-    },
+  return userAuthService.passwordReset(values.email)
+},
     onSuccess: () => {
       setIsResetSent(true)
       toast({
-        title: "Şifre sıfırlama bağlantısı gönderildi",
+        title: "Password Reset Email Sent",
         description:
-          "E-posta adresinize bir şifre sıfırlama bağlantısı gönderdik.",
+          "We send a password reset email to your email adress.",
       })
     },
     onError: (error) => {
@@ -65,7 +65,7 @@ export default function ForgotYourPassword() {
         description:
           error instanceof Error
             ? error.message
-            : "Şifre sıfırlama işlemi başarısız oldu.",
+            : "Password reset failed.",
       })
     },
   })
@@ -86,10 +86,9 @@ export default function ForgotYourPassword() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Card>
             <CardHeader>
-              <CardTitle>Şifrenizi mi unuttunuz?</CardTitle>
+              <CardTitle>Forgot your password?</CardTitle>
               <CardDescription>
-                E-posta adresinizi veya kullanıcı adınızı girin, size şifre
-                sıfırlama bağlantısı gönderelim
+                Fill your email adress and we send you a password reset link.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6 p-4">
@@ -97,14 +96,14 @@ export default function ForgotYourPassword() {
                 <>
                   <FormField
                     control={form.control}
-                    name="emailOrUserName"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email veya Kullanıcı Adı</FormLabel>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input
-                            type="text"
-                            placeholder="Email veya kullanıcı adınızı giriniz"
+                            type="email"
+                            placeholder="Enter your email adress"
                             {...field}
                           />
                         </FormControl>
@@ -121,7 +120,7 @@ export default function ForgotYourPassword() {
                       {resetMutation.isPending ? (
                         <Icons.spinner className="h-4 w-4 animate-spin" />
                       ) : (
-                        "Şifre Sıfırlama Bağlantısı Gönder"
+                        "Send Password Reset Link"
                       )}
                     </Button>
                   </div>
@@ -130,21 +129,20 @@ export default function ForgotYourPassword() {
                 <div className="flex flex-col items-center gap-4 text-center">
                   <Icons.check className="h-10 w-10 text-green-500" />
                   <p>
-                    Şifre sıfırlama bağlantısı gönderildi. Lütfen e-posta
-                    kutunuzu kontrol edin.
+                    Password reset email has been sent to your email adress. Please check your inbox and follow the instructions to reset your password.
                   </p>
                   <Button
                     className="w-full"
                     onClick={() => setIsResetSent(false)}
                   >
-                    Tekrar Dene
+                    Try again
                   </Button>
                 </div>
               )}
               <div className="flex w-full justify-center gap-2">
-                <p>Giriş yapmak mı istiyorsunuz?</p>
+                <p>Do you want to sign in?</p>
                 <Link href={"/sign-in"} className="underline">
-                  Giriş Yap
+                  Sign in
                 </Link>
               </div>
             </CardContent>
