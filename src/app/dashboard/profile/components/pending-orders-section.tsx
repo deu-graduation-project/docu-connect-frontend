@@ -1,6 +1,6 @@
 "use client"
-import React, { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import React, { useState, useEffect } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { userService } from "@/services/user-service"
 import { Icons } from "@/components/icons"
 import { Badge } from "@/components/ui/badge"
@@ -9,6 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Inbox } from "lucide-react"
 import { fileService } from "@/services/file-service"
 import { useOrdersStates } from "./orders-states"
+import {
+  OrderState,
+  getOrderStateLabel,
+  getStateBadgeClass,
+} from "./utils/order-utils"
 import {
   Select,
   SelectContent,
@@ -24,41 +29,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-
-// Order state as strings
-const OrderState = {
-  Pending: "Pending",
-  Confirmed: "Confirmed",
-  Rejected: "Rejected",
-  Started: "Started",
-  Finished: "Finished",
-  Completed: "Completed",
-}
-
-// Get display label (same as state in this case)
-const getOrderStateLabel = (state) => {
-  return state || "All"
-}
-
-// Get badge color based on state
-const getStateBadgeClass = (state) => {
-  switch (state) {
-    case OrderState.Pending:
-      return "border-yellow-500/50 bg-yellow-500/20 text-yellow-700 hover:bg-yellow-500/30"
-    case OrderState.Confirmed:
-      return "border-blue-500/50 bg-blue-500/20 text-blue-700 hover:bg-blue-500/30"
-    case OrderState.Rejected:
-      return "border-red-500/50 bg-red-500/20 text-red-700 hover:bg-red-500/30"
-    case OrderState.Started:
-      return "border-purple-500/50 bg-purple-500/20 text-purple-700 hover:bg-purple-500/30"
-    case OrderState.Finished:
-      return "border-teal-500/50 bg-teal-500/20 text-teal-700 hover:bg-teal-500/30"
-    case OrderState.Completed:
-      return "border-green-500/50 bg-green-500/20 text-green-700 hover:bg-green-500/30"
-    default:
-      return "border-gray-500/50 bg-gray-500/20 text-gray-700 hover:bg-gray-500/30"
-  }
-}
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 const PendingOrdersSection = ({ userId }) => {
   const { OrdersLoadingState, OrdersEmptyState, OrdersErrorState } =
@@ -72,31 +44,26 @@ const PendingOrdersSection = ({ userId }) => {
     queryKey: ["userOrders", userId],
     queryFn: () => {
       if (!userId) {
-        throw new Error("User ID is missing")
+        return Promise.reject(new Error("User ID is missing"))
       }
       return userService.getUserById(userId)
     },
-    enabled: !!userId,
+    enabled: !!userId, // Query will not run until userId is available
   })
 
-  console.log()
   // Filter orders based on active filter and sort option
   const filteredOrders = React.useMemo(() => {
     if (!data?.userOrders) return []
 
-    // Filter by state
     let filtered = [...data.userOrders]
     if (filterState !== "all") {
       filtered = filtered.filter((order) => order.orderState === filterState)
     }
 
-    // Sort by date (assuming we'd add a createdAt field to the orders API)
-    // Since we don't have createdAt in the data, we'll sort by orderCode as a fallback
-    // In a real scenario, replace this with actual date sorting
     if (sortOption === "newest") {
-      filtered.sort((a, b) => b.orderCode.localeCompare(a.orderCode))
+      filtered.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)) // Sort by date
     } else if (sortOption === "oldest") {
-      filtered.sort((a, b) => a.orderCode.localeCompare(b.orderCode))
+      filtered.sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate)) // Sort by date
     }
 
     return filtered
@@ -114,14 +81,12 @@ const PendingOrdersSection = ({ userId }) => {
     return <OrdersEmptyState />
   }
 
-  // Get counts for each status
   const statusCounts = data?.userOrders?.reduce((acc, order) => {
     const state = order.orderState
     acc[state] = (acc[state] || 0) + 1
     return acc
   }, {})
 
-  // Calculate total count
   const totalCount = data?.userOrders?.length || 0
 
   return (
@@ -140,22 +105,22 @@ const PendingOrdersSection = ({ userId }) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Orders ({totalCount})</SelectItem>
-                <SelectItem value={OrderState.Pending.toString()}>
+                <SelectItem value={OrderState.Pending}>
                   Pending ({statusCounts?.[OrderState.Pending] || 0})
                 </SelectItem>
-                <SelectItem value={OrderState.Confirmed.toString()}>
+                <SelectItem value={OrderState.Confirmed}>
                   Confirmed ({statusCounts?.[OrderState.Confirmed] || 0})
                 </SelectItem>
-                <SelectItem value={OrderState.Started.toString()}>
+                <SelectItem value={OrderState.Started}>
                   Started ({statusCounts?.[OrderState.Started] || 0})
                 </SelectItem>
-                <SelectItem value={OrderState.Finished.toString()}>
+                <SelectItem value={OrderState.Finished}>
                   Finished ({statusCounts?.[OrderState.Finished] || 0})
                 </SelectItem>
-                <SelectItem value={OrderState.Completed.toString()}>
+                <SelectItem value={OrderState.Completed}>
                   Completed ({statusCounts?.[OrderState.Completed] || 0})
                 </SelectItem>
-                <SelectItem value={OrderState.Rejected.toString()}>
+                <SelectItem value={OrderState.Rejected}>
                   Rejected ({statusCounts?.[OrderState.Rejected] || 0})
                 </SelectItem>
               </SelectContent>
@@ -194,7 +159,7 @@ const PendingOrdersSection = ({ userId }) => {
         <ScrollArea className="h-[785px] rounded-md border">
           <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredOrders.map((order) => (
-              <OrderCard key={order.orderCode} order={order} />
+              <OrderCard key={order.orderCode} order={order} userId={userId} />
             ))}
           </div>
         </ScrollArea>
@@ -203,12 +168,34 @@ const PendingOrdersSection = ({ userId }) => {
   )
 }
 
-const OrderCard = ({ order }) => {
-  // Convert numeric state to string for display
+const OrderCard = ({ order, userId }) => {
   const stateLabel = getOrderStateLabel(order.orderState)
-
-  // Get appropriate badge styling based on state
   const badgeClass = getStateBadgeClass(order.orderState)
+  const queryClient = useQueryClient()
+
+  // State for storing the completedCode received from the backend
+  const [completedCode, setCompletedCode] = useState("")
+
+  // Mutation to fetch the completed code when the order is in Finished state
+  const fetchCompletedCodeMutation = useMutation({
+    mutationFn: () =>
+      userService.updateOrder(OrderState.Finished, order.orderCode),
+    onSuccess: (data) => {
+      if (data?.completedCode) {
+        setCompletedCode(data.completedCode)
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to fetch completion code:", error)
+    },
+  })
+
+  // Fetch the completion code when the component mounts and order is in Finished state
+  useEffect(() => {
+    if (order.orderState === OrderState.Finished && !completedCode) {
+      fetchCompletedCodeMutation.mutate()
+    }
+  }, [order.orderState, order.orderCode, completedCode])
 
   return (
     <div className="flex flex-col rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
@@ -229,6 +216,7 @@ const OrderCard = ({ order }) => {
               month: "numeric",
               day: "numeric",
               hour: "2-digit",
+              minute: "2-digit",
             })}
           </span>
         </div>
@@ -264,7 +252,7 @@ const OrderCard = ({ order }) => {
               <Icons.chevronRight className="h-3 w-3" />
             </button>
           </SheetTrigger>
-          <SheetContent className="overflow-y-auto pt-12">
+          <SheetContent className="overflow-y-auto pt-12 sm:max-w-lg">
             <SheetHeader>
               <SheetTitle className="flex items-center justify-between">
                 <span>Order #{order.orderCode}</span>
@@ -274,7 +262,6 @@ const OrderCard = ({ order }) => {
                 Complete details for your order
               </SheetDescription>
             </SheetHeader>
-
             <div className="mt-6 space-y-6">
               {/* Order Basic Info */}
               <div className="rounded-lg border p-4">
@@ -296,13 +283,12 @@ const OrderCard = ({ order }) => {
                   <div>
                     <p className="text-xs text-muted-foreground">Order Date</p>
                     <p className="font-medium">
-                      {" "}
                       {new Date(order.createdDate).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "numeric",
                         day: "numeric",
-
                         hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </p>
                   </div>
@@ -313,7 +299,6 @@ const OrderCard = ({ order }) => {
               <div className="rounded-lg border p-4">
                 <h3 className="text-lg font-medium">Print Details</h3>
                 <div className="my-4 h-[1px] w-full bg-secondary"></div>
-
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <p className="text-xs text-muted-foreground">
@@ -361,7 +346,6 @@ const OrderCard = ({ order }) => {
                 <div className="rounded-lg border p-4">
                   <h3 className="text-lg font-medium">Files</h3>
                   <div className="my-4 h-[1px] w-full bg-secondary"></div>
-
                   <div className="space-y-2">
                     {order.copyFiles.map((file, index) => (
                       <div
@@ -374,76 +358,171 @@ const OrderCard = ({ order }) => {
                             {file.fileName}
                           </span>
                         </div>
-                        <button
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => {
                             fileService.downloadFile(file?.filePath)
                           }}
-                          className="rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20"
                         >
-                          <Icons.download className="h-4 w-4" />
-                        </button>
+                          <Icons.download className="mr-2 h-4 w-4" /> Download
+                        </Button>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Order Timeline/History - Can be added later */}
+              {/* Order Timeline/History */}
               <div className="rounded-lg border p-4">
                 <h3 className="text-lg font-medium">Order Timeline</h3>
                 <div className="my-4 h-[1px] w-full bg-secondary"></div>
-
                 <div className="space-y-3">
+                  {/* Order Created */}
                   <div className="flex items-center space-x-3">
-                    <div className="-mt-3 h-2 w-2 rounded-full bg-green-500"></div>
+                    <div className="h-2 w-2 rounded-full bg-green-500"></div>
                     <div className="flex-1">
                       <p className="font-medium">Order Created</p>
                       <p className="text-xs text-muted-foreground">
-                        Your order was successfully created
+                        Your order was successfully created.
                       </p>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {" "}
                       {new Date(order.createdDate).toLocaleDateString("en-US", {
                         year: "numeric",
-                        month: "numeric",
+                        month: "short",
                         day: "numeric",
                         hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </p>
                   </div>
 
-                  {order.orderState !== "Pending" && (
-                    <div className="flex items-center space-x-3">
-                      <div className="mt-0.5 h-2 w-2 rounded-full bg-blue-500"></div>
+                  {/* Status History */}
+                  {order.statusHistory?.map((historyItem, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <div
+                        className={`h-2 w-2 rounded-full ${getStateBadgeClass(historyItem.state).split(" ")[1]}`}
+                      ></div>
                       <div className="flex-1">
-                        <p className="font-medium">Order Status Changed</p>
+                        <p className="font-medium">Order {historyItem.state}</p>
                         <p className="text-xs text-muted-foreground">
-                          Order status updated to {order.orderState}
+                          {historyItem.description ||
+                            `Order status updated to ${historyItem.state}`}
                         </p>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(order.createdDate).toLocaleDateString(
+                        {new Date(historyItem.date).toLocaleDateString(
                           "en-US",
                           {
                             year: "numeric",
-                            month: "numeric",
+                            month: "short",
                             day: "numeric",
                             hour: "2-digit",
+                            minute: "2-digit",
                           }
                         )}
                       </p>
                     </div>
-                  )}
+                  ))}
+
+                  {/* Current Status (if no detailed history or status changed) */}
+                  {order.orderState !== OrderState.Pending &&
+                    (!order.statusHistory ||
+                      !order.statusHistory.some(
+                        (h) => h.state === order.orderState
+                      )) &&
+                    order.updatedDate &&
+                    order.updatedDate !== "0001-01-01T00:00:00" && (
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className={`mt-0.5 h-2 w-2 rounded-full ${getStateBadgeClass(order.orderState).split(" ")[1]}`}
+                        ></div>
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            Order Status: {order.orderState}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Order status updated.
+                          </p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(order.updatedDate).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </p>
+                      </div>
+                    )}
                 </div>
               </div>
 
+              {/* Completion Code for Finished State */}
+              {order.orderState === OrderState.Finished && (
+                <div className="mt-4 rounded-lg border bg-teal-500/10 p-4 text-sm">
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="font-medium text-teal-700">
+                      Your Order is Ready for Pickup
+                    </h3>
+                    {fetchCompletedCodeMutation.isLoading && (
+                      <Icons.loader className="h-4 w-4 animate-spin text-teal-700" />
+                    )}
+                  </div>
+
+                  {completedCode ? (
+                    <div className="space-y-2">
+                      <p className="text-teal-700">
+                        Your order is ready! Please show this code to the agency
+                        when picking up your order:
+                      </p>
+                      <div className="flex items-center justify-center rounded-md border border-teal-300 bg-teal-50 p-4">
+                        <span className="text-xl font-bold tracking-wider text-teal-700">
+                          {completedCode}
+                        </span>
+                      </div>
+                      <p className="text-xs text-teal-600">
+                        The agency will use this code to mark your order as
+                        completed when you pick it up.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-teal-700">
+                      {fetchCompletedCodeMutation.isLoading
+                        ? "Retrieving your pickup code..."
+                        : "Your order is ready for pickup. Please visit the agency to collect your order."}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Message if order is completed */}
+              {order.orderState === OrderState.Completed && (
+                <div className="mt-4 rounded-lg border bg-green-500/10 p-4 text-sm text-green-700">
+                  <p className="font-medium">Order Completed</p>
+                  <p>
+                    This order has been successfully completed and picked up.
+                  </p>
+                </div>
+              )}
+
               {/* Order Actions */}
-              <div className="flex space-x-2">
-                {order.orderState === "Pending" && (
-                  <button className="flex-1 rounded-md border border-destructive bg-destructive/10 py-2 text-sm font-medium text-destructive hover:bg-destructive/20">
+              <div className="flex space-x-2 pt-4">
+                {order.orderState === OrderState.Pending && (
+                  <Button
+                    variant="destructive"
+                    className="flex-1"
+                    onClick={() => {
+                      alert("Cancel functionality to be implemented.")
+                    }}
+                  >
                     Cancel Order
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

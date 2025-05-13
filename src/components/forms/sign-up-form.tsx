@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
@@ -20,8 +20,7 @@ import {
   CardTitle,
   CardDescription,
 } from "../ui/card"
-import { InputPassWord } from "@/components/ui/animation-password-input"
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/input" // DİKKAT: InputPassWord yerine Input kullanıldı
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/icons"
@@ -38,9 +37,9 @@ const formSchema = z
     password: z.string().min(6, "Password must be at least 6 characters"),
     passwordConfirm: z.string().min(6, "Password must be at least 6 characters"),
   })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "Password does not match.",
-    path: ["passwordConfirm"], // Field to highlight
+  .refine((fields) => fields.password === fields.passwordConfirm, {
+    message: "Passwords do not match.",
+    path: ["passwordConfirm"],
   })
 
 type FormData = z.infer<typeof formSchema>
@@ -77,22 +76,17 @@ export default function SignUpForm() {
     try {
       await userService.createUser(
         userPayload,
-        (data) => {
-          setSuccessMessage(`User account succsessfully created!`)
-        },
-        (errorMessage) => {
-          setError(errorMessage)
-        }
+        () => setSuccessMessage("User account successfully created!"),
+        (errorMessage) => setError(errorMessage)
       )
     } catch (err) {
       console.error("Unexpected error:", err)
-      setError("Unexpexted error.Try again later.")
+      setError("Unexpected error. Try again later.")
     }
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <div></div>
       <div className="absolute left-5 top-5">
         <Link href={"/"}>
           <Icons.arrowLeft strokeWidth={"1.3px"} />
@@ -154,13 +148,9 @@ export default function SignUpForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email adress</FormLabel>
+                    <FormLabel>Email address</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="example@example.com"
-                        {...field}
-                      />
+                      <Input type="email" placeholder="example@example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -173,11 +163,7 @@ export default function SignUpForm() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <InputPassWord
-                        type="password"
-                        placeholder="Password"
-                        {...field}
-                      />
+                      <Input type="password" placeholder="Password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -190,11 +176,7 @@ export default function SignUpForm() {
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Confirm Password"
-                        {...field}
-                      />
+                      <Input type="password" placeholder="Confirm Password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

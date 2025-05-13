@@ -1,12 +1,12 @@
 import { GetAgencyAnalytics, GetOrders, GetSingleOrder } from "@/types/classes"
 import { fetchWithAuth } from "./fetch-with-auth"
-import { SucceededMessageResponse } from "@/types";
+import { SucceededMessageResponse } from "@/types"
 
 // Define the expected response structure for initiatePayment
 type InitiatePaymentResponse = {
-  sessionId: string;
+  sessionId: string
   // Add other potential fields if the backend returns more
-};
+}
 
 class OrderService {
   private baseUrl: string
@@ -206,19 +206,17 @@ class OrderService {
       throw new Error("Invalid response format from server.")
     }
   }
-  async cancelOrder(
-    orderCode: string,
-  ):Promise<SucceededMessageResponse>{
+  async cancelOrder(orderCode: string): Promise<SucceededMessageResponse> {
     const response = await fetchWithAuth(`${this.baseUrl}/Orders/CancelOrder`, {
       method: "DELETE",
       headers: {
-        "Content-Type": "application/json", 
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        orderCode
+        orderCode,
       }),
     })
-    return response.json();
+    return response.json()
   }
 }
 

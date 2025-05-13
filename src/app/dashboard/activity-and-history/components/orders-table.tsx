@@ -266,9 +266,14 @@ export default function OrdersTable() {
             />
 
             <OrderDetailsSheet
-              selectedOrder={selectedOrder}
+              selectedOrder={
+                ordersData.find(
+                  (order) => order.orderId === selectedOrder?.orderId
+                ) || selectedOrder
+              }
               isSheetOpen={isSheetOpen}
               setIsSheetOpen={setIsSheetOpen}
+              key={selectedOrder?.orderId} // Force remount when order changes
             />
 
             {/* --- Pagination Controls (Using state managed here) --- */}

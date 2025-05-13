@@ -19,9 +19,6 @@ export default function IndexPage({}: Props) {
       <div id="features-section">
         <FeaturesSection />
       </div>
-      <div id="plan-feature-section">
-        <PlanFeature />
-      </div>
       <div id="faq-section" className="mx-auto py-8">
         <FAQSection />
       </div>
