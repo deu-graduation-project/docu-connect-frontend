@@ -342,17 +342,20 @@ class UserService {
     const data: GetUserByIdResponse = await response.json()
     return data
   }
-  async anyPendingBeAnAgencyRequest(
-  ): Promise<boolean> {
+  async anyPendingBeAnAgencyRequest(): Promise<boolean> {
     try {
-      const data = await fetchWithAuth(`${this.baseUrl}/Users/AnyPendingBeAnAgencyRequest}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      const isPending: boolean = await data.json();
-      return isPending;
+      const data = await fetchWithAuth(
+        `${this.baseUrl}/Users/AnyPendingBeAnAgencyRequest`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+
+      const isPending: boolean = await data.json()
+      return isPending
     } catch (error: any) {
       throw error
     }

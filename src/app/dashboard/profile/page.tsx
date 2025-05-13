@@ -9,8 +9,8 @@ import Image from "next/image"
 import UpdateAgencySheet from "@/components/update-agency-sheet"
 import { getRandomPatternStyle } from "@/lib/generate-pattern"
 import PendingOrdersSection from "./components/pending-orders-section" // Import the new component
-import AgencyLocationMap from "./components/agency-location-map" 
-import { StickyBanner } from "@/components/ui/sticky-banner";
+import AgencyLocationMap from "./components/agency-location-map"
+import { StickyBanner } from "@/components/ui/sticky-banner"
 // mport the new map component
 const ProfilePage = () => {
   const { data: authStatus, isLoading, error } = useAuthStatus()
@@ -65,6 +65,19 @@ const UserProfile = ({ authStatus }) => {
     enabled: authStatus?.isAuthenticated,
   })
 
+  const {
+    data: pendingRequests,
+    isLoading: pendingRequestsLoading,
+    error: pendingRequestsError,
+  } = useQuery({
+    queryKey: ["agencyRequests"],
+    queryFn: () => userService.anyPendingBeAnAgencyRequest(), // Pass default pagination values
+    // Only run this query if we're authenticated
+    enabled: authStatus?.isAuthenticated,
+  })
+
+  console.log("Pending Requests:", pendingRequests)
+
   // Verinin doğru şekilde yüklendiğinden emin olun
   if (isLoading) {
     return <div>Loading...</div>
@@ -75,16 +88,17 @@ const UserProfile = ({ authStatus }) => {
   }
 
   // "Pending" statüsünü kontrol et
-  const isPending = data?.status === 'Pending'  // Verinin durumunu kontrol et
+  const isPending = data?.status === "Pending" // Verinin durumunu kontrol et
   console.log("User data:", data)
- 
+
   return (
     <div className="pb-12">
       {/* Sticky Banner sadece onay bekleyen kullanıcılara */}
       {isPending && (
-        <StickyBanner className="bg-gradient-to-r from-gray-500 to-black-600">
+        <StickyBanner className="to-black-600 bg-gradient-to-r from-gray-500">
           <p className="mx-0 max-w-[90%] text-white drop-shadow-md">
-            Your account is still pending approval. Please wait for confirmation.
+            Your account is still pending approval. Please wait for
+            confirmation.
           </p>
         </StickyBanner>
       )}
@@ -124,7 +138,6 @@ const UserProfile = ({ authStatus }) => {
     </div>
   )
 }
-
 
 const AgencyProfile = ({ authStatus, agencyDetails, agencyDetailsLoading }) => {
   console.log(agencyDetails)
