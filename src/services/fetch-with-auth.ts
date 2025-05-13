@@ -6,13 +6,18 @@ export const fetchWithAuth = async (
 ): Promise<Response> => {
   const token = getCookie("accessToken")
   const isFormData = options.body instanceof FormData
+
+  // Special handling for binary responses (like file downloads)
+  const isBinaryResponse = url.includes("/File/DownloadFile")
+
   const headers = isFormData
     ? {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       }
     : {
-        "Content-Type": "application/json",
+        // Don't set Content-Type for binary responses
+        ...(!isBinaryResponse ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options.headers,
       }

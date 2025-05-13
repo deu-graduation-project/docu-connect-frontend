@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
 import { cn } from "@/lib/utils"
 import { orderService } from "@/services/orders-service" // Ensure this service is correctly imported
 import { fileService } from "@/services/file-service"
@@ -340,38 +341,37 @@ export function OrderDetailsSheet({
               </div>
             </div>
             {/* --- Files --- */}
-            {selectedOrder.CopyFiles && selectedOrder.CopyFiles.length > 0 && (
+            {/* Ensure selectedOrder.CopyFiles exists and is an array */}
+            {
+            console.log("CopyFiles:", selectedOrder.CopyFiles) // For debugging
+            
+            selectedOrder.CopyFiles && selectedOrder.CopyFiles.length > 0 && (
               <div className="rounded-lg border p-4">
                 <h3 className="text-lg font-medium">Files</h3>
                 <div className="my-4 h-[1px] w-full bg-secondary"></div>
                 <div className="space-y-2">
+                  {/* Corrected line: Use CopyFiles instead of copyFile */}
                   {selectedOrder.CopyFiles.map((file, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between rounded-md border p-2"
                     >
-                      <div className="flex items-center space-x-2 overflow-hidden">
-                        <Icons.fileText className="h-8 w-8 flex-shrink-0 text-muted-foreground" />
-                        <span
-                          className="truncate text-xs font-medium"
-                          title={file.fileName}
-                        >
-                          {file.fileName}
+                      <div className="flex items-center space-x-2">
+                        <Icons.fileText className="h-8 w-8 text-muted-foreground" />
+                        <span className="text-xs font-medium">
+                          {file.fileName || `File ${index + 1}`}{" "}
                         </span>
                       </div>
-                      <button
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => {
-                          if (file?.filePath) {
-                            fileService.downloadFile(file.filePath)
-                          } else {
-                            toast.error("File path not available for download.")
-                          }
+                          fileService.downloadFile(file?.fileCode)
                         }}
-                        className="flex-shrink-0 rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20"
-                        title="Download File"
+                        disabled={!file?.fileCode}
                       >
-                        <Icons.download className="h-4 w-4" />
-                      </button>
+                        <Icons.download className="mr-2 h-4 w-4" /> Download
+                      </Button>
                     </div>
                   ))}
                 </div>
