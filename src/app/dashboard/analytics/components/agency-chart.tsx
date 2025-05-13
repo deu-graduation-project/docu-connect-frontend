@@ -64,7 +64,7 @@ export function AgencyCharts() {
         )
         const jsonData = await response;
 
-        return jsonData.agencyAnalytics;
+        return jsonData.agencyAnalytics;t
       } catch (err: any) {
         if (err.message) {
           throw new Error(err.message)

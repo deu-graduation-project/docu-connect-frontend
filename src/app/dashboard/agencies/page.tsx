@@ -79,15 +79,17 @@ export default function Agencies() {
     return city ? city.counties : []
   }, [selectedCity])
 
-  const orderByNumericValue = useMemo(() => {
-    if (!selectedSorting) {
-      return undefined
-    }
-    const index = sortingOptions.findIndex(
-      (opt) => opt.value === selectedSorting
-    )
-    return index === -1 ? undefined : index
-  }, [selectedSorting])
+  const colorOptionsNumericValue = useMemo(() => {
+    if (!selectedColorOption) return undefined;
+    const index = colorOptionsList.findIndex(opt => opt.value === selectedColorOption);
+    return index === -1 ? undefined : index;
+  }, [selectedColorOption]);
+
+  const printTypeNumericValue = useMemo(() => {
+    if (!selectedPrintType) return undefined;
+    const index = printTypesList.findIndex(opt => opt.value === selectedPrintType);
+    return index === -1 ? undefined : index;
+  }, [selectedPrintType]);
 
   // Reset district when city changes
   const handleCityChange = (value: string) => {
@@ -324,20 +326,16 @@ export default function Agencies() {
 
       <div className="w-full max-w-7xl">
         <AgencyList
-          province={
-            selectedCity
-              ? turkish_cities.find((c) => c.name === selectedCity)?.plate
+          province={selectedCity ? capitalizeWords(selectedCity) : undefined}
+          district={
+            selectedDistrict
+              ? capitalizeWords(selectedDistrict)
               : undefined
           }
-          district={
-            (selectedDistrict
-              ? capitalizeWords(selectedDistrict)
-              : undefined) as any // Cast to any for district
-          }
-          orderBy={orderByNumericValue} // Use the new memoized numeric value
+          orderBy={selectedSorting}
           paperType={selectedPaperType}
-          colorOptions={selectedColorOption}
-          printType={selectedPrintType}
+          colorOptions={colorOptionsNumericValue}
+          printType={printTypeNumericValue}
           currentPage={currentPage}
           itemsPerPage={itemsPerPage}
           onPageChange={setCurrentPage}
