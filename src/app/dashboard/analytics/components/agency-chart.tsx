@@ -78,7 +78,7 @@ export function AgencyCharts() {
         )
         const jsonData = await response;
 
-        return jsonData.agencyAnalytics;t
+        return jsonData.agencyAnalytics;
       } catch (err: any) {
         console.error("Error fetching data:", err) // Debug log
         if (err.message) {
@@ -86,7 +86,7 @@ export function AgencyCharts() {
         }
         throw new Error("Bir hata oluştu")
       }
-    },s
+    },
     enabled: !!date?.from && !!date?.to,
     retry: false,
   })
