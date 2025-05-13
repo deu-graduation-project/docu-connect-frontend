@@ -139,6 +139,7 @@ const UserProfile = ({ authStatus }) => {
   )
 }
 
+
 const AgencyProfile = ({ authStatus, agencyDetails, agencyDetailsLoading }) => {
   console.log(agencyDetails)
   return (
