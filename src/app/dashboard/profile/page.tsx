@@ -9,10 +9,11 @@ import Image from "next/image"
 import UpdateAgencySheet from "@/components/update-agency-sheet"
 import { getRandomPatternStyle } from "@/lib/generate-pattern"
 import PendingOrdersSection from "./components/pending-orders-section" // Import the new component
-import AgencyLocationMap from "./components/agency-location-map" // Import the new map component
+import AgencyLocationMap from "./components/agency-location-map"
+import { StickyBanner } from "@/components/ui/sticky-banner"
+// mport the new map component
 const ProfilePage = () => {
   const { data: authStatus, isLoading, error } = useAuthStatus()
-
   // Fetch agency details - only when user is an agency
   const { data: agencyDetails, isLoading: agencyDetailsLoading } = useQuery({
     queryKey: ["agencyDetails", authStatus?.userId],
@@ -24,6 +25,7 @@ const ProfilePage = () => {
     },
     enabled: authStatus?.isAgency,
   })
+  
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -52,6 +54,7 @@ const ProfilePage = () => {
   )
 }
 
+
 const UserProfile = ({ authStatus }) => {
   const { data, isLoading } = useQuery({
     queryKey: ["userDetails", authStatus?.userId],
@@ -64,8 +67,43 @@ const UserProfile = ({ authStatus }) => {
     enabled: authStatus?.isAuthenticated,
   })
 
+  const {
+    data: pendingRequests,
+    isLoading: pendingRequestsLoading,
+    error: pendingRequestsError,
+  } = useQuery({
+    queryKey: ["agencyRequests"],
+    queryFn: () => userService.anyPendingBeAnAgencyRequest(), // Pass default pagination values
+    // Only run this query if we're authenticated
+    enabled: authStatus?.isAuthenticated,
+  })
+
+  console.log("Pending Requests:", pendingRequests)
+
+  // Verinin doğru şekilde yüklendiğinden emin olun
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (pendingRequestsError) {
+    return <div>Error loading user data</div>
+  }
+
+  // "Pending" statüsünü kontrol et
+  const isPending = data?.status === "Pending" // Verinin durumunu kontrol et
+  console.log("User data:", data)
+
   return (
     <div className="pb-12">
+      {/* Sticky Banner sadece onay bekleyen kullanıcılara */}
+      {pendingRequests?.hasRequest && (
+        <StickyBanner  className="bg-secondary">
+          <p className="mx-0 text-sm  text-primary drop-shadow-md">
+            Your account has not been approved yet. Please wait until the review process is finalized.
+          </p>
+        </StickyBanner>
+      )}
+
       <div className="relative h-64 w-full">
         <div className="relative h-full w-full bg-background">
           <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_2px,transparent_2px),linear-gradient(to_bottom,#4f4f4f2e_2px,transparent_2px)] bg-[size:24px_36px] [mask-image:radial-gradient(background,transparent_95%)]"></div>
@@ -96,7 +134,7 @@ const UserProfile = ({ authStatus }) => {
         )}
       </div>
 
-      {/* Add the new PendingOrdersSection component */}
+      {/* Sipariş listesi */}
       <PendingOrdersSection userId={authStatus.userId} />
     </div>
   )

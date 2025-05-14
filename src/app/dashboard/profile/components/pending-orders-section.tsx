@@ -1,4 +1,5 @@
 "use client"
+import { Copy, MessageSquarePlus } from "lucide-react"
 import React, { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { userService } from "@/services/user-service"
@@ -9,6 +10,16 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Inbox } from "lucide-react"
 import { fileService } from "@/services/file-service"
 import { useOrdersStates } from "./orders-states"
+import { toast } from "sonner"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   OrderState,
   getOrderStateLabel,
@@ -362,7 +373,7 @@ const OrderCard = ({ order, userId }) => {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            fileService.downloadFile(file?.filePath)
+                            fileService.downloadFile(file?.fileCode)
                           }}
                         >
                           <Icons.download className="mr-2 h-4 w-4" /> Download
@@ -398,40 +409,8 @@ const OrderCard = ({ order, userId }) => {
                     </p>
                   </div>
 
-                  {/* Status History */}
-                  {order.statusHistory?.map((historyItem, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div
-                        className={`h-2 w-2 rounded-full ${getStateBadgeClass(historyItem.state).split(" ")[1]}`}
-                      ></div>
-                      <div className="flex-1">
-                        <p className="font-medium">Order {historyItem.state}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {historyItem.description ||
-                            `Order status updated to ${historyItem.state}`}
-                        </p>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(historyItem.date).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )}
-                      </p>
-                    </div>
-                  ))}
-
                   {/* Current Status (if no detailed history or status changed) */}
                   {order.orderState !== OrderState.Pending &&
-                    (!order.statusHistory ||
-                      !order.statusHistory.some(
-                        (h) => h.state === order.orderState
-                      )) &&
                     order.updatedDate &&
                     order.updatedDate !== "0001-01-01T00:00:00" && (
                       <div className="flex items-center space-x-3">
@@ -440,10 +419,12 @@ const OrderCard = ({ order, userId }) => {
                         ></div>
                         <div className="flex-1">
                           <p className="font-medium">
-                            Order Status: {order.orderState}
+                            Order Status: {getOrderStateLabel(order.orderState)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Order status updated.
+                            {order.orderState === OrderState.Completed
+                              ? "This order has been successfully completed and picked up."
+                              : "Order status updated."}
                           </p>
                         </div>
                         <p className="text-xs text-muted-foreground">
@@ -466,27 +447,35 @@ const OrderCard = ({ order, userId }) => {
               {/* Completion Code for Finished State */}
               {order.orderState === OrderState.Finished && (
                 <div className="mt-4 rounded-lg border bg-teal-500/10 p-4 text-sm">
-                  <div className="mb-2 flex items-center justify-between">
-                    <h3 className="font-medium text-teal-700">
-                      Your Order is Ready for Pickup
-                    </h3>
-                    {fetchCompletedCodeMutation.isLoading && (
-                      <Icons.loader className="h-4 w-4 animate-spin text-teal-700" />
-                    )}
-                  </div>
-
-                  {completedCode ? (
+                  {order.completedCode ? (
                     <div className="space-y-2">
-                      <p className="text-teal-700">
+                      <p className="pb-1 text-teal-700">
                         Your order is ready! Please show this code to the agency
                         when picking up your order:
                       </p>
-                      <div className="flex items-center justify-center rounded-md border border-teal-300 bg-teal-50 p-4">
-                        <span className="text-xl font-bold tracking-wider text-teal-700">
-                          {completedCode}
+                      <div className="flex items-center justify-between rounded-md border border-teal-300 bg-teal-700 p-4">
+                        <span className="text-xl font-bold tracking-wider text-primary">
+                          {order.completedCode}
                         </span>
+                        <Button
+                          variant="default"
+                          size="icon"
+                          onClick={() => {
+                            navigator.clipboard.writeText(order.completedCode)
+                            toast(
+                              <div className="flex items-center space-x-2">
+                                <Icons.check className="h-4 w-4" />
+                                <span className="ml-2">
+                                  Code copied to clipboard!
+                                </span>
+                              </div>
+                            )
+                          }}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <p className="text-xs text-teal-600">
+                      <p className="pt-1 text-xs text-teal-600">
                         The agency will use this code to mark your order as
                         completed when you pick it up.
                       </p>
@@ -503,11 +492,34 @@ const OrderCard = ({ order, userId }) => {
 
               {/* Message if order is completed */}
               {order.orderState === OrderState.Completed && (
-                <div className="mt-4 rounded-lg border bg-green-500/10 p-4 text-sm text-green-700">
-                  <p className="font-medium">Order Completed</p>
-                  <p>
-                    This order has been successfully completed and picked up.
-                  </p>
+                <div className="flex flex-col gap-4">
+                  <div className="my-4 rounded-lg border bg-green-500/10 p-4 text-sm text-green-700">
+                    <p className="font-medium">Order Completed</p>
+                    <p>
+                      This order has been successfully completed and picked up.
+                    </p>
+                  </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="default"
+                        className="gap-2 text-center text-base tracking-tight"
+                      >
+                        Add a comment
+                        <MessageSquarePlus className="h-5 w-5" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Are you absolutely sure?</DialogTitle>
+                        <DialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete your account and remove your data from our
+                          servers.
+                        </DialogDescription>
+                      </DialogHeader>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
 

@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
 import { cn } from "@/lib/utils"
 import { orderService } from "@/services/orders-service" // Ensure this service is correctly imported
 import { fileService } from "@/services/file-service"
@@ -244,6 +245,7 @@ export function OrderDetailsSheet({
 
   const stateLabel = ORDER_STATES_MAP[currentStatus]
   const badgeClass = getStateBadgeClass(currentStatus)
+  console.log(selectedOrder, "selectedOrder")
 
   return (
     <>
@@ -350,28 +352,60 @@ export function OrderDetailsSheet({
                       key={index}
                       className="flex items-center justify-between rounded-md border p-2"
                     >
-                      <div className="flex items-center space-x-2 overflow-hidden">
-                        <Icons.fileText className="h-8 w-8 flex-shrink-0 text-muted-foreground" />
-                        <span
-                          className="truncate text-xs font-medium"
-                          title={file.fileName}
-                        >
-                          {file.fileName}
+                      <div className="flex items-center space-x-2">
+                        <Icons.fileText className="h-8 w-8 text-muted-foreground" />
+                        <span className="text-xs font-medium">
+                          {file.fileName || `File ${index + 1}`}{" "}
                         </span>
                       </div>
-                      <button
-                        onClick={() => {
-                          if (file?.filePath) {
-                            fileService.downloadFile(file.filePath)
-                          } else {
-                            toast.error("File path not available for download.")
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          if (!file?.fileCode) {
+                            toast.error("Download Error", {
+                              description:
+                                "File identifier is missing. Cannot download.",
+                            })
+                            return
+                          }
+
+                          try {
+                            // Show loading toast
+                            const loadingToast = toast.loading(
+                              "Downloading file..."
+                            )
+
+                            // Use the fileName from the file object when downloading
+                            await fileService.downloadFile(file.fileCode)
+
+                            // Dismiss loading toast and show success
+                            toast.dismiss(loadingToast)
+                            toast.success("Download successful")
+                          } catch (error) {
+                            // Show error toast with detailed message
+                            toast.error("Download Failed", {
+                              description:
+                                error instanceof Error
+                                  ? error.message
+                                  : "Unknown error occurred",
+                            })
                           }
                         }}
-                        className="flex-shrink-0 rounded-md bg-primary/10 p-1 text-xs text-primary hover:bg-primary/20"
-                        title="Download File"
+                        disabled={
+                          !file?.fileCode ||
+                          updateOrderStatusMutation.isPending ||
+                          cancelOrderMutation.isPending
+                        }
                       >
-                        <Icons.download className="h-4 w-4" />
-                      </button>
+                        {/* Add a loading spinner when downloading */}
+                        {updateOrderStatusMutation.isPending ? (
+                          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Icons.download className="mr-2 h-4 w-4" />
+                        )}
+                        Download
+                      </Button>
                     </div>
                   ))}
                 </div>
