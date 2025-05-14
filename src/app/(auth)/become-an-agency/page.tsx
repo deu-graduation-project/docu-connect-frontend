@@ -85,9 +85,9 @@ const formSchema = z
         path: ["passwordConfirm"],
         code: z.ZodIssueCode.custom,
         message: "Şifreler eşleşmiyor.",
-      });
+      })
     }
-  });
+  })
 
 type FormData = z.infer<typeof formSchema>
 
@@ -279,7 +279,7 @@ export default function BecomeAnAgency() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />  
+                />
                 <FormField
                   control={form.control}
                   name="passwordConfirm"
