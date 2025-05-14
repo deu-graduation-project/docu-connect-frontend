@@ -11,6 +11,7 @@ import { Inbox } from "lucide-react"
 import { fileService } from "@/services/file-service"
 import { useOrdersStates } from "./orders-states"
 import { toast } from "sonner"
+import { orderService } from "@/services/orders-service"
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogClose,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
@@ -183,6 +185,7 @@ const OrderCard = ({ order, userId }) => {
   const stateLabel = getOrderStateLabel(order.orderState)
   const badgeClass = getStateBadgeClass(order.orderState)
   const queryClient = useQueryClient()
+  const [isSheetOpen, setIsSheetOpen] = useState(false) // Control sheet visibility
 
   // State for storing the completedCode received from the backend
   const [completedCode, setCompletedCode] = useState("")
@@ -207,6 +210,27 @@ const OrderCard = ({ order, userId }) => {
       fetchCompletedCodeMutation.mutate()
     }
   }, [order.orderState, order.orderCode, completedCode])
+
+  // --- Cancel Order Mutation ---
+  const cancelOrderMutation = useMutation({
+    mutationFn: (orderCode: string) => orderService.cancelOrder(orderCode),
+    onSuccess: (data) => {
+      // data is SucceededMessageResponse
+      toast.success(data.message || "Order cancelled successfully!")
+      queryClient.invalidateQueries({
+        queryKey: ["userOrders", userId, "userDetails"],
+      })
+      setIsSheetOpen(false) // Close the sheet after successful cancellation
+    },
+    onError: (error: Error) => {
+      // Explicitly type error
+      toast.error(`Failed to cancel order: ${error.message}`)
+    },
+  })
+
+  const handleCancelOrder = () => {
+    cancelOrderMutation.mutate(order.orderCode)
+  }
 
   return (
     <div className="flex flex-col rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
@@ -256,7 +280,7 @@ const OrderCard = ({ order, userId }) => {
       <div className="mt-auto flex items-center justify-between border-t pt-3">
         <span className="font-semibold">{order.totalPrice} TL</span>
 
-        <Sheet>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <button className="flex items-center gap-1 text-xs text-primary hover:underline">
               View Details
@@ -524,17 +548,52 @@ const OrderCard = ({ order, userId }) => {
               )}
 
               {/* Order Actions */}
+              {/* Order Actions */}
               <div className="flex space-x-2 pt-4">
                 {order.orderState === OrderState.Pending && (
-                  <Button
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={() => {
-                      alert("Cancel functionality to be implemented.")
-                    }}
-                  >
-                    Cancel Order
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        disabled={cancelOrderMutation.isPending}
+                      >
+                        {cancelOrderMutation.isPending ? (
+                          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          "Cancel Order"
+                        )}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Confirm Cancellation</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to cancel this order (
+                          {order.orderCode})? This action cannot be undone.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter className="sm:justify-end">
+                        <DialogClose asChild>
+                          <Button type="button" variant="outline">
+                            Keep Order
+                          </Button>
+                        </DialogClose>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={handleCancelOrder}
+                          disabled={cancelOrderMutation.isPending}
+                        >
+                          {cancelOrderMutation.isPending ? (
+                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            "Yes, Cancel Order"
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
             </div>

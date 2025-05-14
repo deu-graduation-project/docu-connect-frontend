@@ -65,19 +65,6 @@ const UserProfile = ({ authStatus }) => {
     enabled: authStatus?.isAuthenticated,
   })
 
-  const {
-    data: pendingRequests,
-    isLoading: pendingRequestsLoading,
-    error: pendingRequestsError,
-  } = useQuery({
-    queryKey: ["agencyRequests"],
-    queryFn: () => userService.anyPendingBeAnAgencyRequest(), // Pass default pagination values
-    // Only run this query if we're authenticated
-    enabled: authStatus?.isAuthenticated,
-  })
-
-  console.log("Pending Requests:", pendingRequests)
-
   // Verinin doğru şekilde yüklendiğinden emin olun
   if (isLoading) {
     return <div>Loading...</div>
@@ -89,7 +76,6 @@ const UserProfile = ({ authStatus }) => {
 
   // "Pending" statüsünü kontrol et
   const isPending = data?.status === "Pending" // Verinin durumunu kontrol et
-  console.log("User data:", data)
 
   return (
     <div className="pb-12">
