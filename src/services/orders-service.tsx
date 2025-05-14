@@ -137,8 +137,6 @@ class OrderService {
   async updateOrder(
     orderState: string,
     orderCode: string,
-    comment?: string,
-    starRating?: number,
     removeCommentIds?: string[],
     completedCode?: string
   ) {
@@ -149,8 +147,6 @@ class OrderService {
       },
       body: JSON.stringify({
         orderState,
-        comment,
-        starRating,
         orderCode,
         removeCommentIds,
         completedCode,
@@ -199,7 +195,7 @@ class OrderService {
       }
     )
     try {
-      const data: GetAgencyAnalytics[] = await response.json();
+      const data: GetAgencyAnalytics[] = await response.json()
       return data
     } catch (error) {
       console.error("Failed to parse agency analytics response:", error)
@@ -216,6 +212,23 @@ class OrderService {
         orderCode,
       }),
     })
+    return response.json()
+  }
+  async createComment(orderCode: string,starRating:number,commentText:string): Promise<SucceededMessageResponse> {
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Orders/CreateComment`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderCode,
+          starRating,
+          commentText,
+        }),
+      }
+    )
     return response.json()
   }
 }

@@ -342,8 +342,7 @@ class UserService {
     const data: GetUserByIdResponse = await response.json()
     return data
   }
-  async anyPendingBeAnAgencyRequest(
-  ): Promise<boolean> {
+  async anyPendingBeAnAgencyRequest(): Promise<boolean> {
     try {
       const data = await fetchWithAuth(`${this.baseUrl}/Users/AnyPendingBeAnAgencyRequest}`, {
         method: "GET",
