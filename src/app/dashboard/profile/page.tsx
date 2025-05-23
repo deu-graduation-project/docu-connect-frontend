@@ -25,7 +25,6 @@ const ProfilePage = () => {
     },
     enabled: authStatus?.isAgency,
   })
-  
 
   if (isLoading) {
     return <div>Loading...</div>
@@ -54,7 +53,6 @@ const ProfilePage = () => {
   )
 }
 
-
 const UserProfile = ({ authStatus }) => {
   const { data, isLoading } = useQuery({
     queryKey: ["userDetails", authStatus?.userId],
@@ -75,7 +73,7 @@ const UserProfile = ({ authStatus }) => {
     queryKey: ["agencyRequests"],
     queryFn: () => userService.anyPendingBeAnAgencyRequest(), // Pass default pagination values
     // Only run this query if we're authenticated
-    enabled: authStatus?.isAuthenticated,
+    enabled: authStatus?.isAuthenticated && authStatus?.isAgency === false,
   })
 
   console.log("Pending Requests:", pendingRequests)
@@ -89,17 +87,14 @@ const UserProfile = ({ authStatus }) => {
     return <div>Error loading user data</div>
   }
 
-  // "Pending" statüsünü kontrol et
-  const isPending = data?.status === "Pending" // Verinin durumunu kontrol et
-  console.log("User data:", data)
-
   return (
     <div className="pb-12">
       {/* Sticky Banner sadece onay bekleyen kullanıcılara */}
       {pendingRequests?.hasRequest && (
-        <StickyBanner  className="bg-secondary">
-          <p className="mx-0 text-sm  text-primary drop-shadow-md">
-            Your account has not been approved yet. Please wait until the review process is finalized.
+        <StickyBanner className="bg-secondary">
+          <p className="mx-0 text-sm text-primary drop-shadow-md">
+            Your account has not been approved yet. Please wait until the review
+            process is finalized.
           </p>
         </StickyBanner>
       )}

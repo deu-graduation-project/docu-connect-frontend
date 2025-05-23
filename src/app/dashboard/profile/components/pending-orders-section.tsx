@@ -8,9 +8,13 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Inbox } from "lucide-react"
+import { StarIcon as StarIconFilled } from "lucide-react"
+import { Star as StarIcon } from "lucide-react"
+import { Label } from "@/components/ui/label"
 import { fileService } from "@/services/file-service"
 import { useOrdersStates } from "./orders-states"
 import { toast } from "sonner"
+import { orderService } from "@/services/orders-service"
 import {
   Dialog,
   DialogContent,
@@ -18,6 +22,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogClose,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
@@ -40,8 +45,46 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Star } from "lucide-react"
+interface StarRatingInputProps {
+  rating: number
+  setRating: (rating: number) => void
+  maxStars?: number
+  disabled?: boolean
+}
+
+const StarRatingInput: React.FC<StarRatingInputProps> = ({
+  rating,
+  setRating,
+  maxStars = 5,
+  disabled = false,
+}) => {
+  const [hoverRating, setHoverRating] = useState(0)
+
+  return (
+    <div className="flex items-center space-x-1">
+      {[...Array(maxStars)].map((_, index) => {
+        const starValue = index + 1
+        return (
+          <Star
+            key={starValue}
+            className={`h-6 w-6 cursor-pointer ${
+              starValue <= (hoverRating || rating)
+                ? "fill-yellow-400 text-yellow-400"
+                : "text-gray-300"
+            } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+            onClick={() => !disabled && setRating(starValue)}
+            onMouseEnter={() => !disabled && setHoverRating(starValue)}
+            onMouseLeave={() => !disabled && setHoverRating(0)}
+          />
+        )
+      })}
+    </div>
+  )
+}
 
 const PendingOrdersSection = ({ userId }) => {
   const { OrdersLoadingState, OrdersEmptyState, OrdersErrorState } =
@@ -179,37 +222,135 @@ const PendingOrdersSection = ({ userId }) => {
   )
 }
 
-const OrderCard = ({ order, userId }) => {
+interface OrderCardProps {
+  order: {
+    orderCode: string
+    orderState: OrderState
+    createdDate: string
+    agencyName: string
+    kopyaSayısı: number
+    sayfaSayısı: number
+    totalPrice: number
+    customerName?: string
+    product?: {
+      paperType?: string
+      printType?: string
+      colorOption?: string
+      price?: number
+    }
+    copyFiles?: { fileName: string; fileCode: string }[]
+    updatedDate?: string
+    completedCode?: string
+    commentText?: string | null // Add comment fields from your API response
+    starRating?: number | null // Add comment fields from your API response
+  }
+  userId: string | null
+  onCommentAdded?: () => void // Callback to refresh orders list
+}
+
+const OrderCard = ({ order, userId, onCommentAdded }: OrderCardProps) => {
   const stateLabel = getOrderStateLabel(order.orderState)
   const badgeClass = getStateBadgeClass(order.orderState)
   const queryClient = useQueryClient()
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false)
 
-  // State for storing the completedCode received from the backend
-  const [completedCode, setCompletedCode] = useState("")
+  // State for comment form
+  const [commentText, setCommentText] = useState(order.commentText || "")
+  const [starRating, setStarRating] = useState(order.starRating || 0)
 
-  // Mutation to fetch the completed code when the order is in Finished state
   const fetchCompletedCodeMutation = useMutation({
     mutationFn: () =>
       userService.updateOrder(OrderState.Finished, order.orderCode),
     onSuccess: (data) => {
       if (data?.completedCode) {
-        setCompletedCode(data.completedCode)
+        queryClient.invalidateQueries({ queryKey: ["userOrders", userId] })
+        toast.success("Pickup code retrieved.")
       }
     },
-    onError: (error) => {
-      console.error("Failed to fetch completion code:", error)
+    onError: (error: Error) => {
+      toast.error(`Failed to fetch pickup code: ${error.message}`)
     },
   })
 
-  // Fetch the completion code when the component mounts and order is in Finished state
   useEffect(() => {
-    if (order.orderState === OrderState.Finished && !completedCode) {
+    if (
+      order.orderState === OrderState.Finished &&
+      !order.completedCode &&
+      userId
+    ) {
       fetchCompletedCodeMutation.mutate()
     }
-  }, [order.orderState, order.orderCode, completedCode])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order.orderState, order.orderCode, order.completedCode, userId])
+
+  const cancelOrderMutation = useMutation({
+    mutationFn: (orderCode: string) => orderService.cancelOrder(orderCode),
+    onSuccess: (data) => {
+      toast.success(data.message || "Order cancelled successfully!")
+      queryClient.invalidateQueries({ queryKey: ["userOrders", userId] })
+      setIsSheetOpen(false)
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to cancel order: ${error.message}`)
+    },
+  })
+
+  const handleCancelOrder = () => {
+    cancelOrderMutation.mutate(order.orderCode)
+  }
+
+  // --- Create Comment Mutation ---
+  const createCommentMutation = useMutation({
+    mutationFn: (payload: {
+      orderCode: string
+      starRating: number
+      commentText: string
+    }) =>
+      orderService.createComment(
+        payload.orderCode,
+        payload.starRating,
+        payload.commentText
+      ),
+    onSuccess: (data) => {
+      toast.success(data.message || "Comment submitted successfully!")
+      queryClient.invalidateQueries({ queryKey: ["userOrders", userId] }) // Invalidate to refetch orders
+      if (onCommentAdded) {
+        onCommentAdded() // Call parent callback if provided
+      }
+      setIsCommentDialogOpen(false) // Close dialog
+      // Optionally update local state or rely on query invalidation
+      // setCommentText("");
+      // setStarRating(0);
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to submit comment: ${error.message}`)
+    },
+  })
+
+  const handleCommentSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (starRating === 0) {
+      toast.error("Please select a star rating.")
+      return
+    }
+    if (!commentText.trim()) {
+      toast.error("Please enter your comment.")
+      return
+    }
+    createCommentMutation.mutate({
+      orderCode: order.orderCode,
+      starRating,
+      commentText,
+    })
+  }
+
+  // Check if a comment already exists for this order
+  const hasComment = order.commentText && order.starRating
 
   return (
     <div className="flex flex-col rounded-lg border bg-card p-4 transition-shadow hover:shadow-md">
+      {/* Card Header and Basic Info */}
       <div className="mb-2 flex items-start justify-between">
         <div className="flex flex-col">
           <span className="text-xs text-muted-foreground">Order Code</span>
@@ -217,7 +358,6 @@ const OrderCard = ({ order, userId }) => {
         </div>
         <Badge className={badgeClass}>{stateLabel}</Badge>
       </div>
-
       <div className="mt-2 space-y-1">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Date:</span>
@@ -255,8 +395,7 @@ const OrderCard = ({ order, userId }) => {
 
       <div className="mt-auto flex items-center justify-between border-t pt-3">
         <span className="font-semibold">{order.totalPrice} TL</span>
-
-        <Sheet>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <button className="flex items-center gap-1 text-xs text-primary hover:underline">
               View Details
@@ -274,7 +413,7 @@ const OrderCard = ({ order, userId }) => {
               </SheetDescription>
             </SheetHeader>
             <div className="mt-6 space-y-6">
-              {/* Order Basic Info */}
+              {/* Order Basic Info, Print Details, Files, Timeline */}
               <div className="rounded-lg border p-4">
                 <h3 className="text-lg font-medium">Order Information</h3>
                 <div className="my-4 h-[1px] w-full bg-secondary"></div>
@@ -285,7 +424,7 @@ const OrderCard = ({ order, userId }) => {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Customer</p>
-                    <p className="font-medium">{order.customerName}</p>
+                    <p className="font-medium">{order.customerName || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Total Price</p>
@@ -305,8 +444,6 @@ const OrderCard = ({ order, userId }) => {
                   </div>
                 </div>
               </div>
-
-              {/* Order Details */}
               <div className="rounded-lg border p-4">
                 <h3 className="text-lg font-medium">Print Details</h3>
                 <div className="my-4 h-[1px] w-full bg-secondary"></div>
@@ -351,8 +488,6 @@ const OrderCard = ({ order, userId }) => {
                   </div>
                 </div>
               </div>
-
-              {/* Files */}
               {order.copyFiles && order.copyFiles.length > 0 && (
                 <div className="rounded-lg border p-4">
                   <h3 className="text-lg font-medium">Files</h3>
@@ -373,7 +508,11 @@ const OrderCard = ({ order, userId }) => {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            fileService.downloadFile(file?.fileCode)
+                            if (fileService && file.fileCode) {
+                              fileService.downloadFile(file.fileCode)
+                            } else {
+                              toast.error("File download not available.")
+                            }
                           }}
                         >
                           <Icons.download className="mr-2 h-4 w-4" /> Download
@@ -383,13 +522,10 @@ const OrderCard = ({ order, userId }) => {
                   </div>
                 </div>
               )}
-
-              {/* Order Timeline/History */}
               <div className="rounded-lg border p-4">
                 <h3 className="text-lg font-medium">Order Timeline</h3>
                 <div className="my-4 h-[1px] w-full bg-secondary"></div>
                 <div className="space-y-3">
-                  {/* Order Created */}
                   <div className="flex items-center space-x-3">
                     <div className="h-2 w-2 rounded-full bg-green-500"></div>
                     <div className="flex-1">
@@ -408,8 +544,6 @@ const OrderCard = ({ order, userId }) => {
                       })}
                     </p>
                   </div>
-
-                  {/* Current Status (if no detailed history or status changed) */}
                   {order.orderState !== OrderState.Pending &&
                     order.updatedDate &&
                     order.updatedDate !== "0001-01-01T00:00:00" && (
@@ -443,8 +577,6 @@ const OrderCard = ({ order, userId }) => {
                     )}
                 </div>
               </div>
-
-              {/* Completion Code for Finished State */}
               {order.orderState === OrderState.Finished && (
                 <div className="mt-4 rounded-lg border bg-teal-500/10 p-4 text-sm">
                   {order.completedCode ? (
@@ -461,15 +593,17 @@ const OrderCard = ({ order, userId }) => {
                           variant="default"
                           size="icon"
                           onClick={() => {
-                            navigator.clipboard.writeText(order.completedCode)
-                            toast(
-                              <div className="flex items-center space-x-2">
-                                <Icons.check className="h-4 w-4" />
-                                <span className="ml-2">
-                                  Code copied to clipboard!
-                                </span>
-                              </div>
-                            )
+                            if (order.completedCode) {
+                              navigator.clipboard.writeText(order.completedCode)
+                              toast(
+                                <div className="flex items-center space-x-2">
+                                  <Icons.check className="h-4 w-4" />
+                                  <span className="ml-2">
+                                    Code copied to clipboard!
+                                  </span>
+                                </div>
+                              )
+                            }
                           }}
                         >
                           <Copy className="h-4 w-4" />
@@ -484,13 +618,13 @@ const OrderCard = ({ order, userId }) => {
                     <p className="text-teal-700">
                       {fetchCompletedCodeMutation.isLoading
                         ? "Retrieving your pickup code..."
-                        : "Your order is ready for pickup. Please visit the agency to collect your order."}
+                        : "Your order is ready for pickup. Please visit the agency to collect your order. The pickup code will appear here once available."}
                     </p>
                   )}
                 </div>
               )}
 
-              {/* Message if order is completed */}
+              {/* --- Comment Section --- */}
               {order.orderState === OrderState.Completed && (
                 <div className="flex flex-col gap-4">
                   <div className="my-4 rounded-lg border bg-green-500/10 p-4 text-sm text-green-700">
@@ -499,42 +633,158 @@ const OrderCard = ({ order, userId }) => {
                       This order has been successfully completed and picked up.
                     </p>
                   </div>
+
+                  {/* Display existing comment if any */}
+                  {hasComment && (
+                    <div className="rounded-lg border p-4">
+                      <h3 className="text-lg font-medium">Your Review</h3>
+                      <div className="my-4 h-[1px] w-full bg-secondary"></div>
+                      <div className="mb-2 flex items-center">
+                        <StarRatingInput
+                          rating={order.starRating || 0}
+                          setRating={() => {}}
+                          disabled={true}
+                        />
+                        <span className="ml-2 text-sm text-muted-foreground">
+                          ({order.starRating} out of 5)
+                        </span>
+                      </div>
+                      <p className="whitespace-pre-wrap text-sm text-gray-700">
+                        {order.commentText}
+                      </p>
+                      {/* Optionally, add an edit/delete button here if needed in the future */}
+                    </div>
+                  )}
+
+                  {/* Add Comment Dialog - only if no comment exists yet */}
+                  {!hasComment && (
+                    <Dialog
+                      open={isCommentDialogOpen}
+                      onOpenChange={setIsCommentDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="default"
+                          className="gap-2 text-center text-base tracking-tight"
+                        >
+                          Add a Comment{" "}
+                          <MessageSquarePlus className="h-5 w-5" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <form onSubmit={handleCommentSubmit}>
+                          <DialogHeader>
+                            <DialogTitle>
+                              Leave a Review for Order #{order.orderCode}
+                            </DialogTitle>
+                            <DialogDescription>
+                              Share your experience with this order. Your
+                              feedback helps us improve.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-5 items-center gap-4">
+                              <Label
+                                htmlFor="starRating"
+                                className="text-start"
+                              >
+                                Rating
+                              </Label>
+                              <div className="col-span-4">
+                                <StarRatingInput
+                                  rating={starRating}
+                                  setRating={setStarRating}
+                                />
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-5 items-center gap-4">
+                              <Label
+                                htmlFor="commentText"
+                                className="text-start"
+                              >
+                                Comment
+                              </Label>
+                              <Textarea
+                                id="commentText"
+                                value={commentText}
+                                onChange={(e) => setCommentText(e.target.value)}
+                                placeholder="Tell us about your experience..."
+                                className="col-span-4 h-24 resize-none border"
+                                rows={4}
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <DialogClose asChild>
+                              <Button type="button" variant="outline">
+                                Cancel
+                              </Button>
+                            </DialogClose>
+                            <Button
+                              type="submit"
+                              disabled={createCommentMutation.isPending}
+                            >
+                              {createCommentMutation.isPending ? (
+                                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                              ) : (
+                                "Submit Review"
+                              )}
+                            </Button>
+                          </DialogFooter>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              )}
+              {/* --- End Comment Section --- */}
+
+              {/* Order Actions (Cancel) */}
+              <div className="flex space-x-2 pt-4">
+                {order.orderState === OrderState.Pending && (
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
-                        variant="default"
-                        className="gap-2 text-center text-base tracking-tight"
+                        variant="destructive"
+                        className="flex-1"
+                        disabled={cancelOrderMutation.isPending}
                       >
-                        Add a comment
-                        <MessageSquarePlus className="h-5 w-5" />
+                        {cancelOrderMutation.isPending ? (
+                          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          "Cancel Order"
+                        )}
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Are you absolutely sure?</DialogTitle>
+                        <DialogTitle>Confirm Cancellation</DialogTitle>
                         <DialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete your account and remove your data from our
-                          servers.
+                          Are you sure you want to cancel this order (
+                          {order.orderCode})? This action cannot be undone.
                         </DialogDescription>
                       </DialogHeader>
+                      <DialogFooter className="sm:justify-end">
+                        <DialogClose asChild>
+                          <Button type="button" variant="outline">
+                            Keep Order
+                          </Button>
+                        </DialogClose>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={handleCancelOrder}
+                          disabled={cancelOrderMutation.isPending}
+                        >
+                          {cancelOrderMutation.isPending ? (
+                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            "Yes, Cancel Order"
+                          )}
+                        </Button>
+                      </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                </div>
-              )}
-
-              {/* Order Actions */}
-              <div className="flex space-x-2 pt-4">
-                {order.orderState === OrderState.Pending && (
-                  <Button
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={() => {
-                      alert("Cancel functionality to be implemented.")
-                    }}
-                  >
-                    Cancel Order
-                  </Button>
                 )}
               </div>
             </div>
