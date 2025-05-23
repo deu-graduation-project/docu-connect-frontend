@@ -57,6 +57,21 @@ export class GetAgencyAnalytics {
   TotalPageCount!: number
   TotalCompletedOrder!: number
 }
+export class GetOrderProductAnalysis {
+  getOrderProductAnalysisElements!: GetOrderProductAnalysisElement[]
+}
+export class GetOrderProductAnalysisElement {
+  paperType!: string
+  colorOption!: string
+  printType!: string
+  count!: number
+}
+export class GetAgencyCommentAnalysis {
+  period!: string
+  count!: number
+  averageStar!: number
+  totalUserCount!: number
+}
 export class CreateAgencyProduct {
   ProductId!: string
   Price!: number

@@ -1,4 +1,4 @@
-import { GetAgencyAnalytics, GetOrders, GetSingleOrder } from "@/types/classes"
+import { GetAgencyAnalytics, GetAgencyCommentAnalysis, GetOrderProductAnalysis, GetOrders, GetSingleOrder } from "@/types/classes"
 import { fetchWithAuth } from "./fetch-with-auth"
 import { SucceededMessageResponse } from "@/types"
 
@@ -214,7 +214,11 @@ class OrderService {
     })
     return response.json()
   }
-  async createComment(orderCode: string,starRating:number,commentText:string): Promise<SucceededMessageResponse> {
+  async createComment(
+    orderCode: string,
+    starRating: number,
+    commentText: string
+  ): Promise<SucceededMessageResponse> {
     const response = await fetchWithAuth(
       `${this.baseUrl}/Orders/CreateComment`,
       {
@@ -230,6 +234,67 @@ class OrderService {
       }
     )
     return response.json()
+  }
+
+  async getOrderProductAnalysis(
+    startDate: string,
+    endDate: string,
+    paperType?: string,
+    printType?: string,
+    colorOption?: string
+  ): Promise<GetOrderProductAnalysis> {
+    const queryParams = new URLSearchParams()
+    queryParams.append("startDate", startDate)
+    queryParams.append("endDate", endDate)
+    if (paperType) {
+      queryParams.append("paperType", paperType)
+    }
+    if (printType) {
+      queryParams.append("printType", printType)
+    }
+    if (colorOption) {
+      queryParams.append("colorOption", colorOption)
+    }
+    const queryString = queryParams.toString()
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Orders/GetOrderProductAnalysis?${queryString}`,
+      {
+        method: "GET",
+      }
+    )
+    try {
+      const data: GetOrderProductAnalysis = await response.json()
+      return data
+    } catch (error) {
+      console.error("Failed to parse agency analytics response:", error)
+      throw new Error("Invalid response format from server.")
+    }
+  }
+  async getAgencyCommentAnalysis(
+    startDate: string,
+    endDate: string,
+    groupBy?: string
+  ): Promise<GetAgencyCommentAnalysis[]> {
+    const queryParams = new URLSearchParams()
+    queryParams.append("startDate", startDate)
+    queryParams.append("endDate", endDate)
+    if (groupBy) {
+      queryParams.append("groupBy", groupBy)
+    }
+    const queryString = queryParams.toString()
+    const response = await fetchWithAuth(
+      `${this.baseUrl}/Orders/GetAgencyCommentAnalysis?${queryString}`,
+      {
+        method: "GET",
+      }
+    )
+    try {
+      const data: GetAgencyCommentAnalysis[] = await response.json()
+      return data
+    } catch (error) {
+      console.error("Failed to parse agency analytics response:", error)
+      throw new Error("Invalid response format from server.")
+    }
   }
 }
 
